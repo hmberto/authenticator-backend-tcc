@@ -13,6 +13,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONObject;
+
+import br.com.pucsp.tcc.authenticator.token.SendTokenEmail;
+import br.com.pucsp.tcc.authenticator.token.ValidateTokenEmail;
+import br.com.pucsp.tcc.authenticator.utils.ValidateData;
+
 @Produces("application/json")
 @Consumes("application/json")
 public class Rest {
@@ -31,11 +37,47 @@ public class Rest {
 	
 	@POST
 	@Path("/auth/request/token")
-	public Response emailToken(@Context HttpServletRequest request, String email) {
+	public Response emailToken(@Context HttpServletRequest request, String email, String link, String code) {
 		log.entering(name, "emailToken");
 		
+		ValidateData validateEmail = new ValidateData();
+		
 		try {
-			return Response.ok("OK").build();
+			JSONObject userJSON = new JSONObject(email.toString());
+			
+			if(validateEmail.userEmail(userJSON.getString("email"))) {
+				SendTokenEmail sendTokenEmail = new SendTokenEmail();
+				boolean check = sendTokenEmail.send(userJSON);
+				
+				if(check) {
+					return Response.ok().build();
+				}	
+			}
+		} catch (Exception e) {
+			log.log(Level.SEVERE, e.toString());
+		}
+		
+		return Response.status(Response.Status.FORBIDDEN).build();
+	}
+	
+	@POST
+	@Path("/auth/validate/token")
+	public Response confirmEmailToken(@Context HttpServletRequest request, String email, String token, String approve) {
+		log.entering(name, "confirmEmailToken");
+		
+		ValidateData validateData = new ValidateData();
+		
+		try {
+			JSONObject userJSON = new JSONObject(email.toString());
+			
+			if(validateData.userEmail(userJSON.getString("email")) && validateData.userToken(userJSON.getString("token"))) {
+				ValidateTokenEmail validateTokenEmail = new ValidateTokenEmail();
+				boolean check = validateTokenEmail.verify(userJSON);
+				
+				if(check) {
+					return Response.ok().build();
+				}
+			}
 		} catch (Exception e) {
 			log.log(Level.SEVERE, e.toString());
 		}

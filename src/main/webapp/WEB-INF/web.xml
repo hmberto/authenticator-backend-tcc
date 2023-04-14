@@ -32,12 +32,12 @@
 
   
   <servlet>
-    <servlet-name>LocationAPI</servlet-name>
+    <servlet-name>UserAuthenticator</servlet-name>
     <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>LocationAPI</servlet-name>
+    <servlet-name>UserAuthenticator</servlet-name>
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
 </web-app>
