@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 import org.json.JSONObject;
 
 import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
-import br.com.pucsp.tcc.authenticator.token.SendTokenEmail;
+import br.com.pucsp.tcc.authenticator.rest.RequestToken;
 import br.com.pucsp.tcc.authenticator.token.ValidateTokenEmail;
 import br.com.pucsp.tcc.authenticator.user.UpdateUserNameDB;
 import br.com.pucsp.tcc.authenticator.utils.ValidateData;
@@ -24,50 +24,35 @@ import br.com.pucsp.tcc.authenticator.utils.ValidateData;
 @Produces("application/json")
 @Consumes("application/json")
 public class Rest {
-	private static String name = Rest.class.getSimpleName();
-	private static Logger log = Logger.getLogger(Rest.class.getName());
+	private static final String CLASS_NAME = Rest.class.getSimpleName();
+	private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);
 	
 	@GET
-	@Path("/")
 	public Response getTest() {
-		String test = "{\n"
-				+ "    \"Hello\":\"World!\"\n"
-				+ "}";
-		
-		return Response.ok(test).build();
+		String res = new JSONObject().put("message", "Hello World!").toString();
+		return Response.ok(res).build();
 	}
 	
 	@POST
 	@Path("/auth/request/token")
-	public Response emailToken(@Context HttpServletRequest request, String email, String link, String code) {
-		log.entering(name, "emailToken");
-		
-		ValidateData validateEmail = new ValidateData();
-		
+	public Response requestToken(@Context HttpServletRequest request, String email, String link, String code) {
 		try {
-			JSONObject userJSON = new JSONObject(email.toString());
+			RequestToken requestToken = new RequestToken();
+			String result = requestToken.request(email);
 			
-			if(validateEmail.userEmail(userJSON.getString("email"))) {
-				SendTokenEmail sendTokenEmail = new SendTokenEmail();
-				boolean check = sendTokenEmail.send(userJSON);
-				
-				if(check) {
-					return Response.ok().build();
-				}	
+			if(result != null) {
+				return Response.ok().build();
 			}
 		} catch (Exception e) {
-			log.log(Level.SEVERE, e.toString());
+			LOGGER.log(Level.SEVERE, e.toString());
 		}
 		
-		log.exiting(name, "emailToken");
 		return Response.status(Response.Status.FORBIDDEN).build();
 	}
 	
 	@POST
 	@Path("/auth/validate/token")
 	public Response confirmEmailToken(@Context HttpServletRequest request, String email, String token, String approve) {
-		log.entering(name, "confirmEmailToken");
-		
 		ValidateData validateData = new ValidateData();
 		
 		try {
@@ -82,10 +67,9 @@ public class Rest {
 				}
 			}
 		} catch (Exception e) {
-			log.log(Level.SEVERE, e.toString());
+			LOGGER.log(Level.SEVERE, e.toString());
 		}
 		
-		log.exiting(name, "confirmEmailToken");
 		return Response.status(Response.Status.FORBIDDEN).build();
 	}
 	
@@ -100,7 +84,7 @@ public class Rest {
 				return Response.ok(result).build();
 			}
 		} catch (Exception e) {
-			log.log(Level.SEVERE, e.toString());
+			LOGGER.log(Level.SEVERE, e.toString());
 		}
 		
 		return Response.status(Response.Status.FORBIDDEN).build();
@@ -109,8 +93,6 @@ public class Rest {
 	@POST
 	@Path("/user/register/name")
 	public Response registerName(@Context HttpServletRequest request, String email, String name, String session) {
-		log.entering(name, "registerName");
-		
 		ValidateData validateEmail = new ValidateData();
 		UpdateUserNameDB updateUserNameDB = new UpdateUserNameDB();
 		
@@ -125,10 +107,9 @@ public class Rest {
 				}
 			}
 		} catch (Exception e) {
-			log.log(Level.SEVERE, e.toString());
+			LOGGER.log(Level.SEVERE, e.toString());
 		}
 		
-		log.exiting(name, "registerName");
 		return Response.status(Response.Status.FORBIDDEN).build();
 	}
 	

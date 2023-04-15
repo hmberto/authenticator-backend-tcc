@@ -15,36 +15,35 @@ import br.com.pucsp.tcc.authenticator.utils.ValidateData;
 
 public class RegisterEmail {
 	public String newEmail(String user) throws ClassNotFoundException, JSONException, SQLException {
-		JSONObject json = new JSONObject();
-		SaveUserDB saveUserDB = new SaveUserDB();
-		ValidateData validateEmail = new ValidateData();
-		SaveActiveCodesDB saveActiveCodesDB = new SaveActiveCodesDB();
-		SaveConfirmEmailDB saveConfirmEmailDB = new SaveConfirmEmailDB();
-		SaveActiveSessionsDB saveActiveSessionsDB = new SaveActiveSessionsDB();
-		CheckEmailAlreadyRegisteredDB checkEmailAlreadyRegisteredDB = new CheckEmailAlreadyRegisteredDB();
-		
 		JSONObject userJSON = new JSONObject(user.toString());
 		String email = userJSON.getString("email");
 		
+		ValidateData validateEmail = new ValidateData();
 		if(!validateEmail.userEmail(email)) {
 			return null;
 		}
 		
+		CheckEmailAlreadyRegisteredDB checkEmailAlreadyRegisteredDB = new CheckEmailAlreadyRegisteredDB();
 		String verifyEmail = checkEmailAlreadyRegisteredDB.verify(email);
 		if(verifyEmail != null) {
 			return verifyEmail;
 		}
 		
+		SaveUserDB saveUserDB = new SaveUserDB();
 		long userId = saveUserDB.insertUser("null", email);
 		
 		String code = CreateToken.newToken(6);
+		SaveActiveCodesDB saveActiveCodesDB = new SaveActiveCodesDB();
 		saveActiveCodesDB.insertActiveCode(userId, email, code);
 		
 		String token = CreateToken.newToken(100);
+		SaveActiveSessionsDB saveActiveSessionsDB = new SaveActiveSessionsDB();
 		saveActiveSessionsDB.insertActiveSession(userId, email, token);
 		
+		SaveConfirmEmailDB saveConfirmEmailDB = new SaveConfirmEmailDB();
 		saveConfirmEmailDB.insertConfirmEmail(userId, email, false);
 		
+		JSONObject json = new JSONObject();
         json.put("id_user", userId);
         json.put("token", token);
         
