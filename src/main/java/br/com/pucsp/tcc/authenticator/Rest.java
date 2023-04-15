@@ -15,12 +15,10 @@ import javax.ws.rs.core.Response;
 
 import org.json.JSONObject;
 
+import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 import br.com.pucsp.tcc.authenticator.token.SendTokenEmail;
 import br.com.pucsp.tcc.authenticator.token.ValidateTokenEmail;
-import br.com.pucsp.tcc.authenticator.user.SaveActiveCodesDB;
-import br.com.pucsp.tcc.authenticator.user.SaveConfirmEmailDB;
-import br.com.pucsp.tcc.authenticator.user.SaveUserDB;
-import br.com.pucsp.tcc.authenticator.utils.CreateToken;
+import br.com.pucsp.tcc.authenticator.user.UpdateUserNameDB;
 import br.com.pucsp.tcc.authenticator.utils.ValidateData;
 
 @Produces("application/json")
@@ -94,31 +92,43 @@ public class Rest {
 	@POST
 	@Path("/user/register/email")
 	public Response registerEmail(@Context HttpServletRequest request, String email) {
-		log.entering(name, "registerEmail");
-		
-		ValidateData validateEmail = new ValidateData();
-		SaveActiveCodesDB saveActiveCodesDB = new SaveActiveCodesDB();
-		SaveConfirmEmailDB saveConfirmEmailDB = new SaveConfirmEmailDB();
-		
 		try {
-			JSONObject userJSON = new JSONObject(email.toString());
+			RegisterEmail registerEmail = new RegisterEmail();
+			String result = registerEmail.newEmail(email);
 			
-			if(validateEmail.userEmail(userJSON.getString("email"))) {
-				SaveUserDB saveUserDB = new SaveUserDB();
-				long userId = saveUserDB.insertUser("null", userJSON.getString("email"));
-				
-				String token = CreateToken.newToken(6);
-				
-				saveActiveCodesDB.insertActiveCode(userId, userJSON.getString("email"), token);
-				saveConfirmEmailDB.insertConfirmEmail(userId, userJSON.getString("email"), false);
-				
-				return Response.ok(userId).build();	
+			if(result != null) {
+				return Response.ok(result).build();
 			}
 		} catch (Exception e) {
 			log.log(Level.SEVERE, e.toString());
 		}
 		
-		log.exiting(name, "registerEmail");
+		return Response.status(Response.Status.FORBIDDEN).build();
+	}
+	
+	@POST
+	@Path("/user/register/name")
+	public Response registerName(@Context HttpServletRequest request, String email, String name, String session) {
+		log.entering(name, "registerName");
+		
+		ValidateData validateEmail = new ValidateData();
+		UpdateUserNameDB updateUserNameDB = new UpdateUserNameDB();
+		
+		try {
+			JSONObject userJSON = new JSONObject(email.toString());
+			
+			if(validateEmail.userEmail(userJSON.getString("email"))) {
+				boolean updateName = updateUserNameDB.newName(userJSON.getString("name"), userJSON.getString("email"), userJSON.getString("session"));
+				
+				if(updateName) {
+					return Response.ok().build();	
+				}
+			}
+		} catch (Exception e) {
+			log.log(Level.SEVERE, e.toString());
+		}
+		
+		log.exiting(name, "registerName");
 		return Response.status(Response.Status.FORBIDDEN).build();
 	}
 	
