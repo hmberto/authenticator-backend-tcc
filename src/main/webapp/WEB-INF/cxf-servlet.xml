@@ -10,7 +10,7 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans
   http://cxf.apache.org/schemas/jaxws.xsd">
   <!-- to support Java-to-JSON and vice-versa conversion -->
   <bean id="jsonProvider" class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-  <bean id="serviceBean" class="br.com.pucsp.tcc.authenticator.Rest"/>
+  <bean id="serviceBean" class="br.com.pucsp.tcc.authenticator.RestAPI"/>
   <jaxrs:server id="rest" address="/">
     <jaxrs:serviceBeans>
       <ref bean="serviceBean"/>

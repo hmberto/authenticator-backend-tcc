@@ -1,6 +1,16 @@
 package br.com.pucsp.tcc.authenticator.rest;
 
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,8 +23,30 @@ import br.com.pucsp.tcc.authenticator.user.SaveUserDB;
 import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 import br.com.pucsp.tcc.authenticator.utils.ValidateData;
 
+@Produces("application/json")
+@Consumes("application/json")
 public class RegisterEmail {
-	public String newEmail(String user) throws ClassNotFoundException, JSONException, SQLException {
+	private static final String CLASS_NAME = RegisterEmail.class.getSimpleName();
+	private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);
+	
+	@POST
+	@Path("/user/register/email")
+	public Response register(@Context HttpServletRequest request, String body) {
+		try {
+			RegisterEmail registerEmail = new RegisterEmail();
+			String result = registerEmail.newEmail(body);
+			
+			if(result != null) {
+				return Response.ok(result).build();
+			}
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
+		}
+		
+		return Response.status(Response.Status.FORBIDDEN).build();
+	}
+	
+	private String newEmail(String user) throws ClassNotFoundException, JSONException, SQLException {
 		JSONObject userJSON = new JSONObject(user.toString());
 		String email = userJSON.getString("email");
 		
