@@ -17,6 +17,10 @@ import org.json.JSONObject;
 
 import br.com.pucsp.tcc.authenticator.token.SendTokenEmail;
 import br.com.pucsp.tcc.authenticator.token.ValidateTokenEmail;
+import br.com.pucsp.tcc.authenticator.user.SaveActiveCodesDB;
+import br.com.pucsp.tcc.authenticator.user.SaveConfirmEmailDB;
+import br.com.pucsp.tcc.authenticator.user.SaveUserDB;
+import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 import br.com.pucsp.tcc.authenticator.utils.ValidateData;
 
 @Produces("application/json")
@@ -57,6 +61,7 @@ public class Rest {
 			log.log(Level.SEVERE, e.toString());
 		}
 		
+		log.exiting(name, "emailToken");
 		return Response.status(Response.Status.FORBIDDEN).build();
 	}
 	
@@ -82,6 +87,38 @@ public class Rest {
 			log.log(Level.SEVERE, e.toString());
 		}
 		
+		log.exiting(name, "confirmEmailToken");
+		return Response.status(Response.Status.FORBIDDEN).build();
+	}
+	
+	@POST
+	@Path("/user/register/email")
+	public Response registerEmail(@Context HttpServletRequest request, String email) {
+		log.entering(name, "registerEmail");
+		
+		ValidateData validateEmail = new ValidateData();
+		SaveActiveCodesDB saveActiveCodesDB = new SaveActiveCodesDB();
+		SaveConfirmEmailDB saveConfirmEmailDB = new SaveConfirmEmailDB();
+		
+		try {
+			JSONObject userJSON = new JSONObject(email.toString());
+			
+			if(validateEmail.userEmail(userJSON.getString("email"))) {
+				SaveUserDB saveUserDB = new SaveUserDB();
+				long userId = saveUserDB.insertUser("null", userJSON.getString("email"));
+				
+				String token = CreateToken.newToken(6);
+				
+				saveActiveCodesDB.insertActiveCode(userId, userJSON.getString("email"), token);
+				saveConfirmEmailDB.insertConfirmEmail(userId, userJSON.getString("email"), false);
+				
+				return Response.ok(userId).build();	
+			}
+		} catch (Exception e) {
+			log.log(Level.SEVERE, e.toString());
+		}
+		
+		log.exiting(name, "registerEmail");
 		return Response.status(Response.Status.FORBIDDEN).build();
 	}
 	
