@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.token.SendTokenEmail;
-import br.com.pucsp.tcc.authenticator.utils.ValidateData;
+import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 
 @Produces("application/json")
 @Consumes("application/json")
@@ -44,8 +44,7 @@ public class RequestToken {
 		String link = userJSON.getString("link");
 		String code = userJSON.getString("code");
 		
-		ValidateData validateEmail = new ValidateData();
-		if(!validateEmail.userEmail(email)) {
+		if(!DataValidator.isValidEmail(email)) {
 			return false;
 		}
 		

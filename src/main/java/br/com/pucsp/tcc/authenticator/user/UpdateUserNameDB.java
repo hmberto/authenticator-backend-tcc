@@ -14,7 +14,7 @@ import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 public class UpdateUserNameDB {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 	
-	public boolean newName(String userName, String email, String userToken) throws ClassNotFoundException, SQLException {
+	public boolean update(String userName, String userEmail, String userToken) throws SQLException {
 	    Connection connection = null;
 	    PreparedStatement statement = null;
 	    int rowsUpdated = 0;
@@ -26,7 +26,7 @@ public class UpdateUserNameDB {
 
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	        statement.setString(1, userName);
-	        statement.setString(2, email);
+	        statement.setString(2, userEmail);
 	        statement.setString(3, userToken);
 	        
 	        rowsUpdated = statement.executeUpdate();

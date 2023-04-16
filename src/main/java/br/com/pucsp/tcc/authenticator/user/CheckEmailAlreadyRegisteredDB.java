@@ -16,7 +16,7 @@ import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 public class CheckEmailAlreadyRegisteredDB {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 	
-	public String verify(String email) throws SQLException, ClassNotFoundException {
+	public String verify(String email) throws SQLException {
 		JSONObject json = new JSONObject();
 		
 		Connection connection = null;

@@ -34,7 +34,7 @@ public class SaveUserDB {
 	        statementUser.setString(2, userEmail);
 
 	        userId = insertDB(statementUser, connection);
-	        if (userId <= 0) {
+	        if(userId <= 0) {
 	            return 0;
 	        }
 
@@ -44,7 +44,7 @@ public class SaveUserDB {
 	        statementCode.setString(2, code);
 
 	        int codeId = insertDB(statementCode, connection);
-	        if (codeId <= 0) {
+	        if(codeId <= 0) {
 	        	LOGGER.error("Error inserting 'active_codes' into the database for user '" + userId + "'. Trying to undo changes");
 	        	undoChanges.recovery(userId);
 	            return 0;
@@ -54,7 +54,7 @@ public class SaveUserDB {
 	        statementSession.setString(2, userSession);
 
 	        int sessionId = insertDB(statementSession, connection);
-	        if (sessionId <= 0) {
+	        if(sessionId <= 0) {
 	        	LOGGER.error("Error inserting 'active_sessions' into the database for user '" + userId + "'. Trying to undo changes");
 	        	undoChanges.recovery(userId);
 	            return 0;
@@ -64,7 +64,7 @@ public class SaveUserDB {
 	        statementConfirmEmail.setBoolean(2, false);
 	        
 	        int confirmEmailId = insertDB(statementConfirmEmail, connection);
-	        if (confirmEmailId <= 0) {
+	        if(confirmEmailId <= 0) {
 	        	LOGGER.error("Error inserting 'confirm_email' into the database for user '" + userId + "'. Trying to undo changes");
 	        	undoChanges.recovery(userId);
 	            return 0;

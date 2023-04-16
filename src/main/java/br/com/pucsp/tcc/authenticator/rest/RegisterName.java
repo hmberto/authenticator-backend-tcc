@@ -16,43 +16,68 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidNameException;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionException;
 import br.com.pucsp.tcc.authenticator.user.UpdateUserNameDB;
-import br.com.pucsp.tcc.authenticator.utils.ValidateData;
+import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 
 @Path("/user/register/name")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class RegisterName {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterName.class);
-	
+
 	@POST
 	public Response register(@Context HttpServletRequest request, String body) {
 		try {
-			boolean result = validateUserEmail(body);
+			boolean result = validateUserData(body);
 			
-			if (result) {
+			if(result) {
 				return Response.ok().build();
 			}
-		} catch (Exception e) {
-			LOGGER.error("Error registering a new name for the user", e);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+		} catch (InvalidNameException e) {
+			String json = new JSONObject().put("Error Message", "Invalid name format").toString();
+		    LOGGER.error("Error registering a new name for the user: Invalid name format", e);
+		    return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
+		} catch (InvalidEmailException e) {
+			String json = new JSONObject().put("Error Message", "Invalid email format").toString();
+		    LOGGER.error("Error registering a new name for the user: Invalid email format", e);
+		    return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
+		} catch (InvalidSessionException e) {
+			String json = new JSONObject().put("Error Message", "Invalid session token").toString();
+		    LOGGER.error("Error registering a new name for the user: Invalid session token", e);
+		    return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
+		} catch (JSONException | SQLException e) {
+		    LOGGER.error("Error registering a new name for the user", e);
 		}
-		
-		return Response.status(Response.Status.FORBIDDEN).build();
+		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 	}
 	
-	private boolean validateUserEmail(String body) throws ClassNotFoundException, JSONException, SQLException {
-		JSONObject userJSON = new JSONObject(body.toString());
+	private boolean validateUserData(String body) throws InvalidNameException, InvalidEmailException, InvalidSessionException, JSONException, SQLException {
+		JSONObject userJSON = new JSONObject(body);
 		
-		String email = userJSON.getString("email");
-		String name = userJSON.getString("name");
-        String session = userJSON.getString("session");
-        
-		if(!ValidateData.userEmail(email)) {
-			return false;
+		String email = userJSON.getString("email").trim().toLowerCase();
+		String name = userJSON.getString("name").trim().toLowerCase();
+		String session = userJSON.getString("session");
+		
+		if(!DataValidator.isValidUsername(name)) {
+			throw new InvalidNameException("Invalid name format");
+		}
+		
+		if(!DataValidator.isValidEmail(email)) {
+			throw new InvalidEmailException("Invalid email format");
+		}
+		
+		if(!DataValidator.isValidToken(session)) {
+			throw new InvalidSessionException("Invalid session token");
+		}
+		
+		if(!name.matches("^[\\p{L}]+( [\\p{L}]+)+$")) {
+			throw new InvalidNameException("Name must have two words");
 		}
 		
 		UpdateUserNameDB updateUserNameDB = new UpdateUserNameDB();
-		return updateUserNameDB.newName(name, email, session);
+		return updateUserNameDB.update(name, email, session);
 	}
 }

@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.token.ValidateTokenEmail;
-import br.com.pucsp.tcc.authenticator.utils.ValidateData;
+import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 
 @Produces("application/json")
 @Consumes("application/json")
@@ -40,11 +40,10 @@ public class ValidateToken {
 	}
 	
 	private boolean check(String body) throws ClassNotFoundException, SQLException {
-		ValidateData validateData = new ValidateData();
 		JSONObject bodyJSON = new JSONObject(body.toString());
 		
-		if(validateData.userEmail(bodyJSON.getString("email")) && 
-				validateData.userToken(bodyJSON.getString("token"))) {
+		if(DataValidator.isValidEmail(bodyJSON.getString("email")) && 
+				DataValidator.isValidToken(bodyJSON.getString("token"))) {
 			
 			ValidateTokenEmail validateTokenEmail = new ValidateTokenEmail();
 			return validateTokenEmail.verify(bodyJSON);
