@@ -6,28 +6,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import javax.mail.MessagingException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
+import br.com.pucsp.tcc.authenticator.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.CreateToken;
-import br.com.pucsp.tcc.authenticator.utils.EmailSender;
-import br.com.pucsp.tcc.authenticator.utils.EmailTemplate;
+import br.com.pucsp.tcc.authenticator.utils.EmailType;
 
-public class SaveUserDB {
+public class SaveUserDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SaveUserDB.class);
 	
-	public int insert(String userName, String userEmail, String userSession) throws SQLException {
+	public int insert(String userName, String userEmail, String userSession) throws SQLException, BusinessException {
 	    int userId = 0;
 	    
 	    UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();
 	    
 	    try (Connection connection = ConnDB.getConnection();
 	    		PreparedStatement statementUser = connection.prepareStatement("INSERT INTO users (name, email) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
-	    		PreparedStatement statementCode = connection.prepareStatement("INSERT INTO active_codes (id_user, code) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
-	    		PreparedStatement statementSession = connection.prepareStatement("INSERT INTO active_sessions (id_user, token) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+	    		PreparedStatement statementCode = connection.prepareStatement("INSERT INTO active_codes (id_user, code, active) VALUES (?, ?, true)", Statement.RETURN_GENERATED_KEYS);
+	    		PreparedStatement statementSession = connection.prepareStatement("INSERT INTO active_sessions (id_user, token, active) VALUES (?, ?, true)", Statement.RETURN_GENERATED_KEYS);
 	    		PreparedStatement statementConfirmEmail = connection.prepareStatement("INSERT INTO confirm_email (id_user, confirmed) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS)) {
 
 	        statementUser.setString(1, userName);
@@ -69,8 +67,8 @@ public class SaveUserDB {
 	        	undoChanges.recovery(userId);
 	            return 0;
 	        }
-
-	        sendEmailCode(userEmail, code);
+	        
+	        EmailType.sendEmailCode(userEmail, code);
 	    } catch (SQLException e) {
 	        LOGGER.error("Error inserting user into database - Email: " + userEmail, e);
 	    }
@@ -90,21 +88,10 @@ public class SaveUserDB {
 	    statement.close();
 	    return result;
 	}
-	
-	private static void sendEmailCode(String email, String userCode) {
-		String messageSubject = "Humberto Araújo - TCC PUC-SP: Código de acesso";
-		String shortText = "Confirme que este é seu endereço de e-mail";
-		String info = "Utilize o código abaixo para liberar seu acesso ao site.<br><br>Se você não está tentando fazer login, desconsidere este e-mail.";
-		String btnText = userCode;
-		String btnLink = System.getenv("SITE_HOST") + "/login";
-		String messageText = EmailTemplate.template(messageSubject, info, shortText, btnText, btnLink);
+
+	@Override
+	public void close() throws Exception {
+		// TODO Auto-generated method stub
 		
-		EmailSender sendEmail = new EmailSender();
-		
-		try {
-			sendEmail.confirmation(email.toLowerCase(), messageSubject, messageText);
-		} catch (MessagingException e) {
-			LOGGER.error("Error sendding email", e);
-		}
 	}
 }

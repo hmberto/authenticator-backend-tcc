@@ -38,19 +38,21 @@ public class RegisterEmail {
             	return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
             }
             
-            CheckEmailAlreadyRegisteredDB checkEmailAlreadyRegisteredDB = new CheckEmailAlreadyRegisteredDB();
+            @SuppressWarnings("resource")
+			CheckEmailAlreadyRegisteredDB checkEmailAlreadyRegisteredDB = new CheckEmailAlreadyRegisteredDB();
             String emailAlreadyExists = checkEmailAlreadyRegisteredDB.verify(email);
-            if (emailAlreadyExists != null) {
+            if(emailAlreadyExists != null) {
                 JSONObject userExistsJSON = new JSONObject(emailAlreadyExists);
                 LOGGER.info("Email '{}' already registered in the database - user ID: {}", email, userExistsJSON.getInt("id_user"));
                 return Response.ok(emailAlreadyExists).build();
             }
             
-            SaveUserDB saveUserDB = new SaveUserDB();
+            @SuppressWarnings("resource")
+			SaveUserDB saveUserDB = new SaveUserDB();
             String session = CreateToken.newToken(100);
             int userId = saveUserDB.insert("null", email, session);
             
-            if (userId <= 0) {
+            if(userId <= 0) {
                 throw new SQLException("User registration failed for email: " + email);
             }
             
@@ -61,7 +63,7 @@ public class RegisterEmail {
 
             return Response.ok(json.toString()).build();
         } catch (InvalidEmailException e) {
-        	String json = new JSONObject().put("Error Message", "Invalid email format").toString();
+        	String json = new JSONObject().put("Error Message", e.getMessage()).toString();
             LOGGER.error("Invalid email format", e);
             return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
         } catch (SQLException e) {

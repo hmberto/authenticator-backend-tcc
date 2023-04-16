@@ -9,33 +9,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
-import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 
-public class UpdateUserNameDB {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
+public class SaveActiveCodesDB implements AutoCloseable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SaveActiveCodesDB.class);
 	
-	public boolean update(String userName, String userEmail, String userToken) throws SQLException {
-	    Connection connection = null;
+	public boolean updateCode(String sql, String email, String code) {
+		Connection connection = null;
 	    PreparedStatement statement = null;
 	    int rowsUpdated = 0;
 	    
 	    try {
 	        connection = ConnDB.getConnection();
 	        
-	        String sql = "UPDATE users SET name = ? \n"
-	        		+ "WHERE email = ? \n"
-	        		+ "AND id_user IN (SELECT id_user FROM active_sessions WHERE token = ? AND active = true)\n"
-	        		+ "";
-	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-	        statement.setString(1, userName);
-	        statement.setString(2, userEmail);
-	        statement.setString(3, userToken);
+	        statement.setString(1, code);
+	        statement.setString(2, email);
 	        
 	        rowsUpdated = statement.executeUpdate();
 	    }
 	    catch (SQLException e) {
-	    	LOGGER.error("Error updating user name", e);
+	    	LOGGER.error("Error inserting 6 digit code into database - Email: " + email, e);
 	    }
 	    finally {
 		    if(statement != null) {
@@ -59,5 +52,11 @@ public class UpdateUserNameDB {
 	    } else {
 	        return false;
 	    }
+	}
+
+	@Override
+	public void close() throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 }

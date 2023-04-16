@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 
-public class CheckEmailAlreadyRegisteredDB {
+public class CheckEmailAlreadyRegisteredDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 	
 	public String verify(String email) throws SQLException {
@@ -46,21 +46,21 @@ public class CheckEmailAlreadyRegisteredDB {
 	        throw new SQLException(e);
 	    }
 		finally {
-		    if (rs != null) {
+		    if(rs != null) {
 		        try {
 		            rs.close();
 		        } catch (SQLException e) {
 		        	LOGGER.error("Error closing result set", e);
 		        }
 		    }
-		    if (statement != null) {
+		    if(statement != null) {
 		        try {
 		        	statement.close();
 		        } catch (SQLException e) {
 		        	LOGGER.error("Error closing statement", e);
 		        }
 		    }
-		    if (connection != null) {
+		    if(connection != null) {
 		        try {
 		            ConnDB.closeConnection(connection);
 		        } catch (SQLException e) {
@@ -73,5 +73,11 @@ public class CheckEmailAlreadyRegisteredDB {
 	    	return null;
 	    }
 	    return json.toString();
+	}
+
+	@Override
+	public void close() throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 }

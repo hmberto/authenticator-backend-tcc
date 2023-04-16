@@ -37,15 +37,15 @@ public class RegisterName {
 				return Response.ok().build();
 			}
 		} catch (InvalidNameException e) {
-			String json = new JSONObject().put("Error Message", "Invalid name format").toString();
+			String json = new JSONObject().put("Error Message", e.getMessage()).toString();
 		    LOGGER.error("Error registering a new name for the user: Invalid name format", e);
 		    return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
 		} catch (InvalidEmailException e) {
-			String json = new JSONObject().put("Error Message", "Invalid email format").toString();
+			String json = new JSONObject().put("Error Message", e.getMessage()).toString();
 		    LOGGER.error("Error registering a new name for the user: Invalid email format", e);
 		    return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
 		} catch (InvalidSessionException e) {
-			String json = new JSONObject().put("Error Message", "Invalid session token").toString();
+			String json = new JSONObject().put("Error Message", e.getMessage()).toString();
 		    LOGGER.error("Error registering a new name for the user: Invalid session token", e);
 		    return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
 		} catch (JSONException | SQLException e) {
@@ -58,7 +58,7 @@ public class RegisterName {
 		JSONObject userJSON = new JSONObject(body);
 		
 		String email = userJSON.getString("email").trim().toLowerCase();
-		String name = userJSON.getString("name").trim().toLowerCase();
+		String name = userJSON.getString("name").trim();
 		String session = userJSON.getString("session");
 		
 		if(!DataValidator.isValidUsername(name)) {
