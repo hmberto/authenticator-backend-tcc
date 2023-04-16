@@ -2,6 +2,7 @@ package br.com.pucsp.tcc.authenticator.user;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -14,9 +15,10 @@ import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 public class SaveConfirmEmailDB {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 	
-	public void insertConfirmEmail(long userId, String email, boolean userConfirmed) throws ClassNotFoundException, SQLException {
+	public int insertConfirmEmail(long userId, String email, boolean userConfirmed) throws ClassNotFoundException, SQLException {
 	    Connection connection = null;
 	    PreparedStatement statement = null;
+	    int confirmEmailId = 0;
 	    
 	    try {
 	        connection = ConnDB.getConnection();
@@ -28,9 +30,14 @@ public class SaveConfirmEmailDB {
 	        statement.setBoolean(2, userConfirmed);
 	        
 	        statement.executeUpdate();
+	        
+	        ResultSet generatedKeys = statement.getGeneratedKeys();
+	        if (generatedKeys.next()) {
+	        	confirmEmailId = generatedKeys.getInt(1);
+	        }
 	    }
 	    catch (SQLException e) {
-	    	LOGGER.error("Error confirming email", e);
+	    	LOGGER.error("Error inserting unconfirmed email into database - Email: " + email, e);
 	    }
 	    finally {
 		    if (statement != null) {
@@ -48,5 +55,7 @@ public class SaveConfirmEmailDB {
 		        }
 		    }
 		}
+	    
+	    return confirmEmailId;
 	}
 }

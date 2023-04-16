@@ -21,7 +21,7 @@ public class SendTokenEmail {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SendTokenEmail.class);
 	
 	public boolean send(String email, String link, String code) {
-		long userId = 0;
+		int userId = 0;
 		try {
 			userId = SendTokenEmail.getUserId(email);
 		} catch (ClassNotFoundException | SQLException e) {

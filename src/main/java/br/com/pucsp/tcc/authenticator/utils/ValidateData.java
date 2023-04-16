@@ -8,7 +8,7 @@ import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 public class ValidateData {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 
-	public boolean userEmail(String email) {
+	public static boolean userEmail(String email) {
 		boolean validEmail = true;
 		
 		boolean searchForCharactersF = email.toLowerCase().matches("[0-9 a-z A-Z - _ .]+@[0-9 a-z A-Z - _ .]+");
@@ -20,7 +20,7 @@ public class ValidateData {
 		return validEmail;
 	}
 	
-	public boolean userToken(String token) {
+	public static boolean userToken(String token) {
 		boolean validEmail = true;
 		
 		boolean searchForCharactersF = token.matches("[0-9A-Z]+");

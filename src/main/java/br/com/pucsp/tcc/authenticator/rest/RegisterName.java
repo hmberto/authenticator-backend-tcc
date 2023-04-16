@@ -35,6 +35,7 @@ public class RegisterName {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error registering a new name for the user", e);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
 		return Response.status(Response.Status.FORBIDDEN).build();
@@ -47,10 +48,7 @@ public class RegisterName {
 		String name = userJSON.getString("name");
         String session = userJSON.getString("session");
         
-		ValidateData validateEmail = new ValidateData();
-		boolean isEmailValid = validateEmail.userEmail(email);
-		
-		if(!isEmailValid) {
+		if(!ValidateData.userEmail(email)) {
 			return false;
 		}
 		
