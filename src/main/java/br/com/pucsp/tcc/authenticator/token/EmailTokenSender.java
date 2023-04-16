@@ -25,26 +25,24 @@ public class EmailTokenSender {
 	        
 	        JSONObject userExistsJSON = (emailAlreadyExists != null) ? new JSONObject(emailAlreadyExists) : null;
 	        
-	        String userSession = CreateToken.newToken(100);
+	        String userToken = CreateToken.generate(100);
 	        int userId;
 	        if (userExistsJSON != null) {
 	            userId = userExistsJSON.getInt("id_user");
 	            LOGGER.info("Email '{}' already registered in the database - user ID: {}", email, userId);
 	        } else {
-	            userId = saveUserDB.insert("null", email, userSession);
+	            userId = saveUserDB.insert("null", email, userToken);
 	            if(userId >= 1) {
 	            	LOGGER.info("Token requested for unregistered email '{}' in the database - user ID: {}", email, userId);
 		            JSONObject json = new JSONObject()
 		                    .put("id_user", userId)
-		                    .put("token", userSession);
+		                    .put("token", userToken);
 		            return json;
 	            }
 	            else {
 	            	return null;
 	            }
 	        }
-	        
-	        String userToken = CreateToken.newToken(100);
 	        
 	        if(isSelectedLink && isSelectedCode) {
 	            throw new BusinessException("Both LINK and CODE selected as TRUE");
@@ -60,12 +58,10 @@ public class EmailTokenSender {
 	                return json;
 	            }
 	        } else if (isSelectedCode) {
-	            String userCode = CreateToken.newToken(6);
+	            String userCode = CreateToken.generate(6);
 	            String sql = "UPDATE active_codes \n"
 	            		+ "SET active = true, code = ? \n"
-	            		+ "WHERE id_user = (SELECT id_user FROM users WHERE email = ?) \n"
-	            		+ "AND active = false;\n"
-	            		+ "";
+	            		+ "WHERE id_user = (SELECT id_user FROM users WHERE email = ?);";
 	            boolean isCodeSaved = saveActiveCodesDB.updateCode(sql, email, userCode);
 	            
 	            int isTokenSaved = saveActiveSessionsDB.insertActiveSession(userId, email, userToken, true);

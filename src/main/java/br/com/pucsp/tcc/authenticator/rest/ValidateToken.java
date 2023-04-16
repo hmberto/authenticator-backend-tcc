@@ -52,7 +52,7 @@ public class ValidateToken {
 	private boolean validateUserData(String body) throws SQLException {
 		JSONObject bodyJSON = new JSONObject(body.toString());
 		
-		String token = bodyJSON.getString("token");
+		String token = bodyJSON.getString("token").trim().toUpperCase();
 		String email = bodyJSON.getString("email").trim().toLowerCase();
 		boolean isSelectedApprove = Boolean.parseBoolean(bodyJSON.getString("approve").trim().toLowerCase());
 		

@@ -36,7 +36,7 @@ public class SaveUserDB implements AutoCloseable {
 	            return 0;
 	        }
 
-	        String code = CreateToken.newToken(6);
+	        String code = CreateToken.generate(6);
 
 	        statementCode.setInt(1, userId);
 	        statementCode.setString(2, code);

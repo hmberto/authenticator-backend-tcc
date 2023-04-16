@@ -1,25 +1,19 @@
 package br.com.pucsp.tcc.authenticator.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
+import java.util.Random;
 
 public class CreateToken {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
-	
-	public static String newToken(int sessionLength) {
-		String alphaNumeric = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		
-		StringBuilder token = new StringBuilder();
-		
-		for(int i = 0; i < sessionLength; i++) {
-			double random = Math.random();
-			int myindex = (int)(alphaNumeric.length() * random);
-			
-			token.append(alphaNumeric.charAt(myindex));
-		}
-		
-		return token.toString();
-	}
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final int CHARACTERS_LENGTH = CHARACTERS.length();
+    
+    public static String generate(int tokenLength) {
+        StringBuilder tokenBuilder = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < tokenLength; i++) {
+            int randomIndex = random.nextInt(CHARACTERS_LENGTH);
+            char randomChar = CHARACTERS.charAt(randomIndex);
+            tokenBuilder.append(randomChar);
+        }
+        return tokenBuilder.toString();
+    }
 }

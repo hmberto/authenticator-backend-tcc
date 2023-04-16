@@ -57,9 +57,9 @@ public class RegisterName {
 	private boolean validateUserData(String body) throws InvalidNameException, InvalidEmailException, InvalidSessionException, JSONException, SQLException {
 		JSONObject userJSON = new JSONObject(body);
 		
-		String email = userJSON.getString("email").trim().toLowerCase();
 		String name = userJSON.getString("name").trim();
-		String session = userJSON.getString("session");
+		String email = userJSON.getString("email").trim().toLowerCase();
+		String session = userJSON.getString("session").trim().toUpperCase();
 		
 		if(!DataValidator.isValidUsername(name)) {
 			throw new InvalidNameException("Invalid name format");

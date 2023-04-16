@@ -49,7 +49,7 @@ public class RegisterEmail {
             
             @SuppressWarnings("resource")
 			SaveUserDB saveUserDB = new SaveUserDB();
-            String session = CreateToken.newToken(100);
+            String session = CreateToken.generate(100);
             int userId = saveUserDB.insert("null", email, session);
             
             if(userId <= 0) {
