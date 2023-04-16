@@ -12,17 +12,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
-import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 import br.com.pucsp.tcc.authenticator.utils.EmailSender;
 import br.com.pucsp.tcc.authenticator.utils.EmailTemplate;
 
 public class SaveUserDB {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SaveUserDB.class);
 	
 	public int insert(String userName, String userEmail, String userSession) throws SQLException {
 	    int userId = 0;
-
+	    
+	    UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();
+	    
 	    try (Connection connection = ConnDB.getConnection();
 	    		PreparedStatement statementUser = connection.prepareStatement("INSERT INTO users (name, email) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
 	    		PreparedStatement statementCode = connection.prepareStatement("INSERT INTO active_codes (id_user, code) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
@@ -44,6 +45,8 @@ public class SaveUserDB {
 
 	        int codeId = insertDB(statementCode, connection);
 	        if (codeId <= 0) {
+	        	LOGGER.error("Error inserting 'active_codes' into the database for user '" + userId + "'. Trying to undo changes");
+	        	undoChanges.recovery(userId);
 	            return 0;
 	        }
 
@@ -52,13 +55,18 @@ public class SaveUserDB {
 
 	        int sessionId = insertDB(statementSession, connection);
 	        if (sessionId <= 0) {
+	        	LOGGER.error("Error inserting 'active_sessions' into the database for user '" + userId + "'. Trying to undo changes");
+	        	undoChanges.recovery(userId);
 	            return 0;
 	        }
 	        
 	        statementConfirmEmail.setInt(1, userId);
 	        statementConfirmEmail.setBoolean(2, false);
+	        
 	        int confirmEmailId = insertDB(statementConfirmEmail, connection);
 	        if (confirmEmailId <= 0) {
+	        	LOGGER.error("Error inserting 'confirm_email' into the database for user '" + userId + "'. Trying to undo changes");
+	        	undoChanges.recovery(userId);
 	            return 0;
 	        }
 
