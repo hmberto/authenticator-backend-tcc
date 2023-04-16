@@ -26,7 +26,7 @@ public class CheckEmailAlreadyRegisteredDB {
 	    ResultSet rs = null;
 	    
 		try {
-	        connection = ConnDB.connect();
+	        connection = ConnDB.getConnection();
 	        
 	        String sql = "SELECT active_sessions.id_user, active_sessions.token " +
 		             "FROM active_sessions " +
@@ -47,20 +47,29 @@ public class CheckEmailAlreadyRegisteredDB {
 	        LOGGER.log(Level.SEVERE, "Error inserting user", e);
 	        throw new SQLException(e);
 	    }
-	    finally {
-	        if (statement != null) {
-	            try {
-	            	rs.close();
-	                statement.close();
-	                connection.close();
-	            } catch (SQLException e) {
-	                LOGGER.log(Level.SEVERE, "Error closing statement", e);
-	            }
-	        }
-	        if (connection != null) {
-	            ConnDB.disconnect();
-	        }
-	    }
+		finally {
+		    if (rs != null) {
+		        try {
+		            rs.close();
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing result set", e);
+		        }
+		    }
+		    if (statement != null) {
+		        try {
+		        	statement.close();
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing statement", e);
+		        }
+		    }
+		    if (connection != null) {
+		        try {
+		            ConnDB.closeConnection(connection);
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing connection", e);
+		        }
+		    }
+		}
 	    
 	    LOGGER.exiting(CLASS_NAME, "insertActiveCode");
 	    if(json.toString().length() < 3) {

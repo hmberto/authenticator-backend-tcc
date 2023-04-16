@@ -53,7 +53,7 @@ public class ValidateTokenEmail {
 	    int rowsUpdated = 0;
 	    
 	    try {
-	        connection = ConnDB.connect();
+	        connection = ConnDB.getConnection();
 	        
 	        String sql = "UPDATE active_codes AC JOIN users U ON AC.id_user = U.id_user JOIN confirm_email CE ON AC.id_user = CE.id_user SET AC.code = ?, AC.updated_at = CURRENT_TIMESTAMP, CE.updated_at = CURRENT_TIMESTAMP, CE.confirmed = true WHERE U.email = ?";
 
@@ -68,17 +68,21 @@ public class ValidateTokenEmail {
 	        throw new SQLException(e);
 	    }
 	    finally {
-	        if (statement != null) {
-	            try {
-	                statement.close();
-	            } catch (SQLException e) {
-	                LOGGER.log(Level.SEVERE, "Error closing statement", e);
-	            }
-	        }
-	        if (connection != null) {
-	            ConnDB.disconnect();
-	        }
-	    }
+		    if (statement != null) {
+		        try {
+		        	statement.close();
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing statement", e);
+		        }
+		    }
+		    if (connection != null) {
+		        try {
+		            ConnDB.closeConnection(connection);
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing connection", e);
+		        }
+		    }
+		}
 	    
 	    LOGGER.exiting(CLASS_NAME, "verifyCode");
 	    if (rowsUpdated > 0) {

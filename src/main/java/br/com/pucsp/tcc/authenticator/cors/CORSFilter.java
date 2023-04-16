@@ -1,4 +1,4 @@
-package br.com.pucsp.tcc.authenticator;
+package br.com.pucsp.tcc.authenticator.cors;
 
 import java.io.IOException;
 

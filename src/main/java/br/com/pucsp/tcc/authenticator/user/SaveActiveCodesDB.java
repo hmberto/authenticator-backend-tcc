@@ -24,7 +24,7 @@ public class SaveActiveCodesDB {
 	    PreparedStatement statement = null;
 	    
 	    try {
-	        connection = ConnDB.connect();
+	        connection = ConnDB.getConnection();
 	        
 	        String sql = "INSERT INTO active_codes (id_user, code) VALUES (?, ?)";
 	        
@@ -39,18 +39,23 @@ public class SaveActiveCodesDB {
 	        throw new SQLException(e);
 	    }
 	    finally {
-	        if (statement != null) {
-	            try {
-	                statement.close();
-	                SaveActiveCodesDB.sendCode(email, userCode);
-	            } catch (SQLException e) {
-	                LOGGER.log(Level.SEVERE, "Error closing statement", e);
-	            }
-	        }
-	        if (connection != null) {
-	            ConnDB.disconnect();
-	        }
-	    }
+	    	SaveActiveCodesDB.sendCode(email, userCode);
+	    	
+		    if (statement != null) {
+		        try {
+		        	statement.close();
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing statement", e);
+		        }
+		    }
+		    if (connection != null) {
+		        try {
+		            ConnDB.closeConnection(connection);
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing connection", e);
+		        }
+		    }
+		}
 	    
 	    LOGGER.exiting(CLASS_NAME, "insertActiveCode");
 	}

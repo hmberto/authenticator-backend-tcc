@@ -99,7 +99,7 @@ public class SendTokenEmail {
 	    ResultSet rs = null;
 	    
 		try {
-	        connection = ConnDB.connect();
+	        connection = ConnDB.getConnection();
 	        
 	        String sql = "SELECT id_user FROM users WHERE email = ?";
 	        
@@ -116,22 +116,30 @@ public class SendTokenEmail {
 	        LOGGER.log(Level.SEVERE, "Error getting user", e);
 	        throw new SQLException(e);
 	    }
-	    finally {
-	        if (statement != null) {
-	            try {
-	            	rs.close();
-	                statement.close();
-	                connection.close();
-	            } catch (SQLException e) {
-	                LOGGER.log(Level.SEVERE, "Error closing statement", e);
-	            }
-	        }
-	        if (connection != null) {
-	            ConnDB.disconnect();
-	        }
-	    }
-	    
-	    LOGGER.exiting(CLASS_NAME, "insertActiveCode");
+		finally {
+		    if (rs != null) {
+		        try {
+		            rs.close();
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing result set", e);
+		        }
+		    }
+		    if (statement != null) {
+		        try {
+		        	statement.close();
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing statement", e);
+		        }
+		    }
+		    if (connection != null) {
+		        try {
+		            ConnDB.closeConnection(connection);
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing connection", e);
+		        }
+		    }
+		}
+		
 	    return userId;
 	}
 }

@@ -22,7 +22,7 @@ public class SaveUserDB {
 	    long userId = 0;
 	    
 	    try {
-	        connection = ConnDB.connect();
+	        connection = ConnDB.getConnection();
 	        
 	        String sql = "INSERT INTO users (name, email) VALUES (?, ?)";
 	        
@@ -42,17 +42,21 @@ public class SaveUserDB {
 	        throw new SQLException(e);
 	    }
 	    finally {
-	        if (statement != null) {
-	            try {
-	                statement.close();
-	            } catch (SQLException e) {
-	                LOGGER.log(Level.SEVERE, "Error closing statement", e);
-	            }
-	        }
-	        if (connection != null) {
-	            ConnDB.disconnect();
-	        }
-	    }
+		    if (statement != null) {
+		        try {
+		        	statement.close();
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing statement", e);
+		        }
+		    }
+		    if (connection != null) {
+		        try {
+		            ConnDB.closeConnection(connection);
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing connection", e);
+		        }
+		    }
+		}
 	    
 	    LOGGER.exiting(CLASS_NAME, "insertUser");
 	    return userId;

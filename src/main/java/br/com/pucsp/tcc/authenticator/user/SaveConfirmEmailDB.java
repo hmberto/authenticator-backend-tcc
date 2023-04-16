@@ -20,7 +20,7 @@ public class SaveConfirmEmailDB {
 	    PreparedStatement statement = null;
 	    
 	    try {
-	        connection = ConnDB.connect();
+	        connection = ConnDB.getConnection();
 	        
 	        String sql = "INSERT INTO confirm_email (id_user, confirmed) VALUES (?, ?)";
 	        
@@ -35,17 +35,21 @@ public class SaveConfirmEmailDB {
 	        throw new SQLException(e);
 	    }
 	    finally {
-	        if (statement != null) {
-	            try {
-	                statement.close();
-	            } catch (SQLException e) {
-	                LOGGER.log(Level.SEVERE, "Error closing statement", e);
-	            }
-	        }
-	        if (connection != null) {
-	            ConnDB.disconnect();
-	        }
-	    }
+		    if (statement != null) {
+		        try {
+		        	statement.close();
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing statement", e);
+		        }
+		    }
+		    if (connection != null) {
+		        try {
+		            ConnDB.closeConnection(connection);
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing connection", e);
+		        }
+		    }
+		}
 	    
 	    LOGGER.exiting(CLASS_NAME, "insertConfirmEmail");
 	}

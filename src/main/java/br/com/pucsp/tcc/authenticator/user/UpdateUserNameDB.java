@@ -21,7 +21,7 @@ public class UpdateUserNameDB {
 	    int rowsUpdated = 0;
 	    
 	    try {
-	        connection = ConnDB.connect();
+	        connection = ConnDB.getConnection();
 	        
 	        String sql = "UPDATE users SET name = ? WHERE email = ? AND id_user IN (SELECT id_user FROM active_sessions WHERE token = ?)";
 
@@ -37,17 +37,21 @@ public class UpdateUserNameDB {
 	        throw new SQLException(e);
 	    }
 	    finally {
-	        if (statement != null) {
-	            try {
-	                statement.close();
-	            } catch (SQLException e) {
-	                LOGGER.log(Level.SEVERE, "Error closing statement", e);
-	            }
-	        }
-	        if (connection != null) {
-	            ConnDB.disconnect();
-	        }
-	    }
+		    if (statement != null) {
+		        try {
+		        	statement.close();
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing statement", e);
+		        }
+		    }
+		    if (connection != null) {
+		        try {
+		            ConnDB.closeConnection(connection);
+		        } catch (SQLException e) {
+		            LOGGER.log(Level.SEVERE, "Error closing connection", e);
+		        }
+		    }
+		}
 	    
 	    LOGGER.exiting(CLASS_NAME, "newName");
 	    if (rowsUpdated > 0) {

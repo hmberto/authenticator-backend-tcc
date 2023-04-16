@@ -11,6 +11,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import br.com.pucsp.tcc.authenticator.rest.TestAPI;
+import br.com.pucsp.tcc.authenticator.cors.CORSFilter;
 import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 import br.com.pucsp.tcc.authenticator.rest.RegisterName;
 import br.com.pucsp.tcc.authenticator.rest.RequestToken;

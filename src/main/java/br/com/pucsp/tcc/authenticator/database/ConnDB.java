@@ -2,71 +2,51 @@ package br.com.pucsp.tcc.authenticator.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Properties;
-import java.sql.DriverManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.sql.DataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConnDB {
-	private ConnDB () {}
-	
-	private static String name = ConnDB.class.getSimpleName();
-	private static Logger log = Logger.getLogger(ConnDB.class.getName());
-	
-    private static Connection connection;
-    private static Properties properties;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnDB.class);
+    
+    private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
+    private static final String DB_URL = "jdbc:mysql://{HOST}/{DB_NAME}?sslMode=VERIFY_IDENTITY";
+    private static final String DB_HOST = System.getenv("DB_HOST");
+    private static final String DB_NAME = System.getenv("DB_NAME");
+    private static final String DB_USER = System.getenv("DB_USER");
+    private static final String DB_PASS = System.getenv("DB_PASS");
+    private static final int MAX_POOL_SIZE = 250;
 
-    private static Properties getProperties() {
-    	log.entering(name, "getProperties");
-    	
-    	if (properties == null) {
-    		properties = new Properties();
-    		properties.setProperty("user", System.getenv("DB_USER"));
-    		properties.setProperty("password", System.getenv("DB_PASS"));
-    		properties.setProperty("MaxPooledStatements", "250");
-    	}
-    	
-    	log.log(Level.INFO, "Properties setuped");
-    	
-    	log.exiting(name, "getProperties");
-    	return properties;
+    private static DataSource dataSource;
+
+    private ConnDB() {}
+
+    private static DataSource getDataSource() {
+        if (dataSource == null) {
+            BasicDataSource basicDataSource = new BasicDataSource();
+            basicDataSource.setDriverClassName(DB_DRIVER);
+            basicDataSource.setUrl(DB_URL.replace("{HOST}", DB_HOST).replace("{DB_NAME}", DB_NAME));
+            basicDataSource.setUsername(DB_USER);
+            basicDataSource.setPassword(DB_PASS);
+            basicDataSource.setMaxTotal(MAX_POOL_SIZE);
+            dataSource = basicDataSource;
+
+            LOGGER.info("DataSource created");
+        }
+        return dataSource;
     }
 
-	public static Connection connect() throws SQLException, ClassNotFoundException {
-		log.entering(name, "connect");
-		
-		if (connection == null) {
-			try {
-				Class.forName("com.mysql.cj.jdbc.Driver");
-				connection = DriverManager.getConnection(
-						  "jdbc:mysql://" + System.getenv("DB_HOST") + "/" + System.getenv("DB_NAME") + "?sslMode=VERIFY_IDENTITY",
-						  System.getenv("DB_USER"),
-						  System.getenv("DB_PASS"));
-				
-				log.log(Level.INFO, "Connection started");
-			} catch (SQLException e) {
-				throw new SQLException(e.toString());
-			}
-		}
-		
-		log.exiting(name, "connect");
-		return connection;
-	}
+    public static Connection getConnection() throws SQLException {
+        Connection connection = getDataSource().getConnection();
+        LOGGER.info("Connection established");
+        return connection;
+    }
 
-	public static void disconnect() throws SQLException {
-		log.entering(name, "disconnect");
-		
-        if (connection != null) {
-            try {
-                connection.close();
-                connection = null;
-                
-                log.log(Level.INFO, "Connection closed");
-            } catch (SQLException e) {
-            	throw new SQLException(e.toString());
-            }
+    public static void closeConnection(Connection connection) throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+            LOGGER.info("Connection closed");
         }
-        
-        log.exiting(name, "disconnect");
     }
 }
