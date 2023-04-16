@@ -8,6 +8,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.JSONException;
@@ -23,13 +24,13 @@ import br.com.pucsp.tcc.authenticator.user.SaveUserDB;
 import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 import br.com.pucsp.tcc.authenticator.utils.ValidateData;
 
-@Produces("application/json")
-@Consumes("application/json")
+@Path("/user/register/email")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class RegisterEmail {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 	
 	@POST
-	@Path("/user/register/email")
 	public Response register(@Context HttpServletRequest request, String body) {
 		try {
 			RegisterEmail registerEmail = new RegisterEmail();

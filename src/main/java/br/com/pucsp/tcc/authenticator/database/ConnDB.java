@@ -24,15 +24,17 @@ public class ConnDB {
 
     private static DataSource getDataSource() {
         if (dataSource == null) {
+        	String dbURL = DB_URL.replace("{HOST}", DB_HOST).replace("{DB_NAME}", DB_NAME);
+        	
             BasicDataSource basicDataSource = new BasicDataSource();
             basicDataSource.setDriverClassName(DB_DRIVER);
-            basicDataSource.setUrl(DB_URL.replace("{HOST}", DB_HOST).replace("{DB_NAME}", DB_NAME));
+            basicDataSource.setUrl(dbURL);
             basicDataSource.setUsername(DB_USER);
             basicDataSource.setPassword(DB_PASS);
             basicDataSource.setMaxTotal(MAX_POOL_SIZE);
             dataSource = basicDataSource;
-
-            LOGGER.info("DataSource created");
+            
+            LOGGER.info("DataSource created - Database URL: " + dbURL);
         }
         return dataSource;
     }
