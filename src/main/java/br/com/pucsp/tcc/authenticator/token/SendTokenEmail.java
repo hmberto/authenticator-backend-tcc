@@ -5,10 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.mail.MessagingException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.user.SaveActiveSessionsDB;
@@ -17,15 +18,14 @@ import br.com.pucsp.tcc.authenticator.utils.EmailSender;
 import br.com.pucsp.tcc.authenticator.utils.EmailTemplate;
 
 public class SendTokenEmail {
-	private static final String CLASS_NAME = SendTokenEmail.class.getSimpleName();
-	private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SendTokenEmail.class);
 	
 	public boolean send(String email, String link, String code) {
 		long userId = 0;
 		try {
 			userId = SendTokenEmail.getUserId(email);
 		} catch (ClassNotFoundException | SQLException e) {
-			LOGGER.log(Level.SEVERE, "Error getting id_user", e);
+			LOGGER.error("Error getting id_user", e);
 		}
 		
 		if(userId == 0) {
@@ -33,7 +33,7 @@ public class SendTokenEmail {
 		}
 		
 		if("true".equals(link) && "true".equals(code)) {
-			LOGGER.log(Level.SEVERE, "SendTokenEmail.send: Both LINK and CODE selected as TRUE");
+			LOGGER.error("Both LINK and CODE selected as TRUE");
 			return false;
 		}
 		else if("true".equals(link)) {
@@ -43,7 +43,7 @@ public class SendTokenEmail {
 			try {
 				saveActiveSessionsDB.insertActiveSession(userId, email, token);
 			} catch (ClassNotFoundException | SQLException e) {
-				LOGGER.log(Level.SEVERE, "Error saving token", e);
+				LOGGER.error("Error saving token", e);
 			}
 			
 			SendTokenEmail.sendToken(email, link, code, token, "link");
@@ -53,7 +53,7 @@ public class SendTokenEmail {
 			SendTokenEmail.sendToken(email, link, code, token, "code");
 		}
 		else {
-			LOGGER.log(Level.SEVERE, "SendTokenEmail.send: Both LINK and CODE selected as FALSE");
+			LOGGER.error("Both LINK and CODE selected as FALSE");
 			return false;
 		}
 		
@@ -87,7 +87,7 @@ public class SendTokenEmail {
 		try {
 			sendEmail.confirmation(email.toLowerCase(), messageSubject, messageText);
 		} catch (MessagingException e) {
-			LOGGER.log(Level.SEVERE, "Error sending email '" + email + "' with token", e);
+			LOGGER.error("Error sending email to '" + email + "' with token", e);
 		}
 	}
 	
@@ -113,29 +113,28 @@ public class SendTokenEmail {
 	        }
 	    }
 	    catch (SQLException e) {
-	        LOGGER.log(Level.SEVERE, "Error getting user", e);
-	        throw new SQLException(e);
+	    	LOGGER.error("Error getting user", e);
 	    }
 		finally {
 		    if (rs != null) {
 		        try {
 		            rs.close();
 		        } catch (SQLException e) {
-		            LOGGER.log(Level.SEVERE, "Error closing result set", e);
+		        	LOGGER.error("Error closing result set", e);
 		        }
 		    }
 		    if (statement != null) {
 		        try {
 		        	statement.close();
 		        } catch (SQLException e) {
-		            LOGGER.log(Level.SEVERE, "Error closing statement", e);
+		        	LOGGER.error("Error closing statement", e);
 		        }
 		    }
 		    if (connection != null) {
 		        try {
 		            ConnDB.closeConnection(connection);
 		        } catch (SQLException e) {
-		            LOGGER.log(Level.SEVERE, "Error closing connection", e);
+		        	LOGGER.error("Error closing connection", e);
 		        }
 		    }
 		}

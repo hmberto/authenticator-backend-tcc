@@ -5,20 +5,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
+import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 
 public class CheckEmailAlreadyRegisteredDB {
-	private static final String CLASS_NAME = SaveActiveCodesDB.class.getSimpleName();
-	private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 	
 	public String verify(String email) throws SQLException, ClassNotFoundException {
-		LOGGER.entering(CLASS_NAME, "verify");
-		
 		JSONObject json = new JSONObject();
 		
 		Connection connection = null;
@@ -44,7 +42,7 @@ public class CheckEmailAlreadyRegisteredDB {
 	        }
 	    }
 	    catch (SQLException e) {
-	        LOGGER.log(Level.SEVERE, "Error inserting user", e);
+	    	LOGGER.error("Error inserting user", e);
 	        throw new SQLException(e);
 	    }
 		finally {
@@ -52,26 +50,25 @@ public class CheckEmailAlreadyRegisteredDB {
 		        try {
 		            rs.close();
 		        } catch (SQLException e) {
-		            LOGGER.log(Level.SEVERE, "Error closing result set", e);
+		        	LOGGER.error("Error closing result set", e);
 		        }
 		    }
 		    if (statement != null) {
 		        try {
 		        	statement.close();
 		        } catch (SQLException e) {
-		            LOGGER.log(Level.SEVERE, "Error closing statement", e);
+		        	LOGGER.error("Error closing statement", e);
 		        }
 		    }
 		    if (connection != null) {
 		        try {
 		            ConnDB.closeConnection(connection);
 		        } catch (SQLException e) {
-		            LOGGER.log(Level.SEVERE, "Error closing connection", e);
+		        	LOGGER.error("Error closing connection", e);
 		        }
 		    }
 		}
 	    
-	    LOGGER.exiting(CLASS_NAME, "insertActiveCode");
 	    if(json.toString().length() < 3) {
 	    	return null;
 	    }

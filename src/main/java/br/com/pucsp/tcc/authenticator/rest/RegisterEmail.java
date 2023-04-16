@@ -39,7 +39,7 @@ public class RegisterEmail {
 				return Response.ok(result).build();
 			}
 		} catch (Exception e) {
-		    LOGGER.error("Error creating data source", e);
+		    LOGGER.error("Error registering user email", e);
 		}
 		
 		return Response.status(Response.Status.FORBIDDEN).build();

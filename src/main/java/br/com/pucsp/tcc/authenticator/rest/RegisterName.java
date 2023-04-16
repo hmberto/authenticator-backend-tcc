@@ -1,8 +1,6 @@
 package br.com.pucsp.tcc.authenticator.rest;
 
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -14,6 +12,8 @@ import javax.ws.rs.core.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.user.UpdateUserNameDB;
 import br.com.pucsp.tcc.authenticator.utils.ValidateData;
@@ -21,8 +21,7 @@ import br.com.pucsp.tcc.authenticator.utils.ValidateData;
 @Produces("application/json")
 @Consumes("application/json")
 public class RegisterName {
-	private static final String CLASS_NAME = RegisterName.class.getSimpleName();
-	private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterName.class);
 	
 	@POST
 	@Path("/user/register/name")
@@ -35,7 +34,7 @@ public class RegisterName {
 				return Response.ok(result).build();
 			}
 		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, e.getMessage(), e);
+			LOGGER.error("Error registering user name", e);
 		}
 		
 		return Response.status(Response.Status.FORBIDDEN).build();

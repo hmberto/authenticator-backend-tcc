@@ -4,18 +4,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
+import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 
 public class SaveConfirmEmailDB {
-	private static final String CLASS_NAME = SaveConfirmEmailDB.class.getSimpleName();
-	private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 	
 	public void insertConfirmEmail(long userId, String email, boolean userConfirmed) throws ClassNotFoundException, SQLException {
-	    LOGGER.entering(CLASS_NAME, "insertConfirmEmail");
-	    
 	    Connection connection = null;
 	    PreparedStatement statement = null;
 	    
@@ -31,26 +30,23 @@ public class SaveConfirmEmailDB {
 	        statement.executeUpdate();
 	    }
 	    catch (SQLException e) {
-	        LOGGER.log(Level.SEVERE, "Error inserting user", e);
-	        throw new SQLException(e);
+	    	LOGGER.error("Error confirming email", e);
 	    }
 	    finally {
 		    if (statement != null) {
 		        try {
 		        	statement.close();
 		        } catch (SQLException e) {
-		            LOGGER.log(Level.SEVERE, "Error closing statement", e);
+		        	LOGGER.error("Error closing statement", e);
 		        }
 		    }
 		    if (connection != null) {
 		        try {
 		            ConnDB.closeConnection(connection);
 		        } catch (SQLException e) {
-		            LOGGER.log(Level.SEVERE, "Error closing connection", e);
+		        	LOGGER.error("Error closing connection", e);
 		        }
 		    }
 		}
-	    
-	    LOGGER.exiting(CLASS_NAME, "insertConfirmEmail");
 	}
 }

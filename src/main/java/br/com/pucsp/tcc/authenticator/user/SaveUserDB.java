@@ -5,18 +5,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
+import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 
 public class SaveUserDB {
-	private static final String CLASS_NAME = SaveUserDB.class.getSimpleName();
-	private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 	
 	public long insertUser(String userName, String userEmail) throws ClassNotFoundException, SQLException {
-	    LOGGER.entering(CLASS_NAME, "insertUser");
-	    
 	    Connection connection = null;
 	    PreparedStatement statement = null;
 	    long userId = 0;
@@ -38,27 +37,25 @@ public class SaveUserDB {
 	        }
 	    }
 	    catch (SQLException e) {
-	        LOGGER.log(Level.SEVERE, "Error inserting user", e);
-	        throw new SQLException(e);
+	    	LOGGER.error("Error inserting user", e);
 	    }
 	    finally {
 		    if (statement != null) {
 		        try {
 		        	statement.close();
 		        } catch (SQLException e) {
-		            LOGGER.log(Level.SEVERE, "Error closing statement", e);
+		        	LOGGER.error("Error closing statement", e);
 		        }
 		    }
 		    if (connection != null) {
 		        try {
 		            ConnDB.closeConnection(connection);
 		        } catch (SQLException e) {
-		            LOGGER.log(Level.SEVERE, "Error closing connection", e);
+		        	LOGGER.error("Error closing connection", e);
 		        }
 		    }
 		}
 	    
-	    LOGGER.exiting(CLASS_NAME, "insertUser");
 	    return userId;
 	}
 }

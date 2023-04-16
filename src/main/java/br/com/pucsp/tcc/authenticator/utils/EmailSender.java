@@ -1,7 +1,6 @@
 package br.com.pucsp.tcc.authenticator.utils;
 
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -12,13 +11,15 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
+
 public class EmailSender {
-	private static String name = EmailSender.class.getSimpleName();
-	private static Logger log = Logger.getLogger(EmailSender.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 	
 	public void confirmation(String destinatario, String messageSubject, String messageSend) throws MessagingException {
-		log.entering(name, "confirmation");
-		
 		Properties props = new Properties();
 		props.put("mail.smtp.host", "smtp-mail.outlook.com");
 		props.put("mail.smtp.socketFactory.port", "587");
@@ -46,7 +47,6 @@ public class EmailSender {
 			message.setContent(messageSend, "text/html; charset=UTF-8");
 			
 			Transport.send(message);
-			log.exiting(name, "confirmation");
 		} catch (MessagingException e) {
 			throw new MessagingException(e.toString());
 		}
