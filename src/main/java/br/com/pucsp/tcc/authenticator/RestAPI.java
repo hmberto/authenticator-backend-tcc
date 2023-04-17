@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 
 import br.com.pucsp.tcc.authenticator.rest.TestAPI;
 import br.com.pucsp.tcc.authenticator.cors.CORSFilter;
+import br.com.pucsp.tcc.authenticator.rest.LogoutUser;
 import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 import br.com.pucsp.tcc.authenticator.rest.RegisterName;
 import br.com.pucsp.tcc.authenticator.rest.RequestToken;
@@ -25,6 +26,7 @@ public class RestAPI {
 	private final ValidateToken validateToken = new ValidateToken();
 	private final RegisterEmail registerEmail = new RegisterEmail();
 	private final RegisterName registerName = new RegisterName();
+	private final LogoutUser logoutUser = new LogoutUser();
 	private final CORSFilter CORSFilter = new CORSFilter();
 	
 	@GET
@@ -54,6 +56,12 @@ public class RestAPI {
 	@Path("/user/register/name")
 	public Response registerNewName(@Context HttpServletRequest request, String body) {
 		return registerName.register(request, body);
+	}
+	
+	@POST
+	@Path("/user/logout")
+	public Response logout(@Context HttpServletRequest request, String body) {
+		return logoutUser.logout(request, body);
 	}
 	
 	@OPTIONS

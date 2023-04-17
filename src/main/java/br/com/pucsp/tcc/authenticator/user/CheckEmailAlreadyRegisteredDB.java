@@ -68,7 +68,7 @@ public class CheckEmailAlreadyRegisteredDB implements AutoCloseable {
 		        }
 		    }
 		}
-	    
+		
 	    if(json.toString().length() < 3) {
 	    	return null;
 	    }
