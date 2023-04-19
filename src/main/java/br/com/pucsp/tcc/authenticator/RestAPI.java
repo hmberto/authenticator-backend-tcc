@@ -35,31 +35,31 @@ public class RestAPI {
 	}
 	
 	@POST
-	@Path("/auth/request/token")
+	@Path("/generate-otp")
 	public Response requestNewToken(@Context HttpServletRequest request, String body) {
 		return requestToken.request(request, body);
 	}
 	
 	@POST
-	@Path("/auth/validate/token")
+	@Path("/verify-otp")
 	public Response validateEmailToken(@Context HttpServletRequest request, String body) {
 		return validateToken.validate(request, body);
 	}
 	
 	@POST
-	@Path("/user/register/email")
+	@Path("/register-email")
 	public Response registerNewEmail(@Context HttpServletRequest request, String body) {
 		return registerEmail.register(request, body);
 	}
 	
 	@POST
-	@Path("/user/register/name")
+	@Path("/register-name")
 	public Response registerNewName(@Context HttpServletRequest request, String body) {
 		return registerName.register(request, body);
 	}
 	
 	@POST
-	@Path("/user/logout")
+	@Path("/logout")
 	public Response logout(@Context HttpServletRequest request, String body) {
 		return logoutUser.logout(request, body);
 	}

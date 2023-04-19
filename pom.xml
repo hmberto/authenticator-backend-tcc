@@ -137,9 +137,10 @@
 				<configuration>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
 					<webApp>${basedir}/target/${project.build.finalName}</webApp>
+					<contextPath>/api</contextPath>
 					<connectors>
 						<connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-							<port>8186</port>
+							<port>8080</port>
 							<maxIdleTime>60000</maxIdleTime>
 						</connector>
 					</connectors>
