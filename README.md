@@ -62,7 +62,7 @@ This API is used to validate OTP sent by email to the user. It takes the followi
 
 ```email``` : The email address of the user<br>
 ```approve``` : TRUE or FALSE value to approve or disapprove the login request<br>
-```tokenOrCode``` : The unique session token or 6-digt code to validate
+```tokenOrOTP``` : The unique session token or 6-digt OTP to validate
 
 On successful registration, it returns an OK response with status 200.
 
