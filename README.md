@@ -98,6 +98,8 @@ DB_PASS="user-pass"
 OTP_LENGTH="6"
 
 SESSION_LENGTH="100"
+
+SITE_HOST="https://site_url.com"
 ~~~
 
 > EMAIL_BOX: This variable specifies the email address that the service will use for sending emails.<br>
