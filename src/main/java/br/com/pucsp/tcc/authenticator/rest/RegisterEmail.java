@@ -58,8 +58,8 @@ public class RegisterEmail {
             
             LOGGER.info("Email '{}' registered in the database - user ID: {}", email, userId);
             JSONObject json = new JSONObject()
-                    .put("id_user", userId)
-                    .put("token", session);
+                    .put("userId", userId)
+                    .put("session", session);
 
             return Response.ok(json.toString()).build();
         } catch (InvalidEmailException e) {

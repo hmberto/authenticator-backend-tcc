@@ -41,7 +41,7 @@ public class RestAPI {
 	}
 	
 	@POST
-	@Path("/verify-otp")
+	@Path("/validate-otp")
 	public Response validateEmailToken(@Context HttpServletRequest request, String body) {
 		return validateToken.validate(request, body);
 	}

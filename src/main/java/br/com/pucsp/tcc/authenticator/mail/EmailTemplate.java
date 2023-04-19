@@ -1,4 +1,4 @@
-package br.com.pucsp.tcc.authenticator.utils;
+package br.com.pucsp.tcc.authenticator.mail;
 
 public class EmailTemplate {
 	

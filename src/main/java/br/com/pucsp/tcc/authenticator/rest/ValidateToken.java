@@ -52,19 +52,19 @@ public class ValidateToken {
 	private boolean validateUserData(String body) throws SQLException {
 		JSONObject bodyJSON = new JSONObject(body.toString());
 		
-		String token = bodyJSON.getString("token").trim().toUpperCase();
 		String email = bodyJSON.getString("email").trim().toLowerCase();
+		String tokenOrCode = bodyJSON.getString("tokenOrCode").trim().toUpperCase();
 		boolean isSelectedApprove = Boolean.parseBoolean(bodyJSON.getString("approve").trim().toLowerCase());
 		
 		if(!DataValidator.isValidEmail(email)) {
 			throw new InvalidEmailException("Invalid email format");
 		}
 		
-		if(!DataValidator.isValidToken(token)) {
+		if(!DataValidator.isValidToken(tokenOrCode)) {
 			throw new InvalidSessionException("Invalid session token");
 		}
 		
 		EmailTokenValidator validateTokenEmail = new EmailTokenValidator();
-		return validateTokenEmail.verify(token, email, isSelectedApprove);
+		return validateTokenEmail.verify(tokenOrCode, email, isSelectedApprove);
 	}
 }

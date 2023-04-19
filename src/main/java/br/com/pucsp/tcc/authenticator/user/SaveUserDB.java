@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.exceptions.BusinessException;
+import br.com.pucsp.tcc.authenticator.mail.EmailType;
 import br.com.pucsp.tcc.authenticator.utils.CreateToken;
-import br.com.pucsp.tcc.authenticator.utils.EmailType;
 
 public class SaveUserDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SaveUserDB.class);

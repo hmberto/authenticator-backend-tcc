@@ -54,7 +54,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(LogoutUser.class);
 		
 		String email = userJSON.getString("email").trim().toLowerCase();
 		String session = userJSON.getString("session").trim().toUpperCase();
-		boolean isSelectedKillAll = Boolean.parseBoolean(userJSON.getString("kill_all").trim().toLowerCase());
+		boolean isSelectedKillAll = Boolean.parseBoolean(userJSON.getString("killAll").trim().toLowerCase());
 		
 		if(!DataValidator.isValidEmail(email)) {
 			throw new InvalidEmailException("Invalid email format");
