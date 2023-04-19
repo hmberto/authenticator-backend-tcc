@@ -110,7 +110,8 @@ SITE_HOST="https://site_url.com"
 > DB_USER: This variable represents the username that the service will use to authenticate with the database.<br>
 > DB_PASS: This variable indicates the password associated with the database user provided above.<br>
 > OTP_LENGTH: This variable specifies the length of the One-Time Password (OTP) that the service will generate for user authentication.<br>
-> SESSION_LENGTH: This variable specifies the length of the session token that the service will generate to identify a user session.
+> SESSION_LENGTH: This variable specifies the length of the session token that the service will generate to identify a user session.<br>
+> SITE_HOST: This variable indicates the hostname of the website to which the service will connect and consume this rest service.
 
 By modifying the values of these variables, the service's configuration can be customized to meet specific requirements.
 
