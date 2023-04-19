@@ -47,7 +47,7 @@ On successful registration, it returns an OK response with status 200.
 This API is used to generate and email a new OTP code to the user. It takes the following parameters:
 
 ```email``` : The email address of the user<br>
-```code``` : TRUE or FALSE value for email new 6-digit OTP<br>
+```otp``` : TRUE or FALSE value for email new 6-digit OTP<br>
 ```link``` : TRUE or FALSE value for email confirmation link
 
 On successful registration, it returns a JSON response containing the following:
@@ -62,7 +62,7 @@ This API is used to validate OTP sent by email to the user. It takes the followi
 
 ```email``` : The email address of the user<br>
 ```approve``` : TRUE or FALSE value to approve or disapprove the login request<br>
-```tokenOrCode``` : The unique session token or 6-digt code to validate
+```sessionTokenOrOTP``` : The unique session token or 6-digt OTP to validate
 
 On successful registration, it returns an OK response with status 200.
 
@@ -94,6 +94,10 @@ DB_NAME="tcc-humberto"
 DB_USER="user-db"
 
 DB_PASS="user-pass"
+
+OTP_LENGTH="6"
+
+SESSION_LENGTH="100"
 ~~~
 
 > EMAIL_BOX: This variable specifies the email address that the service will use for sending emails.<br>
@@ -102,7 +106,9 @@ DB_PASS="user-pass"
 > DB_HOST: This variable indicates the hostname of the database server that the service will connect to.<br>
 > DB_NAME: This variable specifies the name of the database that the service will use.<br>
 > DB_USER: This variable represents the username that the service will use to authenticate with the database.<br>
-> DB_PASS: This variable indicates the password associated with the database user provided above.
+> DB_PASS: This variable indicates the password associated with the database user provided above.<br>
+> OTP_LENGTH: This variable specifies the length of the One-Time Password (OTP) that the service will generate for user authentication.<br>
+> SESSION_LENGTH: This variable specifies the length of the session token that the service will generate to identify a user session.
 
 By modifying the values of these variables, the service's configuration can be customized to meet specific requirements.
 
