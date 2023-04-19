@@ -14,7 +14,7 @@ import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 public class LogoutUserDB {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 	
-	public boolean logout(String userEmail, String userToken, boolean isSelectedKillAll) throws SQLException {
+	public boolean logout(String userEmail, String userSessionToken, boolean isSelectedKillAll) throws SQLException {
 		Connection connection = null;
 	    PreparedStatement statement = null;
 	    int rowsUpdated = 0;
@@ -24,28 +24,34 @@ public class LogoutUserDB {
 	        
 	        String sql = null;
 	        
-	        sql = "DELETE a\n"
-	        		+ "FROM active_sessions a\n"
-	        		+ "JOIN (\n"
-	        		+ "    SELECT token, id_user\n"
-	        		+ "    FROM active_sessions\n"
-	        		+ "    WHERE active = true AND token = ?\n"
-	        		+ ") b ON a.token != b.token AND a.id_user = b.id_user\n"
-	        		+ "WHERE a.id_user = (SELECT id_user FROM users WHERE email = ?);";
+	        sql = "UPDATE active_sessions \n"
+	        		+ "SET active = false \n"
+	        		+ "WHERE token = ? \n"
+	        		+ "AND active = true \n"
+	        		+ "AND id_user = (SELECT id_user FROM users WHERE email = ?);";
 	        
 	        if(isSelectedKillAll) {
 	        	sql = "DELETE a\n"
-	        		    + "FROM active_sessions a\n"
-	        		    + "JOIN (\n"
-	        		    + "    SELECT token, id_user\n"
-	        		    + "    FROM active_sessions\n"
-	        		    + "    WHERE active = true AND token = ?\n"
-	        		    + ") b ON a.id_user = b.id_user\n"
-	        		    + "WHERE a.id_user = (SELECT id_user FROM users WHERE email = ?);";
+		        		+ "FROM active_sessions a\n"
+		        		+ "JOIN (\n"
+		        		+ "    SELECT token, id_user\n"
+		        		+ "    FROM active_sessions\n"
+		        		+ "    WHERE active = true AND token = ?\n"
+		        		+ ") b ON a.token != b.token AND a.id_user = b.id_user\n"
+		        		+ "WHERE a.id_user = (SELECT id_user FROM users WHERE email = ?);";
+	        	
+//	        	sql = "DELETE a\n"
+//	        		    + "FROM active_sessions a\n"
+//	        		    + "JOIN (\n"
+//	        		    + "    SELECT token, id_user\n"
+//	        		    + "    FROM active_sessions\n"
+//	        		    + "    WHERE active = true AND token = ?\n"
+//	        		    + ") b ON a.id_user = b.id_user\n"
+//	        		    + "WHERE a.id_user = (SELECT id_user FROM users WHERE email = ?);";
 	        }
 	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-	        statement.setString(1, userToken);
+	        statement.setString(1, userSessionToken);
 	        statement.setString(2, userEmail);
 	        
 	        rowsUpdated = statement.executeUpdate();

@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 
-public class SaveActiveCodesDB implements AutoCloseable {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SaveActiveCodesDB.class);
+public class SaveActiveOTPDB implements AutoCloseable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SaveActiveOTPDB.class);
 	
-	public boolean updateCode(String sql, String email, String code) {
+	public boolean updateCode(String sql, String userEmail, String userOTP) {
 		Connection connection = null;
 	    PreparedStatement statement = null;
 	    int rowsUpdated = 0;
@@ -22,13 +22,13 @@ public class SaveActiveCodesDB implements AutoCloseable {
 	        connection = ConnDB.getConnection();
 	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-	        statement.setString(1, code);
-	        statement.setString(2, email);
+	        statement.setString(1, userOTP);
+	        statement.setString(2, userEmail);
 	        
 	        rowsUpdated = statement.executeUpdate();
 	    }
 	    catch (SQLException e) {
-	    	LOGGER.error("Error inserting 6 digit code into database - Email: " + email, e);
+	    	LOGGER.error("Error inserting 6 digit code into database - Email: " + userEmail, e);
 	    }
 	    finally {
 		    if(statement != null) {

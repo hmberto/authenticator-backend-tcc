@@ -52,19 +52,19 @@ private static final Logger LOGGER = LoggerFactory.getLogger(LogoutUser.class);
 	private boolean validateUserData(String body) throws InvalidEmailException, InvalidSessionException, JSONException, SQLException {
 		JSONObject userJSON = new JSONObject(body);
 		
-		String email = userJSON.getString("email").trim().toLowerCase();
-		String session = userJSON.getString("session").trim().toUpperCase();
+		String userEmail = userJSON.getString("email").trim().toLowerCase();
+		String userSessionToken = userJSON.getString("session").trim().toUpperCase();
 		boolean isSelectedKillAll = Boolean.parseBoolean(userJSON.getString("killAll").trim().toLowerCase());
 		
-		if(!DataValidator.isValidEmail(email)) {
+		if(!DataValidator.isValidEmail(userEmail)) {
 			throw new InvalidEmailException("Invalid email format");
 		}
 		
-		if(!DataValidator.isValidToken(session) || session.length() != 100) {
+		if(!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != 100) {
 			throw new InvalidSessionException("Invalid session token");
 		}
 		
 		LogoutUserDB logoutUserDB = new LogoutUserDB();
-		return logoutUserDB.logout(email, session, isSelectedKillAll);
+		return logoutUserDB.logout(userEmail, userSessionToken, isSelectedKillAll);
 	}
 }

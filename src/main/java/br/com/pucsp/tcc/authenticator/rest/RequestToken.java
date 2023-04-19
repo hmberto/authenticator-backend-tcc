@@ -55,16 +55,16 @@ public class RequestToken {
     private JSONObject validateUserData(@Context HttpServletRequest request, String body) throws Exception {
     	JSONObject userJSON = new JSONObject(body.toString());
     	
-    	String email = userJSON.getString("email").trim().toLowerCase();
+    	String userEmail = userJSON.getString("email").trim().toLowerCase();
     	boolean isSelectedLink = Boolean.parseBoolean(userJSON.getString("link").trim().toLowerCase());
-		boolean isSelectedCode = Boolean.parseBoolean(userJSON.getString("code").trim().toLowerCase());
+		boolean isSelectedOTP = Boolean.parseBoolean(userJSON.getString("otp").trim().toLowerCase());
 		
-        if (!DataValidator.isValidEmail(email)) {
+        if (!DataValidator.isValidEmail(userEmail)) {
         	throw new InvalidEmailException("Invalid email format");
         }
         
         EmailTokenSender sendTokenEmail = new EmailTokenSender();
-        return sendTokenEmail.send(email, isSelectedLink, isSelectedCode);
+        return sendTokenEmail.send(userEmail, isSelectedLink, isSelectedOTP);
     }
 
 }

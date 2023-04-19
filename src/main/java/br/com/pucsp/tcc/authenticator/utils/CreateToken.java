@@ -6,7 +6,21 @@ public class CreateToken {
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int CHARACTERS_LENGTH = CHARACTERS.length();
     
-    public static String generate(int tokenLength) {
+    private static final int OTP_LENGTH = Integer.parseInt(System.getenv("OTP_LENGTH"));
+    private static final int SESSION_LENGTH = Integer.parseInt(System.getenv("SESSION_LENGTH"));
+    
+    public static String generate(String tokenType) {
+    	switch (tokenType) {
+    		case "session":
+    			return create(SESSION_LENGTH);
+    		case "otp":
+    			return create(OTP_LENGTH);
+    		default:
+		        throw new IllegalArgumentException("Invalid Token Type: {} - Expected value: session or otp");
+    	}
+    }
+    
+    private static String create(int tokenLength) {
         StringBuilder tokenBuilder = new StringBuilder();
         Random random = new Random();
         for (int i = 0; i < tokenLength; i++) {

@@ -14,7 +14,7 @@ import br.com.pucsp.tcc.authenticator.database.ConnDB;
 public class SaveActiveSessionsDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SaveActiveSessionsDB.class);
 	
-	public int insertActiveSession(int userId, String email, String userToken, boolean active) {
+	public int insertActiveSession(int userId, String userEmail, String userSessionToken, boolean active) {
 	    Connection connection = null;
 	    PreparedStatement statement = null;
 	    int sessionId = 0;
@@ -26,7 +26,7 @@ public class SaveActiveSessionsDB implements AutoCloseable {
 	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	        statement.setInt(1, userId);
-	        statement.setString(2, userToken);
+	        statement.setString(2, userSessionToken);
 	        statement.setBoolean(3, active);
 	        
 	        statement.executeUpdate();
@@ -37,7 +37,7 @@ public class SaveActiveSessionsDB implements AutoCloseable {
 	        }
 	    }
 	    catch (SQLException e) {
-	    	LOGGER.error("Error inserting 100 digit token into database - Email: " + email, e);
+	    	LOGGER.error("Error inserting 100 digit token into database - Email: " + userEmail, e);
 	    }
 	    finally {
 		    if(statement != null) {

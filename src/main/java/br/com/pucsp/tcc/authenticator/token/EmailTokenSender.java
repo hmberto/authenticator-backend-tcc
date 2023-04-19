@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import br.com.pucsp.tcc.authenticator.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.mail.EmailType;
 import br.com.pucsp.tcc.authenticator.user.CheckEmailAlreadyRegisteredDB;
-import br.com.pucsp.tcc.authenticator.user.SaveActiveCodesDB;
+import br.com.pucsp.tcc.authenticator.user.SaveActiveOTPDB;
 import br.com.pucsp.tcc.authenticator.user.SaveActiveSessionsDB;
 import br.com.pucsp.tcc.authenticator.user.SaveUserDB;
 import br.com.pucsp.tcc.authenticator.utils.CreateToken;
@@ -15,28 +15,28 @@ import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 public class EmailTokenSender {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailTokenSender.class);
 	
-	public JSONObject send(String email, boolean isSelectedLink, boolean isSelectedCode) throws Exception {
+	public JSONObject send(String userEmail, boolean isSelectedLink, boolean isSelectedOTP) throws Exception {
 	    try (CheckEmailAlreadyRegisteredDB checkEmailAlreadyRegisteredDB = new CheckEmailAlreadyRegisteredDB();
 	         SaveUserDB saveUserDB = new SaveUserDB();
 	         SaveActiveSessionsDB saveActiveSessionsDB = new SaveActiveSessionsDB();
-	         SaveActiveCodesDB saveActiveCodesDB = new SaveActiveCodesDB()) {
+	         SaveActiveOTPDB saveActiveCodesDB = new SaveActiveOTPDB()) {
 	    	
-	        String emailAlreadyExists = checkEmailAlreadyRegisteredDB.verify(email);
+	        String emailAlreadyExists = checkEmailAlreadyRegisteredDB.verify(userEmail);
 	        
 	        JSONObject userExistsJSON = (emailAlreadyExists != null) ? new JSONObject(emailAlreadyExists) : null;
 	        
-	        String userToken = CreateToken.generate(100);
+	        String userSession = CreateToken.generate("session");
 	        int userId;
 	        if (userExistsJSON != null) {
 	            userId = userExistsJSON.getInt("userId");
-	            LOGGER.info("Email '{}' already registered in the database - user ID: {}", email, userId);
+	            LOGGER.info("Email '{}' already registered in the database - user ID: {}", userEmail, userId);
 	        } else {
-	            userId = saveUserDB.insert("null", email, userToken);
+	            userId = saveUserDB.insert("null", userEmail, userSession);
 	            if(userId >= 1) {
-	            	LOGGER.info("Token requested for unregistered email '{}' in the database - user ID: {}", email, userId);
+	            	LOGGER.info("Token requested for unregistered email '{}' in the database - user ID: {}", userEmail, userId);
 		            JSONObject json = new JSONObject()
 		                    .put("userId", userId)
-		                    .put("session", userToken);
+		                    .put("session", userSession);
 		            return json;
 	            }
 	            else {
@@ -44,34 +44,35 @@ public class EmailTokenSender {
 	            }
 	        }
 	        
-	        if(isSelectedLink && isSelectedCode) {
+	        if(isSelectedLink && isSelectedOTP) {
 	            throw new BusinessException("Both LINK and CODE selected as TRUE");
 	        } else if(isSelectedLink) {
 	            JSONObject json = new JSONObject()
 	                    .put("userId", userId)
-	                    .put("session", userToken);
+	                    .put("session", userSession);
 	            
-	            int isSaved = saveActiveSessionsDB.insertActiveSession(userId, email, userToken, false);
+	            int isSaved = saveActiveSessionsDB.insertActiveSession(userId, userEmail, userSession, false);
 	            
 	            if(isSaved >= 1) {
-	                sendToken(email, "", userToken, "link");
+	                sendToken(userEmail, "", userSession, "session");
 	                return json;
 	            }
-	        } else if (isSelectedCode) {
-	            String userCode = CreateToken.generate(6);
+	        } else if (isSelectedOTP) {
+	            String userOTP = CreateToken.generate("otp");
 	            String sql = "UPDATE active_codes \n"
 	            		+ "SET active = true, code = ? \n"
 	            		+ "WHERE id_user = (SELECT id_user FROM users WHERE email = ?);";
-	            boolean isCodeSaved = saveActiveCodesDB.updateCode(sql, email, userCode);
 	            
-	            int isTokenSaved = saveActiveSessionsDB.insertActiveSession(userId, email, userToken, true);
+	            boolean isCodeSaved = saveActiveCodesDB.updateCode(sql, userEmail, userOTP);
+	            
+	            int isTokenSaved = saveActiveSessionsDB.insertActiveSession(userId, userEmail, userSession, true);
 	            
 	            JSONObject json = new JSONObject()
 	                    .put("userId", userId)
-	                    .put("session", userToken);
+	                    .put("session", userSession);
 
 	            if (isCodeSaved && isTokenSaved >= 1) {
-	                sendToken(email, userCode, "", "code");
+	                sendToken(userEmail, userOTP, "", "otp");
 	                return json;
 	            }
 	        } else {
@@ -83,16 +84,16 @@ public class EmailTokenSender {
 	}
 
 	
-	private static void sendToken(String email, String code, String token, String type) throws BusinessException {
-		switch (type) {
-        	case "link":
-        		EmailType.sendEmailLink(email, token);
+	private static void sendToken(String userEmail, String userOTP, String userSessionToken, String tokenType) throws BusinessException {
+		switch (tokenType) {
+        	case "session":
+        		EmailType.sendEmailLink(userEmail, userSessionToken);
 				break;
-        	case "code":
-        		EmailType.sendEmailCode(email, code);
+        	case "otp":
+        		EmailType.sendEmailCode(userEmail, userOTP);
 				break;
         	default:
-                throw new IllegalArgumentException("Invalid token type: " + type);
+                throw new IllegalArgumentException("Invalid token type: " + tokenType  + " - token type must be session or otp");
 		}
 	}
 }

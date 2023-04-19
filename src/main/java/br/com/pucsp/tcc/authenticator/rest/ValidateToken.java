@@ -52,19 +52,19 @@ public class ValidateToken {
 	private boolean validateUserData(String body) throws SQLException {
 		JSONObject bodyJSON = new JSONObject(body.toString());
 		
-		String email = bodyJSON.getString("email").trim().toLowerCase();
-		String tokenOrCode = bodyJSON.getString("tokenOrCode").trim().toUpperCase();
+		String userEmail = bodyJSON.getString("email").trim().toLowerCase();
+		String userSessionTokenOrOTP = bodyJSON.getString("sessionTokenOrOTP").trim().toUpperCase();
 		boolean isSelectedApprove = Boolean.parseBoolean(bodyJSON.getString("approve").trim().toLowerCase());
 		
-		if(!DataValidator.isValidEmail(email)) {
+		if(!DataValidator.isValidEmail(userEmail)) {
 			throw new InvalidEmailException("Invalid email format");
 		}
 		
-		if(!DataValidator.isValidToken(tokenOrCode)) {
-			throw new InvalidSessionException("Invalid session token");
+		if(!DataValidator.isValidToken(userSessionTokenOrOTP)) {
+			throw new InvalidSessionException("Invalid session token or OTP format");
 		}
 		
 		EmailTokenValidator validateTokenEmail = new EmailTokenValidator();
-		return validateTokenEmail.verify(tokenOrCode, email, isSelectedApprove);
+		return validateTokenEmail.verify(userSessionTokenOrOTP, userEmail, isSelectedApprove);
 	}
 }

@@ -11,12 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
-import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 
 public class CheckEmailAlreadyRegisteredDB implements AutoCloseable {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CheckEmailAlreadyRegisteredDB.class);
 	
-	public String verify(String email) throws SQLException {
+	public String verify(String userEmail) throws SQLException {
 		JSONObject json = new JSONObject();
 		
 		Connection connection = null;
@@ -32,7 +31,7 @@ public class CheckEmailAlreadyRegisteredDB implements AutoCloseable {
 		             "WHERE users.email = ?";
 	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-	        statement.setString(1, email);
+	        statement.setString(1, userEmail);
 	        
 	        rs = statement.executeQuery();
 	        

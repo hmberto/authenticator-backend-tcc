@@ -31,36 +31,36 @@ public class RegisterEmail {
 	public Response register(@Context HttpServletRequest request, String body) {
 		try {
             JSONObject userJSON = new JSONObject(body);
-            String email = userJSON.getString("email").trim().toLowerCase();
+            String userEmail = userJSON.getString("email").trim().toLowerCase();
             
-            if(!DataValidator.isValidEmail(email)) {
+            if(!DataValidator.isValidEmail(userEmail)) {
             	String json = new JSONObject().put("Error Message", "Invalid email format").toString();
             	return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
             }
             
             @SuppressWarnings("resource")
 			CheckEmailAlreadyRegisteredDB checkEmailAlreadyRegisteredDB = new CheckEmailAlreadyRegisteredDB();
-            String emailAlreadyExists = checkEmailAlreadyRegisteredDB.verify(email);
+            String emailAlreadyExists = checkEmailAlreadyRegisteredDB.verify(userEmail);
             if(emailAlreadyExists != null) {
                 JSONObject userExistsJSON = new JSONObject(emailAlreadyExists);
-                LOGGER.info("Email '{}' already registered in the database - user ID: {}", email, userExistsJSON.getInt("id_user"));
+                LOGGER.info("Email '{}' already registered in the database - user ID: {}", userEmail, userExistsJSON.getInt("id_user"));
                 return Response.ok(emailAlreadyExists).build();
             }
             
             @SuppressWarnings("resource")
 			SaveUserDB saveUserDB = new SaveUserDB();
-            String session = CreateToken.generate(100);
-            int userId = saveUserDB.insert("null", email, session);
+            String newUserSessionToken = CreateToken.generate("session");
+            int userId = saveUserDB.insert("null", userEmail, newUserSessionToken);
             
             if(userId <= 0) {
-                throw new SQLException("User registration failed for email: " + email);
+                throw new SQLException("User registration failed for email: " + userEmail);
             }
             
-            LOGGER.info("Email '{}' registered in the database - user ID: {}", email, userId);
+            LOGGER.info("Email '{}' registered in the database - user ID: {}", userEmail, userId);
             JSONObject json = new JSONObject()
                     .put("userId", userId)
-                    .put("session", session);
-
+                    .put("session", newUserSessionToken);
+            
             return Response.ok(json.toString()).build();
         } catch (InvalidEmailException e) {
         	String json = new JSONObject().put("Error Message", e.getMessage()).toString();
