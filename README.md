@@ -47,7 +47,7 @@ On successful registration, it returns an OK response with status 200.
 This API is used to generate and email a new OTP code to the user. It takes the following parameters:
 
 ```email``` : The email address of the user<br>
-```code``` : TRUE or FALSE value for email new 6-digit OTP<br>
+```otp``` : TRUE or FALSE value for email new 6-digit OTP<br>
 ```link``` : TRUE or FALSE value for email confirmation link
 
 On successful registration, it returns a JSON response containing the following:
