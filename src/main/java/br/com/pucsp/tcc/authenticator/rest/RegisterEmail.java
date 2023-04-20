@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.user.CheckEmailAlreadyRegisteredDB;
+import br.com.pucsp.tcc.authenticator.user.SaveActiveSessionsDB;
 import br.com.pucsp.tcc.authenticator.user.SaveUserDB;
 import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
@@ -32,6 +33,7 @@ public class RegisterEmail {
 		try {
             JSONObject userJSON = new JSONObject(body);
             String userEmail = userJSON.getString("email").trim().toLowerCase();
+            String newUserSessionToken = CreateToken.generate("session");
             
             if(!DataValidator.isValidEmail(userEmail)) {
             	String json = new JSONObject().put("Error Message", "Invalid email format").toString();
@@ -43,13 +45,39 @@ public class RegisterEmail {
             String emailAlreadyExists = checkEmailAlreadyRegisteredDB.verify(userEmail);
             if(emailAlreadyExists != null) {
                 JSONObject userExistsJSON = new JSONObject(emailAlreadyExists);
-                LOGGER.info("Email '{}' already registered in the database - user ID: {}", userEmail, userExistsJSON.getInt("id_user"));
-                return Response.ok(emailAlreadyExists).build();
+                LOGGER.info("Email '{}' already registered in the database - user ID: {}", userEmail, userExistsJSON.getInt("userId"));
+                
+                boolean isSessionTokenActive = Boolean.parseBoolean(userExistsJSON.getString("isSessionTokenActive").trim().toLowerCase());
+                
+                if(isSessionTokenActive) {
+                	return Response.ok(emailAlreadyExists).build();
+                }
+                else {
+                	int userId = userExistsJSON.getInt("userId");
+    	            String name = userExistsJSON.getString("name");
+    	            
+    	            String isLoginOrRegistration = "true";
+    	            if(name == "null") {
+    	            	isLoginOrRegistration = "false";
+    	            }
+    	            
+    	            String json = new JSONObject()
+	            		.put("userId", userId)
+	    	            .put("session", newUserSessionToken)
+	    	            .put("isSessionTokenActive", "true")
+	    	            .put("isLogin", isLoginOrRegistration)
+	    	            .toString();
+                	
+                	SaveActiveSessionsDB saveActiveSessionsDB = new SaveActiveSessionsDB();
+                	int isSaved = saveActiveSessionsDB.insertActiveSession(userId, userEmail, newUserSessionToken, false);
+                	if(isSaved >= 1) {
+                		return Response.ok(json).build();
+                	}
+                }
             }
             
             @SuppressWarnings("resource")
 			SaveUserDB saveUserDB = new SaveUserDB();
-            String newUserSessionToken = CreateToken.generate("session");
             int userId = saveUserDB.insert("null", userEmail, newUserSessionToken);
             
             if(userId <= 0) {
@@ -59,7 +87,9 @@ public class RegisterEmail {
             LOGGER.info("Email '{}' registered in the database - user ID: {}", userEmail, userId);
             JSONObject json = new JSONObject()
                     .put("userId", userId)
-                    .put("session", newUserSessionToken);
+                    .put("session", newUserSessionToken)
+                    .put("isSessionTokenActive", "true")
+                    .put("isLogin", "false");
             
             return Response.ok(json.toString()).build();
         } catch (InvalidEmailException e) {

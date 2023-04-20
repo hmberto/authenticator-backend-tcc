@@ -30,13 +30,16 @@ public class EmailTokenSender {
 	        if (userExistsJSON != null) {
 	            userId = userExistsJSON.getInt("userId");
 	            LOGGER.info("Email '{}' already registered in the database - user ID: {}", userEmail, userId);
-	        } else {
+	        }
+	        else {
 	            userId = saveUserDB.insert("null", userEmail, userSession);
 	            if(userId >= 1) {
 	            	LOGGER.info("Token requested for unregistered email '{}' in the database - user ID: {}", userEmail, userId);
 		            JSONObject json = new JSONObject()
 		                    .put("userId", userId)
-		                    .put("session", userSession);
+		                    .put("session", userSession)
+		                    .put("isSessionTokenActive", "true")
+		                    .put("isLogin", "false");
 		            return json;
 	            }
 	            else {
@@ -49,7 +52,9 @@ public class EmailTokenSender {
 	        } else if(isSelectedLink) {
 	            JSONObject json = new JSONObject()
 	                    .put("userId", userId)
-	                    .put("session", userSession);
+	                    .put("session", userSession)
+	                    .put("isSessionTokenActive", "true")
+	                    .put("isLogin", "true");
 	            
 	            int isSaved = saveActiveSessionsDB.insertActiveSession(userId, userEmail, userSession, false);
 	            
@@ -69,7 +74,9 @@ public class EmailTokenSender {
 	            
 	            JSONObject json = new JSONObject()
 	                    .put("userId", userId)
-	                    .put("session", userSession);
+	                    .put("session", userSession)
+	                    .put("isLogin", "true")
+	            		.put("isSessionTokenActive", "true");
 
 	            if (isCodeSaved && isTokenSaved >= 1) {
 	                sendToken(userEmail, userOTP, "", "otp");
