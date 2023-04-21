@@ -23,10 +23,10 @@ public class SaveUserDB implements AutoCloseable {
 	    UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();
 	    
 	    try (Connection connection = ConnDB.getConnection();
-	    		PreparedStatement statementUser = connection.prepareStatement("INSERT INTO users (name, email) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
-	    		PreparedStatement statementCode = connection.prepareStatement("INSERT INTO active_codes (id_user, code, active) VALUES (?, ?, true)", Statement.RETURN_GENERATED_KEYS);
-	    		PreparedStatement statementSession = connection.prepareStatement("INSERT INTO active_sessions (id_user, token, active) VALUES (?, ?, true)", Statement.RETURN_GENERATED_KEYS);
-	    		PreparedStatement statementConfirmEmail = connection.prepareStatement("INSERT INTO confirm_email (id_user, confirmed) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+	    		PreparedStatement statementUser = connection.prepareStatement("INSERT INTO users (first_name, last_name, email) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+	    		PreparedStatement statementCode = connection.prepareStatement("INSERT INTO otps (user_id, otp, is_active) VALUES (?, ?, true)", Statement.RETURN_GENERATED_KEYS);
+	    		PreparedStatement statementSession = connection.prepareStatement("INSERT INTO sessions (user_id, session, is_active) VALUES (?, ?, true)", Statement.RETURN_GENERATED_KEYS);
+	    		PreparedStatement statementConfirmEmail = connection.prepareStatement("INSERT INTO email_verifications (user_id, is_confirmed) VALUES (?, false)", Statement.RETURN_GENERATED_KEYS)) {
 
 	        statementUser.setString(1, userName);
 	        statementUser.setString(2, userEmail);
@@ -43,7 +43,7 @@ public class SaveUserDB implements AutoCloseable {
 
 	        int codeId = insertDB(statementCode, connection);
 	        if(codeId <= 0) {
-	        	LOGGER.error("Error inserting 'active_codes' into the database for user '" + userId + "'. Trying to undo changes");
+	        	LOGGER.error("Error inserting 'otps' into the database for user '" + userId + "'. Trying to undo changes");
 	        	undoChanges.recovery(userId);
 	            return 0;
 	        }
@@ -53,17 +53,16 @@ public class SaveUserDB implements AutoCloseable {
 
 	        int sessionId = insertDB(statementSession, connection);
 	        if(sessionId <= 0) {
-	        	LOGGER.error("Error inserting 'active_sessions' into the database for user '" + userId + "'. Trying to undo changes");
+	        	LOGGER.error("Error inserting 'sessions' into the database for user '" + userId + "'. Trying to undo changes");
 	        	undoChanges.recovery(userId);
 	            return 0;
 	        }
 	        
 	        statementConfirmEmail.setInt(1, userId);
-	        statementConfirmEmail.setBoolean(2, false);
 	        
 	        int confirmEmailId = insertDB(statementConfirmEmail, connection);
 	        if(confirmEmailId <= 0) {
-	        	LOGGER.error("Error inserting 'confirm_email' into the database for user '" + userId + "'. Trying to undo changes");
+	        	LOGGER.error("Error inserting 'email_verifications' into the database for user '" + userId + "'. Trying to undo changes");
 	        	undoChanges.recovery(userId);
 	            return 0;
 	        }

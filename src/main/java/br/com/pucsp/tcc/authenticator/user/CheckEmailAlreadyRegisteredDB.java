@@ -25,9 +25,9 @@ public class CheckEmailAlreadyRegisteredDB implements AutoCloseable {
 		try {
 	        connection = ConnDB.getConnection();
 	        
-	        String sql = "SELECT active_sessions.id_user, active_sessions.token, active_sessions.active, users.name\n"
-	        		+ "FROM active_sessions\n"
-	        		+ "INNER JOIN users ON users.id_user = active_sessions.id_user\n"
+	        String sql = "SELECT sessions.user_id, sessions.session, sessions.is_active, users.first_name\n"
+	        		+ "FROM sessions\n"
+	        		+ "INNER JOIN users ON users.user_id = sessions.user_id\n"
 	        		+ "WHERE users.email = ?";
 	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -38,6 +38,7 @@ public class CheckEmailAlreadyRegisteredDB implements AutoCloseable {
 	        while (rs.next()) {
 	            json.put("userId", rs.getInt("id_user"));
 	            json.put("session", rs.getString("token"));
+	            
 	            if(rs.getBoolean("active")) {
 	            	json.put("isSessionTokenActive", "true");
 	            }
@@ -45,7 +46,7 @@ public class CheckEmailAlreadyRegisteredDB implements AutoCloseable {
 	            	json.put("isSessionTokenActive", "false");
 	            }
 	            
-	            if(rs.getString("name") != "null") {
+	            if(!"null".equals(rs.getString("name").trim().toLowerCase())) {
 	            	json.put("isLogin", "true");
 	            }
 	            else {

@@ -15,10 +15,10 @@ public class UndoChangesSaveUserDB {
 	
 	public void recovery(int userId) throws SQLException {
 	    try (Connection connection = ConnDB.getConnection();
-	    		PreparedStatement statementUser = connection.prepareStatement("DELETE FROM active_sessions WHERE id_user = ? AND EXISTS (SELECT id_user FROM active_sessions WHERE id_user = ?);", Statement.RETURN_GENERATED_KEYS);
-	    		PreparedStatement statementCode = connection.prepareStatement("DELETE FROM active_codes WHERE id_user = ? AND EXISTS (SELECT id_user FROM active_codes WHERE id_user = ?);", Statement.RETURN_GENERATED_KEYS);
-	    		PreparedStatement statementSession = connection.prepareStatement("DELETE FROM confirm_email WHERE id_user = ? AND EXISTS (SELECT id_user FROM confirm_email WHERE id_user = ?);", Statement.RETURN_GENERATED_KEYS);
-	    		PreparedStatement statementConfirmEmail = connection.prepareStatement("DELETE FROM users WHERE id_user = ? AND EXISTS (SELECT id_user FROM users WHERE id_user = ?);", Statement.RETURN_GENERATED_KEYS)) {
+	    		PreparedStatement statementUser = connection.prepareStatement("DELETE FROM sessions WHERE user_id = ? AND EXISTS (SELECT user_id FROM sessions WHERE user_id = ?);", Statement.RETURN_GENERATED_KEYS);
+	    		PreparedStatement statementCode = connection.prepareStatement("DELETE FROM otps WHERE user_id = ? AND EXISTS (SELECT user_id FROM otps WHERE user_id = ?);", Statement.RETURN_GENERATED_KEYS);
+	    		PreparedStatement statementSession = connection.prepareStatement("DELETE FROM email_verifications WHERE user_id = ? AND EXISTS (SELECT user_id FROM email_verifications WHERE user_id = ?);", Statement.RETURN_GENERATED_KEYS);
+	    		PreparedStatement statementConfirmEmail = connection.prepareStatement("DELETE FROM users WHERE user_id = ? AND EXISTS (SELECT user_id FROM users WHERE user_id = ?);", Statement.RETURN_GENERATED_KEYS)) {
 	    	
 	        statementCode.setInt(1, userId);
 	        statementCode.setInt(2, userId);

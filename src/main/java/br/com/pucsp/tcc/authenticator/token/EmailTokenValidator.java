@@ -17,23 +17,23 @@ public class EmailTokenValidator {
 		
 		try (SaveActiveOTPDB saveActiveCodesDB = new SaveActiveOTPDB()) {
 			if(userSessionTokenOrOTP.length() == SESSION_LENGTH && isSelectedApprove) {
-				String sql = "UPDATE active_sessions \n"
-				           + "JOIN users ON users.id_user = active_sessions.id_user \n"
-				           + "SET active_sessions.active = true \n"
-				           + "WHERE active_sessions.token = ? AND users.email = ? \n"
-				           + "AND active_sessions.created_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE) \n"
-				           + "AND active_sessions.active = false;";
+				String sql = "UPDATE sessions \n"
+				           + "JOIN users ON users.user_id = sessions.user_id \n"
+				           + "SET sessions.is_active = true \n"
+				           + "WHERE sessions.session = ? AND users.email = ? \n"
+				           + "AND sessions.created_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE) \n"
+				           + "AND sessions.is_active = false;";
 				
 				validate = saveActiveCodesDB.updateCode(sql, userEmail, userSessionTokenOrOTP);
 			}
 			else if(userSessionTokenOrOTP.length() == OTP_LENGTH) {
-				String sql = "UPDATE active_codes\n"
-				           + "JOIN confirm_email ON active_codes.id_user = confirm_email.id_user\n"
-				           + "SET active = false, confirmed = true\n"
-				           + "WHERE active_codes.code = ?\n"
-				           + "AND active_codes.active = true\n"
-				           + "AND active_codes.id_user = (SELECT id_user FROM users WHERE email = ?)\n"
-				           + "AND active_codes.updated_at >= DATE_SUB(NOW(), INTERVAL 5 MINUTE);\n";
+				String sql = "UPDATE otps\n"
+				           + "JOIN email_verifications ON otps.user_id = email_verifications.user_id\n"
+				           + "SET is_active = false, is_confirmed = true\n"
+				           + "WHERE otps.otp = ?\n"
+				           + "AND otps.is_active = true\n"
+				           + "AND otps.user_id = (SELECT user_id FROM users WHERE email = ?)\n"
+				           + "AND otps.updated_at >= DATE_SUB(NOW(), INTERVAL 5 MINUTE);\n";
 				
 				validate = saveActiveCodesDB.updateCode(sql, userEmail, userSessionTokenOrOTP);
 			}

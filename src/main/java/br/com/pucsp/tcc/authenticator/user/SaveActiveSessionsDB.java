@@ -22,7 +22,7 @@ public class SaveActiveSessionsDB implements AutoCloseable {
 	    try {
 	        connection = ConnDB.getConnection();
 	        
-	        String sql = "INSERT INTO active_sessions (id_user, token, active) VALUES (?, ?, ?)";
+	        String sql = "INSERT INTO sessions (user_id, session, is_active) VALUES (?, ?, ?)";
 	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	        statement.setInt(1, userId);

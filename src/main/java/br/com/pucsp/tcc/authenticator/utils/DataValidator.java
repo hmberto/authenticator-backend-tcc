@@ -20,7 +20,7 @@ public class DataValidator {
 	
 	public static boolean isValidUsername(String username) {
 		boolean validUsername = true;
-		boolean searchForCharacters = username.matches("[\\p{L} ]+");
+		boolean searchForCharacters = username.matches("[\\p{L}]+");
 		
 		if (!searchForCharacters) {
 			LOGGER.error("Invalid username: {}", username);

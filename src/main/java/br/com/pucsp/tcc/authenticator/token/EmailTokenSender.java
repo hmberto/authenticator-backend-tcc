@@ -23,19 +23,21 @@ public class EmailTokenSender {
 	    	
 	        String emailAlreadyExists = checkEmailAlreadyRegisteredDB.verify(userEmail);
 	        
-	        JSONObject userExistsJSON = (emailAlreadyExists != null) ? new JSONObject(emailAlreadyExists) : null;
+	        JSONObject userJSON = (emailAlreadyExists != null) ? new JSONObject(emailAlreadyExists) : null;
 	        
 	        String userSession = CreateToken.generate("session");
 	        int userId;
-	        if (userExistsJSON != null) {
-	            userId = userExistsJSON.getInt("userId");
+	        
+	        if (userJSON != null) {
+	            userId = userJSON.getInt("userId");
 	            LOGGER.info("Email '{}' already registered in the database - user ID: {}", userEmail, userId);
 	        }
 	        else {
 	            userId = saveUserDB.insert("null", userEmail, userSession);
+	            
 	            if(userId >= 1) {
 	            	LOGGER.info("Token requested for unregistered email '{}' in the database - user ID: {}", userEmail, userId);
-		            JSONObject json = new JSONObject()
+		            JSONObject json = new JSONObject(emailAlreadyExists)
 		                    .put("userId", userId)
 		                    .put("session", userSession)
 		                    .put("isSessionTokenActive", "true")
@@ -50,11 +52,9 @@ public class EmailTokenSender {
 	        if(isSelectedLink && isSelectedOTP) {
 	            throw new BusinessException("Both LINK and CODE selected as TRUE");
 	        } else if(isSelectedLink) {
-	            JSONObject json = new JSONObject()
-	                    .put("userId", userId)
+	            JSONObject json = new JSONObject(emailAlreadyExists)
 	                    .put("session", userSession)
-	                    .put("isSessionTokenActive", "true")
-	                    .put("isLogin", "true");
+	                    .put("isSessionTokenActive", "true");
 	            
 	            int isSaved = saveActiveSessionsDB.insertActiveSession(userId, userEmail, userSession, false);
 	            
@@ -64,20 +64,16 @@ public class EmailTokenSender {
 	            }
 	        } else if (isSelectedOTP) {
 	            String userOTP = CreateToken.generate("otp");
-	            String sql = "UPDATE active_codes \n"
-	            		+ "SET active = true, code = ? \n"
-	            		+ "WHERE id_user = (SELECT id_user FROM users WHERE email = ?);";
+	            String sql = "UPDATE otp \n"
+	            		+ "SET is_active = true, code = ? \n"
+	            		+ "WHERE user_id = (SELECT user_id FROM users WHERE email = ?);";
 	            
 	            boolean isCodeSaved = saveActiveCodesDB.updateCode(sql, userEmail, userOTP);
-	            
 	            int isTokenSaved = saveActiveSessionsDB.insertActiveSession(userId, userEmail, userSession, true);
 	            
-	            JSONObject json = new JSONObject()
-	                    .put("userId", userId)
+	            JSONObject json = new JSONObject(emailAlreadyExists)
 	                    .put("session", userSession)
-	                    .put("isLogin", "true")
 	            		.put("isSessionTokenActive", "true");
-
 	            if (isCodeSaved && isTokenSaved >= 1) {
 	                sendToken(userEmail, userOTP, "", "otp");
 	                return json;

@@ -14,7 +14,7 @@ import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 public class UpdateUserNameDB {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
 	
-	public boolean update(String userName, String userEmail, String userToken) throws SQLException {
+	public boolean update(String userFirstName, String userLastName, String userEmail, String userToken) throws SQLException {
 	    Connection connection = null;
 	    PreparedStatement statement = null;
 	    int rowsUpdated = 0;
@@ -22,15 +22,15 @@ public class UpdateUserNameDB {
 	    try {
 	        connection = ConnDB.getConnection();
 	        
-	        String sql = "UPDATE users SET name = ? \n"
-	        		+ "WHERE email = ? \n"
-	        		+ "AND id_user IN (SELECT id_user FROM active_sessions WHERE token = ? AND active = true)\n"
-	        		+ "";
+	        String sql = "UPDATE users SET first_name = ?, last_name = ?\n"
+	        		+ "WHERE email = ?\n"
+	        		+ "AND user_id IN (SELECT user_id FROM sessions WHERE sessions = ? AND is_active = true)";
 	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-	        statement.setString(1, userName);
-	        statement.setString(2, userEmail);
-	        statement.setString(3, userToken);
+	        statement.setString(1, userFirstName);
+	        statement.setString(2, userLastName);
+	        statement.setString(3, userEmail);
+	        statement.setString(4, userToken);
 	        
 	        rowsUpdated = statement.executeUpdate();
 	    }

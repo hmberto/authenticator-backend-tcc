@@ -68,7 +68,8 @@ public class RegisterEmail {
 	    	            .put("isLogin", isLoginOrRegistration)
 	    	            .toString();
                 	
-                	SaveActiveSessionsDB saveActiveSessionsDB = new SaveActiveSessionsDB();
+                	@SuppressWarnings("resource")
+					SaveActiveSessionsDB saveActiveSessionsDB = new SaveActiveSessionsDB();
                 	int isSaved = saveActiveSessionsDB.insertActiveSession(userId, userEmail, newUserSessionToken, false);
                 	if(isSaved >= 1) {
                 		return Response.ok(json).build();

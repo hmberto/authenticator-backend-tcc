@@ -24,30 +24,30 @@ public class LogoutUserDB {
 	        
 	        String sql = null;
 	        
-	        sql = "UPDATE active_sessions \n"
-	        		+ "SET active = false \n"
-	        		+ "WHERE token = ? \n"
-	        		+ "AND active = true \n"
-	        		+ "AND id_user = (SELECT id_user FROM users WHERE email = ?);";
+	        sql = "UPDATE sessions \n"
+	        		+ "SET is_active = false \n"
+	        		+ "WHERE session = ? \n"
+	        		+ "AND is_active = true \n"
+	        		+ "AND user_id = (SELECT user_id FROM users WHERE email = ?);";
 	        
 	        if(isSelectedKillAll) {
 	        	sql = "DELETE a\n"
-		        		+ "FROM active_sessions a\n"
+		        		+ "FROM sessions a\n"
 		        		+ "JOIN (\n"
-		        		+ "    SELECT token, id_user\n"
-		        		+ "    FROM active_sessions\n"
-		        		+ "    WHERE active = true AND token = ?\n"
-		        		+ ") b ON a.token != b.token AND a.id_user = b.id_user\n"
-		        		+ "WHERE a.id_user = (SELECT id_user FROM users WHERE email = ?);";
+		        		+ "    SELECT session, user_id\n"
+		        		+ "    FROM sessions\n"
+		        		+ "    WHERE is_active = true AND session = ?\n"
+		        		+ ") b ON a.session != b.session AND a.user_id = b.user_id\n"
+		        		+ "WHERE a.user_id = (SELECT user_id FROM users WHERE email = ?);";
 	        	
 //	        	sql = "DELETE a\n"
-//	        		    + "FROM active_sessions a\n"
+//	        		    + "FROM sessions a\n"
 //	        		    + "JOIN (\n"
-//	        		    + "    SELECT token, id_user\n"
-//	        		    + "    FROM active_sessions\n"
-//	        		    + "    WHERE active = true AND token = ?\n"
-//	        		    + ") b ON a.id_user = b.id_user\n"
-//	        		    + "WHERE a.id_user = (SELECT id_user FROM users WHERE email = ?);";
+//	        		    + "    SELECT session, user_id\n"
+//	        		    + "    FROM sessions\n"
+//	        		    + "    WHERE is_active = true AND session = ?\n"
+//	        		    + ") b ON a.user_id = b.user_id\n"
+//	        		    + "WHERE a.user_id = (SELECT user_id FROM users WHERE email = ?);";
 	        }
 	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);

@@ -57,12 +57,17 @@ public class RegisterName {
 	private boolean validateUserData(String body) throws InvalidNameException, InvalidEmailException, InvalidSessionException, JSONException, SQLException {
 		JSONObject userJSON = new JSONObject(body);
 		
-		String userName = userJSON.getString("name").trim();
+		String userFirstName = userJSON.getString("firstName").trim();
+		String userLastName = userJSON.getString("lastName").trim();
 		String userEmail = userJSON.getString("email").trim().toLowerCase();
 		String userSessionToken = userJSON.getString("session").trim().toUpperCase();
 		
-		if(!DataValidator.isValidUsername(userName)) {
-			throw new InvalidNameException("Invalid name format");
+		if(!DataValidator.isValidUsername(userFirstName)) {
+			throw new InvalidNameException("Invalid first name format");
+		}
+		
+		if(!DataValidator.isValidUsername(userLastName)) {
+			throw new InvalidNameException("Invalid last name format");
 		}
 		
 		if(!DataValidator.isValidEmail(userEmail)) {
@@ -73,11 +78,12 @@ public class RegisterName {
 			throw new InvalidSessionException("Invalid session token format");
 		}
 		
-		if(!userName.matches("^[\\p{L}]+( [\\p{L}]+)+$")) {
+		String fullName = userFirstName + " " + userLastName;
+		if(!fullName.matches("^[\\p{L}]+( [\\p{L}]+)+$")) {
 			throw new InvalidNameException("Name must have two words");
 		}
 		
 		UpdateUserNameDB updateUserNameDB = new UpdateUserNameDB();
-		return updateUserNameDB.update(userName, userEmail, userSessionToken);
+		return updateUserNameDB.update(userFirstName, userLastName, userEmail, userSessionToken);
 	}
 }
