@@ -24,7 +24,7 @@ public class UpdateUserNameDB {
 	        
 	        String sql = "UPDATE users SET first_name = ?, last_name = ?\n"
 	        		+ "WHERE email = ?\n"
-	        		+ "AND user_id IN (SELECT user_id FROM sessions WHERE sessions = ? AND is_active = true)";
+	        		+ "AND user_id IN (SELECT user_id FROM sessions WHERE session = ? AND is_active = true)";
 	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	        statement.setString(1, userFirstName);
