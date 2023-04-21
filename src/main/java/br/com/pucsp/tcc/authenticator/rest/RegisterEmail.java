@@ -79,7 +79,7 @@ public class RegisterEmail {
             
             @SuppressWarnings("resource")
 			SaveUserDB saveUserDB = new SaveUserDB();
-            int userId = saveUserDB.insert("null", userEmail, newUserSessionToken);
+            int userId = saveUserDB.insert("null", "null", userEmail, newUserSessionToken);
             
             if(userId <= 0) {
                 throw new SQLException("User registration failed for email: " + userEmail);

@@ -33,7 +33,7 @@ public class EmailTokenSender {
 	            LOGGER.info("Email '{}' already registered in the database - user ID: {}", userEmail, userId);
 	        }
 	        else {
-	            userId = saveUserDB.insert("null", userEmail, userSession);
+	            userId = saveUserDB.insert("null", "null", userEmail, userSession);
 	            
 	            if(userId >= 1) {
 	            	LOGGER.info("Token requested for unregistered email '{}' in the database - user ID: {}", userEmail, userId);

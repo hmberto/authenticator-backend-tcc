@@ -17,7 +17,7 @@ import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 public class SaveUserDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SaveUserDB.class);
 	
-	public int insert(String userName, String userEmail, String userSessionToken) throws SQLException, BusinessException {
+	public int insert(String userFirstName, String userLastName, String userEmail, String userSessionToken) throws SQLException, BusinessException {
 	    int userId = 0;
 	    
 	    UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();
@@ -28,8 +28,9 @@ public class SaveUserDB implements AutoCloseable {
 	    		PreparedStatement statementSession = connection.prepareStatement("INSERT INTO sessions (user_id, session, is_active) VALUES (?, ?, true)", Statement.RETURN_GENERATED_KEYS);
 	    		PreparedStatement statementConfirmEmail = connection.prepareStatement("INSERT INTO email_verifications (user_id, is_confirmed) VALUES (?, false)", Statement.RETURN_GENERATED_KEYS)) {
 
-	        statementUser.setString(1, userName);
-	        statementUser.setString(2, userEmail);
+	        statementUser.setString(1, userFirstName);
+	        statementUser.setString(2, userLastName);
+	        statementUser.setString(3, userEmail);
 
 	        userId = insertDB(statementUser, connection);
 	        if(userId <= 0) {
