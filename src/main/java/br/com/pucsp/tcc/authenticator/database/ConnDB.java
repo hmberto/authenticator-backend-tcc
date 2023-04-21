@@ -34,7 +34,7 @@ public class ConnDB {
             basicDataSource.setMaxTotal(MAX_POOL_SIZE);
             dataSource = basicDataSource;
             
-            LOGGER.info("DataSource created - Database URL: " + dbURL);
+            LOGGER.info("DataSource created - Database Type: MySQL, Database URL: " + dbURL);
         }
         return dataSource;
     }
