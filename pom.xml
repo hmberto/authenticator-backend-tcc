@@ -216,12 +216,22 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>3.3.2</version>
 				<configuration>
+					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
 					<warName>${project.artifactId}</warName>
 					<archive>
 						<manifest>
 							<mainClass>br.com.pucsp.tcc.authenticator.RestAPI</mainClass>
 						</manifest>
 					</archive>
+					<webResources>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<targetPath>WEB-INF</targetPath>
+							<includes>
+								<include>**/*.xml</include>
+							</includes>
+						</resource>
+					</webResources>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -245,8 +255,6 @@
 				</executions>
 			</plugin>
 		</plugins>
-
-
 		<pluginManagement>
 			<plugins>
 				<plugin>
