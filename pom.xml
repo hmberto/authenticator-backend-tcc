@@ -1,113 +1,155 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+	http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.com.pucsp.tcc.authenticator</groupId>
 	<artifactId>UserAuthenticator</artifactId>
-	<packaging>jar</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>UserAuthenticator</name>
+	<description>Projeto de autenticação de usuários</description>
 	<url>http://maven.apache.org</url>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Humberto Araújo</name>
+			<email>contato@humbertoaraujo.com</email>
+		</developer>
+	</developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<skip.integration.tests>false</skip.integration.tests>
+		<commons-dbcp2.version>2.9.0</commons-dbcp2.version>
+		<slf4j-api.version>1.8.0-beta4</slf4j-api.version>
+		<logback-classic.version>1.3.0-alpha4</logback-classic.version>
+		<jetty-servlets.version>9.4.18.v20190429</jetty-servlets.version>
+		<mysql-connector-java.version>8.0.24</mysql-connector-java.version>
+		<json.version>20210307</json.version>
+		<junit.version>4.13.2</junit.version>
+		<guava.version>30.1.1-jre</guava.version>
+		<javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
+		<cxf-rt-core.version>2.7.18</cxf-rt-core.version>
+		<cxf-rt-frontend-jaxrs.version>3.4.5</cxf-rt-frontend-jaxrs.version>
+		<cxf-rt-transports-http-jetty.version>3.4.5</cxf-rt-transports-http-jetty.version>
+		<spring-web.version>3.0.1.RELEASE</spring-web.version>
+		<jaxb-api.version>2.1</jaxb-api.version>
+		<jackson-xc.version>1.9.13</jackson-xc.version>
+		<jackson-jaxrs.version>1.9.13</jackson-jaxrs.version>
+		<httpclient.version>4.3</httpclient.version>
+		<javax.mail.version>1.6.2</javax.mail.version>
+		<geronimo-javamail_1.4_spec.version>1.7.1</geronimo-javamail_1.4_spec.version>
+		<geronimo-servlet_3.0_spec.version>1.0</geronimo-servlet_3.0_spec.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-dbcp2</artifactId>
-			<version>2.9.0</version>
+			<version>${commons-dbcp2.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.8.0-beta4</version>
+			<version>${slf4j-api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.3.0-alpha4</version>
+			<version>${logback-classic.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlets</artifactId>
-			<version>9.4.18.v20190429</version>
+			<version>${jetty-servlets.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.24</version>
+			<version>${mysql-connector-java.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20180130</version>
+			<version>${json.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>18.0</version>
+			<version>${guava.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>javax.ws.rs-api</artifactId>
-			<version>2.0-m10</version>
+			<version>${javax.ws.rs-api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-core</artifactId>
-			<version>2.7.18</version>
+			<version>${cxf-rt-core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
-			<version>2.7.18</version>
+			<version>${cxf-rt-frontend-jaxrs.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-transports-http-jetty</artifactId>
-			<version>2.7.18</version>
+			<version>${cxf-rt-transports-http-jetty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>3.0.1.RELEASE</version>
+			<version>${spring-web.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
-			<version>2.1</version>
+			<version>${jaxb-api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-xc</artifactId>
-			<version>1.9.13</version>
+			<version>${jackson-xc.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-jaxrs</artifactId>
-			<version>1.9.13</version>
+			<version>${jackson-jaxrs.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.3</version>
+			<version>${httpclient.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
-			<version>1.6.2</version>
+			<version>${javax.mail.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-			<version>7.10.0</version>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-javamail_1.4_spec</artifactId>
+			<version>${geronimo-javamail_1.4_spec.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-servlet_3.0_spec</artifactId>
+			<version>${geronimo-servlet_3.0_spec.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<build>
