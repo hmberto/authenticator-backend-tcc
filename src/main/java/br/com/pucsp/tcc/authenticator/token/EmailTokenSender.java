@@ -65,17 +65,17 @@ public class EmailTokenSender {
 	            }
 	        } else if (isSelectedOTP) {
 	            String userOTP = CreateToken.generate("otp");
-	            String sql = "UPDATE otp \n"
-	            		+ "SET is_active = true, code = ? \n"
+	            String sql = "UPDATE otps \n"
+	            		+ "SET is_active = true, otp = ? \n"
 	            		+ "WHERE user_id = (SELECT user_id FROM users WHERE email = ?);";
 	            
-	            boolean isCodeSaved = saveActiveCodesDB.updateCode(sql, userEmail, userOTP);
+	            boolean isOTPSaved = saveActiveCodesDB.updateCode(sql, userEmail, userOTP);
 	            int isTokenSaved = saveActiveSessionsDB.insertActiveSession(userId, userEmail, userSession, true);
 	            
 	            JSONObject json = new JSONObject(emailAlreadyExists)
 	                    .put("session", userSession)
 	            		.put("isSessionTokenActive", "true");
-	            if (isCodeSaved && isTokenSaved >= 1) {
+	            if (isOTPSaved && isTokenSaved >= 1) {
 	                sendToken(userEmail, userOTP, "", userIP, loginDate, "otp");
 	                
 	                return json;

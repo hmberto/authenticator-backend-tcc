@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
+import br.com.pucsp.tcc.authenticator.mail.EmailType;
 import br.com.pucsp.tcc.authenticator.user.CheckEmailAlreadyRegisteredDB;
 import br.com.pucsp.tcc.authenticator.user.SaveActiveSessionsDB;
 import br.com.pucsp.tcc.authenticator.user.SaveUserDB;
@@ -33,7 +34,7 @@ public class RegisterEmail {
 	
 	@POST
 	public Response register(@Context HttpServletRequest request, String body) {
-		String ip = request.getRemoteAddr();
+		String userIP = request.getRemoteAddr();
 		
 		LocalDateTime agora = LocalDateTime.now();
 		DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd 'de' MMM. 'de' yyyy HH:mm", new Locale("pt", "BR"));
@@ -57,30 +58,27 @@ public class RegisterEmail {
                 LOGGER.info("Email '{}' already registered in the database - user ID: {}", userEmail, userExistsJSON.getInt("userId"));
                 
                 boolean isSessionTokenActive = Boolean.parseBoolean(userExistsJSON.getString("isSessionTokenActive").trim().toLowerCase());
-                
+                String newUserOTP = CreateToken.generate("otp");
                 if(isSessionTokenActive) {
+                	EmailType.sendEmailOTP(userEmail, newUserOTP, userIP, loginDate);
                 	return Response.ok(emailAlreadyExists).build();
                 }
                 else {
                 	int userId = userExistsJSON.getInt("userId");
-    	            String name = userExistsJSON.getString("name");
-    	            
-    	            String isLoginOrRegistration = "true";
-    	            if(name == "null") {
-    	            	isLoginOrRegistration = "false";
-    	            }
+                	String isLogin = userExistsJSON.getString("isLogin").trim().toLowerCase();
     	            
     	            String json = new JSONObject()
 	            		.put("userId", userId)
 	    	            .put("session", newUserSessionToken)
 	    	            .put("isSessionTokenActive", "true")
-	    	            .put("isLogin", isLoginOrRegistration)
+	    	            .put("isLogin", isLogin)
 	    	            .toString();
                 	
                 	@SuppressWarnings("resource")
 					SaveActiveSessionsDB saveActiveSessionsDB = new SaveActiveSessionsDB();
-                	int isSaved = saveActiveSessionsDB.insertActiveSession(userId, userEmail, newUserSessionToken, false);
+                	int isSaved = saveActiveSessionsDB.insertActiveSession(userId, userEmail, newUserSessionToken, true);
                 	if(isSaved >= 1) {
+                		EmailType.sendEmailOTP(userEmail, newUserOTP, userIP, loginDate);
                 		return Response.ok(json).build();
                 	}
                 }
@@ -88,7 +86,7 @@ public class RegisterEmail {
             
             @SuppressWarnings("resource")
 			SaveUserDB saveUserDB = new SaveUserDB();
-            int userId = saveUserDB.insert("null", "null", userEmail, newUserSessionToken, ip, loginDate);
+            int userId = saveUserDB.insert("null", "null", userEmail, newUserSessionToken, userIP, loginDate);
             
             if(userId <= 0) {
                 throw new SQLException("User registration failed for email: " + userEmail);
