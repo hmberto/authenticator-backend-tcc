@@ -36,17 +36,17 @@ public class CheckEmailAlreadyRegisteredDB implements AutoCloseable {
 	        rs = statement.executeQuery();
 	        
 	        while (rs.next()) {
-	            json.put("userId", rs.getInt("id_user"));
-	            json.put("session", rs.getString("token"));
+	            json.put("userId", rs.getInt("user_id"));
+	            json.put("session", rs.getString("session"));
 	            
-	            if(rs.getBoolean("active")) {
+	            if(rs.getBoolean("is_active")) {
 	            	json.put("isSessionTokenActive", "true");
 	            }
 	            else {
 	            	json.put("isSessionTokenActive", "false");
 	            }
 	            
-	            if(!"null".equals(rs.getString("name").trim().toLowerCase())) {
+	            if(!"null".equals(rs.getString("first_name").trim().toLowerCase())) {
 	            	json.put("isLogin", "true");
 	            }
 	            else {

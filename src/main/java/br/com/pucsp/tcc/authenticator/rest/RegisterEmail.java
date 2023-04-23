@@ -1,6 +1,9 @@
 package br.com.pucsp.tcc.authenticator.rest;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -30,6 +33,12 @@ public class RegisterEmail {
 	
 	@POST
 	public Response register(@Context HttpServletRequest request, String body) {
+		String ip = request.getRemoteAddr();
+		
+		LocalDateTime agora = LocalDateTime.now();
+		DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd 'de' MMM. 'de' yyyy HH:mm", new Locale("pt", "BR"));
+		String loginDate = agora.format(formatador);
+		
 		try {
             JSONObject userJSON = new JSONObject(body);
             String userEmail = userJSON.getString("email").trim().toLowerCase();
@@ -79,7 +88,7 @@ public class RegisterEmail {
             
             @SuppressWarnings("resource")
 			SaveUserDB saveUserDB = new SaveUserDB();
-            int userId = saveUserDB.insert("null", "null", userEmail, newUserSessionToken);
+            int userId = saveUserDB.insert("null", "null", userEmail, newUserSessionToken, ip, loginDate);
             
             if(userId <= 0) {
                 throw new SQLException("User registration failed for email: " + userEmail);

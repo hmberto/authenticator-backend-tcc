@@ -1,6 +1,9 @@
 package br.com.pucsp.tcc.authenticator.rest;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -53,6 +56,12 @@ public class RequestToken {
     }
 
     private JSONObject validateUserData(@Context HttpServletRequest request, String body) throws Exception {
+    	String ip = request.getRemoteAddr();
+		
+		LocalDateTime agora = LocalDateTime.now();
+		DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd 'de' MMM. 'de' yyyy HH:mm", new Locale("pt", "BR"));
+		String loginDate = agora.format(formatador);
+    	
     	JSONObject userJSON = new JSONObject(body.toString());
     	
     	String userEmail = userJSON.getString("email").trim().toLowerCase();
@@ -64,7 +73,7 @@ public class RequestToken {
         }
         
         EmailTokenSender sendTokenEmail = new EmailTokenSender();
-        return sendTokenEmail.send(userEmail, isSelectedLink, isSelectedOTP);
+        return sendTokenEmail.send(userEmail, ip, loginDate, isSelectedLink, isSelectedOTP);
     }
 
 }

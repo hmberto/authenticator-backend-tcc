@@ -17,7 +17,7 @@ import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 public class SaveUserDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SaveUserDB.class);
 	
-	public int insert(String userFirstName, String userLastName, String userEmail, String userSessionToken) throws SQLException, BusinessException {
+	public int insert(String userFirstName, String userLastName, String userEmail, String userSessionToken, String userIP, String loginDate) throws SQLException, BusinessException {
 	    int userId = 0;
 	    
 	    UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();
@@ -68,7 +68,7 @@ public class SaveUserDB implements AutoCloseable {
 	            return 0;
 	        }
 	        
-	        EmailType.sendEmailCode(userEmail, newUserOTP);
+	        EmailType.sendEmailOTP(userEmail, newUserOTP, userIP, loginDate);
 	    } catch (SQLException e) {
 	        LOGGER.error("Error inserting user into database - Email: " + userEmail, e);
 	    }
