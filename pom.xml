@@ -31,13 +31,11 @@
 		<logback-classic.version>1.3.0-alpha4</logback-classic.version>
 		<jetty-servlets.version>9.4.18.v20190429</jetty-servlets.version>
 		<mysql-connector-java.version>8.0.24</mysql-connector-java.version>
-		<json.version>20210307</json.version>
-		<junit.version>4.13.2</junit.version>
-		<guava.version>30.1.1-jre</guava.version>
-		<javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
-		<cxf-rt-core.version>2.7.18</cxf-rt-core.version>
-		<cxf-rt-frontend-jaxrs.version>3.4.5</cxf-rt-frontend-jaxrs.version>
-		<cxf-rt-transports-http-jetty.version>3.4.5</cxf-rt-transports-http-jetty.version>
+		<json.version>20180130</json.version>
+		<junit.version>4.11</junit.version>
+		<guava.version>18.0</guava.version>
+		<javax.ws.rs-api.version>2.0-m10</javax.ws.rs-api.version>
+		<cxf.version>2.7.18</cxf.version>
 		<spring-web.version>3.0.1.RELEASE</spring-web.version>
 		<jaxb-api.version>2.1</jaxb-api.version>
 		<jackson-xc.version>1.9.13</jackson-xc.version>
@@ -98,17 +96,17 @@
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-core</artifactId>
-			<version>${cxf-rt-core.version}</version>
+			<version>${cxf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
-			<version>${cxf-rt-frontend-jaxrs.version}</version>
+			<version>${cxf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-transports-http-jetty</artifactId>
-			<version>${cxf-rt-transports-http-jetty.version}</version>
+			<version>${cxf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
