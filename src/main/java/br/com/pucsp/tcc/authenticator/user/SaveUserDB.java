@@ -77,17 +77,14 @@ public class SaveUserDB implements AutoCloseable {
 	}
 
 	private int insertDB(PreparedStatement statement, Connection connection) throws SQLException {
+		int result = statement.executeUpdate();
 		try(ResultSet rs = statement.getGeneratedKeys()) {
-			int result = statement.executeUpdate();
-			if (rs.next()) {
+			if(rs.next()) {
 				result = rs.getInt(1);
 			}
-			return result;
 		}
-		catch(SQLException e) {
-			statement.close();
-			throw e;
-		}
+		statement.close();
+		return result;
 	}
 	
 	@Override
