@@ -10,8 +10,8 @@ import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.exceptions.UnregisteredUserException;
 import br.com.pucsp.tcc.authenticator.mail.EmailType;
 import br.com.pucsp.tcc.authenticator.user.GetUserFromDB;
-import br.com.pucsp.tcc.authenticator.user.SaveActiveOTPDB;
-import br.com.pucsp.tcc.authenticator.user.SaveActiveSessionsDB;
+import br.com.pucsp.tcc.authenticator.user.SessionTokenAndOTPManagerDB;
+import br.com.pucsp.tcc.authenticator.user.SaveSessionTokenDB;
 import br.com.pucsp.tcc.authenticator.user.SaveUserDB;
 import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
@@ -23,8 +23,8 @@ public class EmailSessionTokenOrOTPSender {
 	public String send(final JSONObject body, final String userIP, final String loginDate) throws Exception {
 		try(GetUserFromDB getUserFromDB = new GetUserFromDB();
 	    		SaveUserDB saveUserDB = new SaveUserDB();
-	    		SaveActiveSessionsDB saveActiveSessionsDB = new SaveActiveSessionsDB();
-	    		SaveActiveOTPDB saveActiveOTPDB = new SaveActiveOTPDB()) {
+	    		SaveSessionTokenDB saveSessionToken = new SaveSessionTokenDB();
+	    		SessionTokenAndOTPManagerDB saveActiveOTPDB = new SessionTokenAndOTPManagerDB()) {
 			
 			String userEmail = body.has("email") ? body.getString("email").trim().toLowerCase() : null;
 			boolean isSelectedLink = body.has("link") ? body.getBoolean("link") : false;
@@ -55,7 +55,7 @@ public class EmailSessionTokenOrOTPSender {
 	    		throw new BusinessException("Link request denied for email '" + userEmail + "' because the user did not complete the registration");
 	    	}
 	    	else if(isSelectedLink && isLogin) {
-	    		boolean isSessionTokenSaved = saveActiveSessionsDB.insertActiveSession(userId, userEmail, userSession, sessionTokenActive);
+	    		boolean isSessionTokenSaved = saveSessionToken.insert(userId, userEmail, userSession, sessionTokenActive);
 	    		
 	    		if(isSessionTokenSaved) {
 	    			sendToken(userEmail, "", userSession, userIP, loginDate, "session");
@@ -66,7 +66,7 @@ public class EmailSessionTokenOrOTPSender {
 	    	}
 	    	else if(isSelectedOTP) {
 	    		String userOTP = CreateToken.generate("otp");
-	    		boolean isOTPSaved = saveActiveOTPDB.updateOTP(SqlQueries.UPDATE_OTP_TABLE, userEmail, userOTP);
+	    		boolean isOTPSaved = saveActiveOTPDB.insert(SqlQueries.UPDATE_OTP_TABLE, userEmail, userOTP);
 	    		
 	    		if(isOTPSaved) {
 	    			sendToken(userEmail, userOTP, "", userIP, loginDate, "otp");

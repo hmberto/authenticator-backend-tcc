@@ -16,55 +16,51 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.pucsp.tcc.authenticator.exceptions.BusinessException;
+import br.com.pucsp.tcc.authenticator.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
-import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionException;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidNameException;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionTokenOrOTPException;
+import br.com.pucsp.tcc.authenticator.exceptions.UnregisteredUserException;
 import br.com.pucsp.tcc.authenticator.user.LogoutUserDB;
-import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 
-@Path("/user/logout")
+@Path("/logout")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class LogoutUser {
 private static final Logger LOGGER = LoggerFactory.getLogger(LogoutUser.class);
 	
 	@POST
-	public Response logout(@Context HttpServletRequest request, String body) {
+	public Response logout(final @Context HttpServletRequest request, final String body) {
+		JSONObject bodyJSON = new JSONObject(body);
+		
 		try {
-			boolean result = validateUserData(body);
+			LogoutUserDB logoutUserDB = new LogoutUserDB();
+			boolean result = logoutUserDB.logout(bodyJSON);
 			
 			if(result) {
 				return Response.ok().build();
 			}
-		} catch (InvalidEmailException e) {
-			String json = new JSONObject().put("Error Message", e.getMessage()).toString();
-		    LOGGER.error("Error logging out user: Invalid email format", e);
-		    return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
-		} catch (InvalidSessionException e) {
-			String json = new JSONObject().put("Error Message", e.getMessage()).toString();
-		    LOGGER.error("Error logging out user: Invalid session token", e);
-		    return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
-		} catch (JSONException | SQLException e) {
-		    LOGGER.error("Error logging out user", e);
 		}
-		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+		catch(JSONException e) {
+			return buildErrorResponse("Invalid JSON payload", Response.Status.BAD_REQUEST);
+		}
+		catch(InvalidEmailException | UnregisteredUserException | BusinessException | InvalidSessionTokenOrOTPException | InvalidNameException e) {
+			return buildErrorResponse(e.getMessage(), Response.Status.BAD_REQUEST);
+		}
+		catch(SQLException | DatabaseInsertException e) {
+			return buildErrorResponse("Unexpected error occurred while registering a new user", Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		catch(Exception e) {
+			return buildErrorResponse("Unexpected error occurred while registering a new user", Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		
+		return buildErrorResponse("Unexpected error occurred while registering a new user", Response.Status.INTERNAL_SERVER_ERROR);
 	}
 	
-	private boolean validateUserData(String body) throws InvalidEmailException, InvalidSessionException, JSONException, SQLException {
-		JSONObject userJSON = new JSONObject(body);
-		
-		String userEmail = userJSON.getString("email").trim().toLowerCase();
-		String userSessionToken = userJSON.getString("session").trim().toUpperCase();
-		boolean isSelectedKillAll = Boolean.parseBoolean(userJSON.getString("killAll").trim().toLowerCase());
-		
-		if(!DataValidator.isValidEmail(userEmail)) {
-			throw new InvalidEmailException("Invalid email format");
-		}
-		
-		if(!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != 100) {
-			throw new InvalidSessionException("Invalid session token");
-		}
-		
-		LogoutUserDB logoutUserDB = new LogoutUserDB();
-		return logoutUserDB.logout(userEmail, userSessionToken, isSelectedKillAll);
+	private Response buildErrorResponse(String message, Response.Status status) {
+		String errorJson = new JSONObject().put("Error Message", message).toString();
+		LOGGER.error(message);
+		return Response.status(status).entity(errorJson).build();
 	}
 }

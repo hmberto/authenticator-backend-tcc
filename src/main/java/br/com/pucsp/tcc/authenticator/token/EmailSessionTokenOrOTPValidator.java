@@ -1,10 +1,14 @@
 package br.com.pucsp.tcc.authenticator.token;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionException;
-import br.com.pucsp.tcc.authenticator.user.SaveActiveOTPDB;
+import br.com.pucsp.tcc.authenticator.database.SqlQueries;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionTokenOrOTPException;
+import br.com.pucsp.tcc.authenticator.user.SessionTokenAndOTPManagerDB;
+import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 
 public class EmailSessionTokenOrOTPValidator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailSessionTokenOrOTPValidator.class);
@@ -12,38 +16,39 @@ public class EmailSessionTokenOrOTPValidator {
 	private static final int OTP_LENGTH = Integer.parseInt(System.getenv("OTP_LENGTH"));
     private static final int SESSION_LENGTH = Integer.parseInt(System.getenv("SESSION_LENGTH"));
 	
-	public boolean verify(String userSessionTokenOrOTP, String userEmail, boolean isSelectedApprove) {
+	public boolean verify(final JSONObject body, final String userIP, final String loginDate) throws Exception {
 		boolean validate = false;
 		
-		try (SaveActiveOTPDB saveActiveCodesDB = new SaveActiveOTPDB()) {
+		String userEmail = body.has("email") ? body.getString("email").trim().toLowerCase() : null;
+		String userSessionTokenOrOTP = body.getString("sessionTokenOrOTP").trim().toUpperCase();
+		boolean isSelectedApprove = body.has("approve") ? body.getBoolean("approve") : false;
+		
+		validateBody(userEmail, userSessionTokenOrOTP, isSelectedApprove);
+		
+		try(SessionTokenAndOTPManagerDB saveSessionTokenAndOTP = new SessionTokenAndOTPManagerDB()) {
 			if(userSessionTokenOrOTP.length() == SESSION_LENGTH && isSelectedApprove) {
-				String sql = "UPDATE sessions \n"
-				           + "JOIN users ON users.user_id = sessions.user_id \n"
-				           + "SET sessions.is_active = true \n"
-				           + "WHERE sessions.session = ? AND users.email = ? \n"
-				           + "AND sessions.created_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE) \n"
-				           + "AND sessions.is_active = false;";
-				
-				validate = saveActiveCodesDB.updateOTP(sql, userEmail, userSessionTokenOrOTP);
-			}
-			else if(userSessionTokenOrOTP.length() == OTP_LENGTH) {
-				String sql = "UPDATE otps\n"
-				           + "JOIN email_verifications ON otps.user_id = email_verifications.user_id\n"
-				           + "SET is_active = false, is_confirmed = true\n"
-				           + "WHERE otps.otp = ?\n"
-				           + "AND otps.is_active = true\n"
-				           + "AND otps.user_id = (SELECT user_id FROM users WHERE email = ?)\n"
-				           + "AND otps.updated_at >= DATE_SUB(NOW(), INTERVAL 5 MINUTE);\n";
-				
-				validate = saveActiveCodesDB.updateOTP(sql, userEmail, userSessionTokenOrOTP);
+				validate = saveSessionTokenAndOTP.insert(SqlQueries.UPDATE_SESSION, userEmail, userSessionTokenOrOTP);
 			}
 			else {
-				throw new InvalidSessionException("Invalid token format length: " + userSessionTokenOrOTP.length() + " - OTP code must contain " + OTP_LENGTH + "-digits and session token must contain " + SESSION_LENGTH + "-digits");
+				validate = saveSessionTokenAndOTP.insert(SqlQueries.UPDATE_OTP, userEmail, userSessionTokenOrOTP);
 			}
-		} catch (Exception e) {
-			LOGGER.error("Error validating user OTP or Session Token", e);
+		}
+		catch(Exception e) {
+			LOGGER.error("Unknown error occurred while validating OTP or Session Token", e);
 		}
 		
 		return validate;
+	}
+	
+	private static void validateBody(String userEmail, String userSessionTokenOrOTP, boolean isSelectedApprove) throws Exception {
+		if(userEmail == null) {
+			throw new InvalidEmailException("Email is required but not sent");
+		}
+		if(!DataValidator.isValidEmail(userEmail)) {
+			throw new InvalidEmailException("Invalid format for email '" + userEmail + "'");
+        }
+		if(!DataValidator.isValidToken(userSessionTokenOrOTP) || (userSessionTokenOrOTP.length() != OTP_LENGTH && userSessionTokenOrOTP.length() != SESSION_LENGTH)) {
+			throw new InvalidSessionTokenOrOTPException("Invalid Session Token or OTP format");
+		}
 	}
 }

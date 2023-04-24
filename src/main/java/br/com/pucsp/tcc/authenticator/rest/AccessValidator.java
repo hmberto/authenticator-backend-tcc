@@ -11,14 +11,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.pucsp.tcc.authenticator.exceptions.BusinessException;
+import br.com.pucsp.tcc.authenticator.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
-import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionException;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionTokenOrOTPException;
+import br.com.pucsp.tcc.authenticator.exceptions.UnregisteredUserException;
 import br.com.pucsp.tcc.authenticator.token.EmailSessionTokenOrOTPValidator;
-import br.com.pucsp.tcc.authenticator.utils.DataValidator;
+import br.com.pucsp.tcc.authenticator.utils.DateTime;
 
 @Path("/access-validator")
 @Produces(MediaType.APPLICATION_JSON)
@@ -27,44 +31,39 @@ public class AccessValidator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccessValidator.class);
 	
 	@POST
-	public Response validate(@Context HttpServletRequest request, String body) {
+	public Response validate(final @Context HttpServletRequest request, final String body) {
+		JSONObject bodyJSON = new JSONObject(body);
+		
+		String loginDate = DateTime.date();
+    	String userIP = request.getRemoteAddr();
+		
 		try {
-			boolean result = validateUserData(body);
+			EmailSessionTokenOrOTPValidator emailSessionTokenOrOTPValidator = new EmailSessionTokenOrOTPValidator();
+			boolean resp = emailSessionTokenOrOTPValidator.verify(bodyJSON, userIP, loginDate);
 			
-			if(result) {
+			if(resp) {
 				return Response.ok().build();
 			}
-		} catch (InvalidEmailException e) {
-			String json = new JSONObject().put("Error Message", e.getMessage()).toString();
-		    LOGGER.error("Error registering a new name for the user: Invalid email format", e);
-		    return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
-		} catch (InvalidSessionException e) {
-			String json = new JSONObject().put("Error Message", e.getMessage()).toString();
-		    LOGGER.error("Error registering a new name for the user: Invalid session token", e);
-		    return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
-		} catch (Exception e) {
-			LOGGER.error("Error validating token", e);
+		}
+		catch(JSONException e) {
+			return buildErrorResponse("Invalid JSON payload", Response.Status.BAD_REQUEST);
+		}
+		catch(InvalidEmailException | UnregisteredUserException | BusinessException | InvalidSessionTokenOrOTPException e) {
+			return buildErrorResponse(e.getMessage(), Response.Status.BAD_REQUEST);
+		}
+		catch(SQLException | DatabaseInsertException e) {
+			return buildErrorResponse("Unexpected error occurred while registering a new user", Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		catch(Exception e) {
+			return buildErrorResponse("Unexpected error occurred while registering a new user", Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		
-		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+		return buildErrorResponse("Unexpected error occurred while registering a new user", Response.Status.INTERNAL_SERVER_ERROR);
 	}
 	
-	private boolean validateUserData(String body) throws SQLException {
-		JSONObject bodyJSON = new JSONObject(body.toString());
-		
-		String userEmail = bodyJSON.getString("email").trim().toLowerCase();
-		String userSessionTokenOrOTP = bodyJSON.getString("sessionTokenOrOTP").trim().toUpperCase();
-		boolean isSelectedApprove = Boolean.parseBoolean(bodyJSON.getString("approve").trim().toLowerCase());
-		
-		if(!DataValidator.isValidEmail(userEmail)) {
-			throw new InvalidEmailException("Invalid email format");
-		}
-		
-		if(!DataValidator.isValidToken(userSessionTokenOrOTP)) {
-			throw new InvalidSessionException("Invalid session token or OTP format");
-		}
-		
-		EmailSessionTokenOrOTPValidator validateTokenEmail = new EmailSessionTokenOrOTPValidator();
-		return validateTokenEmail.verify(userSessionTokenOrOTP, userEmail, isSelectedApprove);
+	private Response buildErrorResponse(String message, Response.Status status) {
+		String errorJson = new JSONObject().put("Error Message", message).toString();
+		LOGGER.error(message);
+		return Response.status(status).entity(errorJson).build();
 	}
 }

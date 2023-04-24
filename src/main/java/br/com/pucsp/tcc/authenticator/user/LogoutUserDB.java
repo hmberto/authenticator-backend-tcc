@@ -5,48 +5,41 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
+import br.com.pucsp.tcc.authenticator.database.SqlQueries;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionTokenOrOTPException;
+import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 
 public class LogoutUserDB {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LogoutUserDB.class);
 	
-	public boolean logout(String userEmail, String userSessionToken, boolean isSelectedKillAll) throws SQLException {
+	private static final int SESSION_LENGTH = Integer.parseInt(System.getenv("SESSION_LENGTH"));
+	
+	public boolean logout(final JSONObject body) throws Exception {
+		String userEmail = body.getString("email").trim().toLowerCase();
+		String userSessionToken = body.getString("session").trim().toUpperCase();
+		boolean isSelectedKillAll = body.getBoolean("killAll");
+		
 		Connection connection = null;
 	    PreparedStatement statement = null;
 	    int rowsUpdated = 0;
+	    
+	    validateBody(userEmail, userSessionToken);
 	    
 	    try {
 	        connection = ConnDB.getConnection();
 	        
 	        String sql = null;
 	        
-	        sql = "UPDATE sessions \n"
-	        		+ "SET is_active = false \n"
-	        		+ "WHERE session = ? \n"
-	        		+ "AND is_active = true \n"
-	        		+ "AND user_id = (SELECT user_id FROM users WHERE email = ?);";
+	        sql = SqlQueries.UPDATE_SESSION_LOGOUT_ONE;
 	        
 	        if(isSelectedKillAll) {
-	        	sql = "DELETE a\n"
-		        		+ "FROM sessions a\n"
-		        		+ "JOIN (\n"
-		        		+ "    SELECT session, user_id\n"
-		        		+ "    FROM sessions\n"
-		        		+ "    WHERE is_active = true AND session = ?\n"
-		        		+ ") b ON a.session != b.session AND a.user_id = b.user_id\n"
-		        		+ "WHERE a.user_id = (SELECT user_id FROM users WHERE email = ?);";
-	        	
-//	        	sql = "DELETE a\n"
-//	        		    + "FROM sessions a\n"
-//	        		    + "JOIN (\n"
-//	        		    + "    SELECT session, user_id\n"
-//	        		    + "    FROM sessions\n"
-//	        		    + "    WHERE is_active = true AND session = ?\n"
-//	        		    + ") b ON a.user_id = b.user_id\n"
-//	        		    + "WHERE a.user_id = (SELECT user_id FROM users WHERE email = ?);";
+	        	sql = SqlQueries.UPDATE_SESSION_LOGOUT_ALL;
 	        }
 	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -55,30 +48,42 @@ public class LogoutUserDB {
 	        
 	        rowsUpdated = statement.executeUpdate();
 	    }
-	    catch (SQLException e) {
+	    catch(SQLException e) {
 	    	LOGGER.error("Error logging out user", e);
 	    }
 	    finally {
 		    if(statement != null) {
 		        try {
 		        	statement.close();
-		        } catch (SQLException e) {
+		        }
+		        catch(SQLException e) {
 		        	LOGGER.error("Error closing statement", e);
 		        }
 		    }
 		    if(connection != null) {
 		        try {
 		            ConnDB.closeConnection(connection);
-		        } catch (SQLException e) {
+		        }
+		        catch(SQLException e) {
 		        	LOGGER.error("Error closing connection", e);
 		        }
 		    }
 		}
 	    
-	    if (rowsUpdated > 0) {
+	    if(rowsUpdated > 0) {
 	        return true;
-	    } else {
+	    }
+	    else{
 	        return false;
 	    }
+	}
+	
+	private static void validateBody(String userEmail, String userSessionToken) throws Exception {
+		if(!DataValidator.isValidEmail(userEmail)) {
+			throw new InvalidEmailException("Invalid email format");
+		}
+		if(!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != SESSION_LENGTH) {
+			throw new InvalidSessionTokenOrOTPException("Invalid Session Token format");
+		}
 	}
 }

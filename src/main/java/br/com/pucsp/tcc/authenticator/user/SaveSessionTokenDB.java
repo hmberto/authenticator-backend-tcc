@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 
-public class SaveActiveSessionsDB implements AutoCloseable {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SaveActiveSessionsDB.class);
+public class SaveSessionTokenDB implements AutoCloseable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SaveSessionTokenDB.class);
 	
-	public boolean insertActiveSession(int userId, String userEmail, String userSessionToken, boolean isActive) {
+	public boolean insert(int userId, String userEmail, String userSessionToken, boolean isActive) {
 	    Connection connection = null;
 	    PreparedStatement statement = null;
 	    int sessionId = 0;

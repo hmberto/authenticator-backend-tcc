@@ -10,16 +10,16 @@ import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 
-public class SaveActiveOTPDB implements AutoCloseable {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SaveActiveOTPDB.class);
+public class SessionTokenAndOTPManagerDB implements AutoCloseable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SessionTokenAndOTPManagerDB.class);
 	
-	public boolean updateOTP(String sql, String userEmail, String userOTP) {
+	public boolean insert(String sql, String userEmail, String userOTP) {
 		Connection connection = null;
-	    PreparedStatement statement = null;
+		PreparedStatement statement = null;
 	    int rowsUpdated = 0;
 	    
 	    try {
-	        connection = ConnDB.getConnection();
+	    	connection = ConnDB.getConnection();
 	        
 	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	        statement.setString(1, userOTP);
@@ -27,36 +27,36 @@ public class SaveActiveOTPDB implements AutoCloseable {
 	        
 	        rowsUpdated = statement.executeUpdate();
 	    }
-	    catch (SQLException e) {
+	    catch(SQLException e) {
 	    	LOGGER.error("Error inserting 6 digit code into database - Email: " + userEmail, e);
 	    }
 	    finally {
-		    if(statement != null) {
-		        try {
+	    	if(statement != null) {
+		    	try {
 		        	statement.close();
-		        } catch (SQLException e) {
+		        }
+		        catch(SQLException e) {
 		        	LOGGER.error("Error closing statement", e);
 		        }
 		    }
 		    if(connection != null) {
-		        try {
-		            ConnDB.closeConnection(connection);
-		        } catch (SQLException e) {
+		    	try {
+		        	ConnDB.closeConnection(connection);
+		        }
+		        catch(SQLException e) {
 		        	LOGGER.error("Error closing connection", e);
 		        }
 		    }
-		}
+	    }
 	    
-	    if (rowsUpdated > 0) {
-	        return true;
-	    } else {
-	        return false;
+	    if(rowsUpdated > 0) {
+	    	return true;
+	    }
+	    else {
+	    	return false;
 	    }
 	}
-
+	
 	@Override
-	public void close() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+	public void close() throws Exception {}
 }

@@ -29,15 +29,15 @@ public class AccessRequester {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccessRequester.class);
 	
 	@POST
-    public Response request(@Context HttpServletRequest request, String body) {
+    public Response request(final @Context HttpServletRequest request, final String body) {
     	JSONObject bodyJSON = new JSONObject(body);
     	
     	String loginDate = DateTime.date();
 		String userIP = request.getRemoteAddr();
 		
 		try {
-        	EmailSessionTokenOrOTPSender emailTokenSender = new EmailSessionTokenOrOTPSender();
-        	String resp = emailTokenSender.send(bodyJSON, userIP, loginDate);
+        	EmailSessionTokenOrOTPSender emailSessionTokenOrOTPSender = new EmailSessionTokenOrOTPSender();
+        	String resp = emailSessionTokenOrOTPSender.send(bodyJSON, userIP, loginDate);
 			
 			if(resp != null) {
 				return Response.ok(resp).build();
@@ -46,10 +46,10 @@ public class AccessRequester {
         catch(JSONException e) {
 			return buildErrorResponse("Invalid JSON payload", Response.Status.BAD_REQUEST);
 		}
-		catch(DatabaseInsertException | InvalidEmailException | UnregisteredUserException | BusinessException e) {
+		catch(InvalidEmailException | UnregisteredUserException | BusinessException e) {
 			return buildErrorResponse(e.getMessage(), Response.Status.BAD_REQUEST);
 		}
-		catch(SQLException e) {
+		catch(SQLException | DatabaseInsertException e) {
 			return buildErrorResponse("Unexpected error occurred while registering a new user", Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		catch(Exception e) {
