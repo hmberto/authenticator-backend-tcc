@@ -13,7 +13,7 @@ import org.json.JSONObject;
 public class TestAPI {
 	@GET
 	public Response test() {
-		String res = new JSONObject().put("message", "Hello World!").toString();
+		String res = new JSONObject().put("Message", "Hello World!").toString();
 		return Response.ok(res).build();
 	}
 }

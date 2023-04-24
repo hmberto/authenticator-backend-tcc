@@ -10,11 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
+import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 
 public class SaveActiveSessionsDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SaveActiveSessionsDB.class);
 	
-	public int insertActiveSession(int userId, String userEmail, String userSessionToken, boolean active) {
+	public boolean insertActiveSession(int userId, String userEmail, String userSessionToken, boolean isActive) {
 	    Connection connection = null;
 	    PreparedStatement statement = null;
 	    int sessionId = 0;
@@ -22,12 +23,10 @@ public class SaveActiveSessionsDB implements AutoCloseable {
 	    try {
 	        connection = ConnDB.getConnection();
 	        
-	        String sql = "INSERT INTO sessions (user_id, session, is_active) VALUES (?, ?, ?)";
-	        
-	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+	        statement = connection.prepareStatement(SqlQueries.INSERT_SESSION, Statement.RETURN_GENERATED_KEYS);
 	        statement.setInt(1, userId);
 	        statement.setString(2, userSessionToken);
-	        statement.setBoolean(3, active);
+	        statement.setBoolean(3, isActive);
 	        
 	        statement.executeUpdate();
 	        
@@ -56,7 +55,12 @@ public class SaveActiveSessionsDB implements AutoCloseable {
 		    }
 		}
 	    
-	    return sessionId;
+	    if(sessionId >= 1) {
+	    	return true;
+	    }
+	    else {
+	    	return false;
+	    }
 	}
 
 	@Override

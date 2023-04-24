@@ -13,7 +13,7 @@ import br.com.pucsp.tcc.authenticator.database.ConnDB;
 public class SaveActiveOTPDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SaveActiveOTPDB.class);
 	
-	public boolean updateCode(String sql, String userEmail, String userOTP) {
+	public boolean updateOTP(String sql, String userEmail, String userOTP) {
 		Connection connection = null;
 	    PreparedStatement statement = null;
 	    int rowsUpdated = 0;

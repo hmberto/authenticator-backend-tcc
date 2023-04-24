@@ -9,10 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
-import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 
 public class UpdateUserNameDB {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UpdateUserNameDB.class);
 	
 	public boolean update(String userFirstName, String userLastName, String userEmail, String userToken) throws SQLException {
 	    Connection connection = null;

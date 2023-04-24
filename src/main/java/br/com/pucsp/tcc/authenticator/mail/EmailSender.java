@@ -14,10 +14,8 @@ import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
-
 public class EmailSender {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(EmailSender.class);
 	
 	private static final String EMAIL_SERVER = System.getenv("EMAIL_SERVER");
 	private static final String EMAIL_BOX = System.getenv("EMAIL_BOX");

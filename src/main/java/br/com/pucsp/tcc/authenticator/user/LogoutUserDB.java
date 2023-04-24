@@ -9,10 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
-import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 
 public class LogoutUserDB {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmail.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LogoutUserDB.class);
 	
 	public boolean logout(String userEmail, String userSessionToken, boolean isSelectedKillAll) throws SQLException {
 		Connection connection = null;

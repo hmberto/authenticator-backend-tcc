@@ -10,88 +10,86 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
-import br.com.pucsp.tcc.authenticator.exceptions.BusinessException;
+import br.com.pucsp.tcc.authenticator.database.SqlQueries;
+import br.com.pucsp.tcc.authenticator.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.mail.EmailType;
 import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 
 public class SaveUserDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SaveUserDB.class);
 	
-	public int insert(String userFirstName, String userLastName, String userEmail, String userSessionToken, String userIP, String loginDate) throws SQLException, BusinessException {
-	    int userId = 0;
+	public int insert(String userFirstName, String userLastName, String userEmail, String userSessionToken, String userIP, String loginDate) throws Exception {
+		int userId = 0;
 	    
-	    UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();
-	    
-	    try (Connection connection = ConnDB.getConnection();
-	    		PreparedStatement statementUser = connection.prepareStatement("INSERT INTO users (first_name, last_name, email) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-	    		PreparedStatement statementCode = connection.prepareStatement("INSERT INTO otps (user_id, otp, is_active) VALUES (?, ?, true)", Statement.RETURN_GENERATED_KEYS);
-	    		PreparedStatement statementSession = connection.prepareStatement("INSERT INTO sessions (user_id, session, is_active) VALUES (?, ?, true)", Statement.RETURN_GENERATED_KEYS);
-	    		PreparedStatement statementConfirmEmail = connection.prepareStatement("INSERT INTO email_verifications (user_id, is_confirmed) VALUES (?, false)", Statement.RETURN_GENERATED_KEYS)) {
-
-	        statementUser.setString(1, userFirstName);
-	        statementUser.setString(2, userLastName);
-	        statementUser.setString(3, userEmail);
-
-	        userId = insertDB(statementUser, connection);
-	        if(userId <= 0) {
-	            return 0;
-	        }
-
+	    try(Connection connection = ConnDB.getConnection();
+	    		UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();
+	    		PreparedStatement statementUser = connection.prepareStatement(SqlQueries.INSERT_USER, Statement.RETURN_GENERATED_KEYS);
+	    		PreparedStatement statementOTP = connection.prepareStatement(SqlQueries.INSERT_OTP, Statement.RETURN_GENERATED_KEYS);
+	    		PreparedStatement statementSessionToken = connection.prepareStatement(SqlQueries.INSERT_SESSION, Statement.RETURN_GENERATED_KEYS);
+	    		PreparedStatement statementEmailVerification = connection.prepareStatement(SqlQueries.INSERT_EMAIL_VERIFICATION, Statement.RETURN_GENERATED_KEYS)) {
+	    	
+	    	statementUser.setString(1, userFirstName);
+	    	statementUser.setString(2, userLastName);
+	    	statementUser.setString(3, userEmail);
+	    	
+	    	userId = insertDB(statementUser, connection);
+	    	if(userId <= 0) {
+	    		throw new DatabaseInsertException("Error inserting user '" + userEmail + "' into the database");
+	    	}
+	    	
 	        String newUserOTP = CreateToken.generate("otp");
 
-	        statementCode.setInt(1, userId);
-	        statementCode.setString(2, newUserOTP);
+	        statementOTP.setInt(1, userId);
+	        statementOTP.setString(2, newUserOTP);
 
-	        int codeId = insertDB(statementCode, connection);
-	        if(codeId <= 0) {
-	        	LOGGER.error("Error inserting 'otps' into the database for user '" + userId + "'. Trying to undo changes");
+	        int otpId = insertDB(statementOTP, connection);
+	        if(otpId <= 0) {
 	        	undoChanges.recovery(userId);
-	            return 0;
+	        	throw new DatabaseInsertException("Error inserting OTP into the database for user '" + userId + "'");
 	        }
 
-	        statementSession.setInt(1, userId);
-	        statementSession.setString(2, userSessionToken);
+	        statementSessionToken.setInt(1, userId);
+	        statementSessionToken.setString(2, userSessionToken);
+	        statementSessionToken.setBoolean(3, true);
 
-	        int sessionId = insertDB(statementSession, connection);
+	        int sessionId = insertDB(statementSessionToken, connection);
 	        if(sessionId <= 0) {
-	        	LOGGER.error("Error inserting 'sessions' into the database for user '" + userId + "'. Trying to undo changes");
 	        	undoChanges.recovery(userId);
-	            return 0;
+	        	throw new DatabaseInsertException("Error inserting session token into the database for user '" + userId + "'");
 	        }
 	        
-	        statementConfirmEmail.setInt(1, userId);
+	        statementEmailVerification.setInt(1, userId);
 	        
-	        int confirmEmailId = insertDB(statementConfirmEmail, connection);
+	        int confirmEmailId = insertDB(statementEmailVerification, connection);
 	        if(confirmEmailId <= 0) {
-	        	LOGGER.error("Error inserting 'email_verifications' into the database for user '" + userId + "'. Trying to undo changes");
 	        	undoChanges.recovery(userId);
-	            return 0;
+	        	throw new DatabaseInsertException("Error inserting 'email_verifications' into the database for user '" + userId + "'");
 	        }
+	        
+	        LOGGER.info("User '{}' created in database - userId: {}", userEmail, userId);
 	        
 	        EmailType.sendEmailOTP(userEmail, newUserOTP, userIP, loginDate);
 	    } catch (SQLException e) {
-	        LOGGER.error("Error inserting user into database - Email: " + userEmail, e);
+	        throw new DatabaseInsertException("Error inserting user into database - Email: " + userEmail);
 	    }
 
 	    return userId;
 	}
 
 	private int insertDB(PreparedStatement statement, Connection connection) throws SQLException {
-	    int result = statement.executeUpdate();
-	    ResultSet rs = statement.getGeneratedKeys();
-
-	    if (rs.next()) {
-	        result = rs.getInt(1);
-	    }
-
-	    rs.close();
-	    statement.close();
-	    return result;
+		try(ResultSet rs = statement.getGeneratedKeys()) {
+			int result = statement.executeUpdate();
+			if (rs.next()) {
+				result = rs.getInt(1);
+			}
+			return result;
+		}
+		catch(SQLException e) {
+			statement.close();
+			throw e;
+		}
 	}
-
+	
 	@Override
-	public void close() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+	public void close() throws Exception {}
 }

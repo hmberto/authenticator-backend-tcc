@@ -13,49 +13,41 @@ import javax.ws.rs.core.Response;
 import br.com.pucsp.tcc.authenticator.rest.TestAPI;
 import br.com.pucsp.tcc.authenticator.cors.CORSFilter;
 import br.com.pucsp.tcc.authenticator.rest.LogoutUser;
-import br.com.pucsp.tcc.authenticator.rest.RegisterEmail;
 import br.com.pucsp.tcc.authenticator.rest.RegisterName;
-import br.com.pucsp.tcc.authenticator.rest.RequestToken;
-import br.com.pucsp.tcc.authenticator.rest.ValidateToken;
+import br.com.pucsp.tcc.authenticator.rest.AccessRequester;
+import br.com.pucsp.tcc.authenticator.rest.AccessValidator;
 
 @Produces("application/json")
 @Consumes("application/json")
 public class RestAPI {
-	private final TestAPI testAPI = new TestAPI();
-	private final RequestToken requestToken = new RequestToken();
-	private final ValidateToken validateToken = new ValidateToken();
-	private final RegisterEmail registerEmail = new RegisterEmail();
-	private final RegisterName registerName = new RegisterName();
+	private final TestAPI api = new TestAPI();
+	private final AccessRequester newSessionTokenOrOTP = new AccessRequester();
+	private final AccessValidator sessionTokenOrOTP = new AccessValidator();
+	private final RegisterName newName = new RegisterName();
 	private final LogoutUser logoutUser = new LogoutUser();
 	private final CORSFilter CORSFilter = new CORSFilter();
 	
 	@GET
 	public Response getTest() {
-		return testAPI.test();
+		return api.test();
 	}
 	
 	@POST
-	@Path("/generate-otp")
-	public Response requestNewToken(@Context HttpServletRequest request, String body) {
-		return requestToken.request(request, body);
+	@Path("/access-requester")
+	public Response requester(@Context HttpServletRequest request, String body) {
+		return newSessionTokenOrOTP.request(request, body);
 	}
 	
 	@POST
-	@Path("/validate-otp")
-	public Response validateEmailToken(@Context HttpServletRequest request, String body) {
-		return validateToken.validate(request, body);
-	}
-	
-	@POST
-	@Path("/register-email")
-	public Response registerNewEmail(@Context HttpServletRequest request, String body) {
-		return registerEmail.register(request, body);
+	@Path("/access-validator")
+	public Response validator(@Context HttpServletRequest request, String body) {
+		return sessionTokenOrOTP.validate(request, body);
 	}
 	
 	@POST
 	@Path("/register-name")
-	public Response registerNewName(@Context HttpServletRequest request, String body) {
-		return registerName.register(request, body);
+	public Response registerName(@Context HttpServletRequest request, String body) {
+		return newName.register(request, body);
 	}
 	
 	@POST

@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionException;
 import br.com.pucsp.tcc.authenticator.user.SaveActiveOTPDB;
 
-public class EmailTokenValidator {
-	private static final Logger LOGGER = LoggerFactory.getLogger(EmailTokenValidator.class);
+public class EmailSessionTokenOrOTPValidator {
+	private static final Logger LOGGER = LoggerFactory.getLogger(EmailSessionTokenOrOTPValidator.class);
 	
 	private static final int OTP_LENGTH = Integer.parseInt(System.getenv("OTP_LENGTH"));
     private static final int SESSION_LENGTH = Integer.parseInt(System.getenv("SESSION_LENGTH"));
@@ -24,7 +24,7 @@ public class EmailTokenValidator {
 				           + "AND sessions.created_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE) \n"
 				           + "AND sessions.is_active = false;";
 				
-				validate = saveActiveCodesDB.updateCode(sql, userEmail, userSessionTokenOrOTP);
+				validate = saveActiveCodesDB.updateOTP(sql, userEmail, userSessionTokenOrOTP);
 			}
 			else if(userSessionTokenOrOTP.length() == OTP_LENGTH) {
 				String sql = "UPDATE otps\n"
@@ -35,7 +35,7 @@ public class EmailTokenValidator {
 				           + "AND otps.user_id = (SELECT user_id FROM users WHERE email = ?)\n"
 				           + "AND otps.updated_at >= DATE_SUB(NOW(), INTERVAL 5 MINUTE);\n";
 				
-				validate = saveActiveCodesDB.updateCode(sql, userEmail, userSessionTokenOrOTP);
+				validate = saveActiveCodesDB.updateOTP(sql, userEmail, userSessionTokenOrOTP);
 			}
 			else {
 				throw new InvalidSessionException("Invalid token format length: " + userSessionTokenOrOTP.length() + " - OTP code must contain " + OTP_LENGTH + "-digits and session token must contain " + SESSION_LENGTH + "-digits");

@@ -17,14 +17,14 @@ import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionException;
-import br.com.pucsp.tcc.authenticator.token.EmailTokenValidator;
+import br.com.pucsp.tcc.authenticator.token.EmailSessionTokenOrOTPValidator;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 
-@Path("/auth/validate/token")
+@Path("/access-validator")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ValidateToken {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ValidateToken.class);
+public class AccessValidator {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AccessValidator.class);
 	
 	@POST
 	public Response validate(@Context HttpServletRequest request, String body) {
@@ -64,7 +64,7 @@ public class ValidateToken {
 			throw new InvalidSessionException("Invalid session token or OTP format");
 		}
 		
-		EmailTokenValidator validateTokenEmail = new EmailTokenValidator();
+		EmailSessionTokenOrOTPValidator validateTokenEmail = new EmailSessionTokenOrOTPValidator();
 		return validateTokenEmail.verify(userSessionTokenOrOTP, userEmail, isSelectedApprove);
 	}
 }
