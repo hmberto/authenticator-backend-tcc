@@ -1,6 +1,13 @@
 package br.com.pucsp.tcc.authenticator.database;
 
 public class SqlQueries {
+	public static final String TIME_ZONE = System.getenv("TIME_ZONE") != null
+			? "SET time_zone = '" + System.getenv("TIME_ZONE") + "'"
+			: "SET time_zone = 'UTC'";
+	public static final String TIME_ZONE_GLOBAL = System.getenv("TIME_ZONE") != null
+			? "SET GLOBAL time_zone = '" + System.getenv("TIME_ZONE") + "'"
+			: "SET GLOBAL time_zone = 'UTC'";
+
 	public static final String INSERT_USER = "INSERT INTO users (first_name, last_name, email) VALUES (?, ?, ?)";
 	public static final String INSERT_OTP = "INSERT INTO otps (user_id, otp, is_active) VALUES (?, ?, true)";
 	public static final String INSERT_SESSION = "INSERT INTO sessions (user_id, session, is_active) VALUES (?, ?, ?)";
@@ -27,9 +34,9 @@ public class SqlQueries {
 	public static final String UPDATE_APPROVE_LOGIN = "UPDATE sessions\n"
 			+ "INNER JOIN users ON sessions.user_id = users.user_id\n"
 			+ "INNER JOIN access_confirmations ON users.user_id = access_confirmations.user_id\n"
-			+ "SET sessions.is_active = true\n" + "WHERE sessions.session = ?\n" + "AND users.email = ?\n"
-			+ "AND access_confirmations.token = ?\n" + "AND sessions.is_active = false \n"
-			+ "AND access_confirmations.is_approved = false;";
+			+ "SET sessions.is_active = true, access_confirmations.is_approved = true\n"
+			+ "WHERE sessions.session = ?\n" + "AND users.email = ?\n" + "AND access_confirmations.token = ?\n"
+			+ "AND sessions.is_active = false \n" + "AND access_confirmations.is_approved = false;";
 
 	public static final String UPDATE_AUTH_OTP = "UPDATE otps\n"
 			+ "JOIN email_verifications ON otps.user_id = email_verifications.user_id\n"

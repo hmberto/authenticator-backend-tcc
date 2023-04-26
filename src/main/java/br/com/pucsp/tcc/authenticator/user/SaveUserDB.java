@@ -6,32 +6,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 import br.com.pucsp.tcc.authenticator.exceptions.DatabaseInsertException;
-import br.com.pucsp.tcc.authenticator.mail.EmailType;
-import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 
-public class SaveUserDB implements AutoCloseable {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SaveUserDB.class);
-	
-	private Connection connection;
-	
-	public SaveUserDB() throws SQLException {
-		this.connection = ConnDB.getConnection();
-	}
-	
-	public int insert(String userFirstName, String userLastName, String userEmail, String userSessionToken, String userIP, String loginDate) throws Exception {
+public class SaveUserDB {
+	public int insert(Connection connection, String userFirstName, String userLastName, String userEmail, String userSessionToken, String userOTP, String userIP, String loginDate) throws Exception {
 		int userId = 0;
 	    
-	    try(UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();
+		UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();
+		
+	    try(PreparedStatement statementTimezone = connection.prepareStatement(SqlQueries.TIME_ZONE);
 	    		PreparedStatement statementUser = connection.prepareStatement(SqlQueries.INSERT_USER, Statement.RETURN_GENERATED_KEYS);
 	    		PreparedStatement statementOTP = connection.prepareStatement(SqlQueries.INSERT_OTP, Statement.RETURN_GENERATED_KEYS);
 	    		PreparedStatement statementSessionToken = connection.prepareStatement(SqlQueries.INSERT_SESSION, Statement.RETURN_GENERATED_KEYS);
 	    		PreparedStatement statementEmailVerification = connection.prepareStatement(SqlQueries.INSERT_EMAIL_VERIFICATION, Statement.RETURN_GENERATED_KEYS)) {
+	    	
+	    	statementTimezone.executeUpdate();
 	    	
 	    	statementUser.setString(1, userFirstName);
 	    	statementUser.setString(2, userLastName);
@@ -42,14 +32,12 @@ public class SaveUserDB implements AutoCloseable {
 	    		throw new DatabaseInsertException("Error inserting user '" + userEmail + "' into the database");
 	    	}
 	    	
-	        String newUserOTP = CreateToken.generate("otp");
-
 	        statementOTP.setInt(1, userId);
-	        statementOTP.setString(2, newUserOTP);
+	        statementOTP.setString(2, userOTP);
 
 	        int otpId = insertDB(statementOTP, connection);
 	        if(otpId <= 0) {
-	        	undoChanges.recovery(userId);
+	        	undoChanges.recovery(connection, userId);
 	        	throw new DatabaseInsertException("Error inserting OTP into the database for user '" + userId + "'");
 	        }
 
@@ -59,7 +47,7 @@ public class SaveUserDB implements AutoCloseable {
 
 	        int sessionId = insertDB(statementSessionToken, connection);
 	        if(sessionId <= 0) {
-	        	undoChanges.recovery(userId);
+	        	undoChanges.recovery(connection, userId);
 	        	throw new DatabaseInsertException("Error inserting session token into the database for user '" + userId + "'");
 	        }
 	        
@@ -67,15 +55,9 @@ public class SaveUserDB implements AutoCloseable {
 	        
 	        int confirmEmailId = insertDB(statementEmailVerification, connection);
 	        if(confirmEmailId <= 0) {
-	        	undoChanges.recovery(userId);
+	        	undoChanges.recovery(connection, userId);
 	        	throw new DatabaseInsertException("Error inserting 'email_verifications' into the database for user '" + userId + "'");
 	        }
-	        
-	        LOGGER.info("User '{}' created in database - userId: {}", userEmail, userId);
-	        
-	        EmailType.sendEmailOTP(userEmail, newUserOTP, userIP, loginDate);
-	    } catch (SQLException e) {
-	        throw new DatabaseInsertException("Error inserting user into database - Email: " + userEmail);
 	    }
 
 	    return userId;
@@ -90,12 +72,5 @@ public class SaveUserDB implements AutoCloseable {
 		}
 		statement.close();
 		return result;
-	}
-	
-	@Override
-	public void close() throws Exception {
-		if(connection != null) {
-			ConnDB.closeConnection(connection);
-		}
 	}
 }

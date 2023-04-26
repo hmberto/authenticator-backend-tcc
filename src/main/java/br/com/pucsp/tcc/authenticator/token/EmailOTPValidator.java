@@ -1,10 +1,15 @@
 package br.com.pucsp.tcc.authenticator.token;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
+import br.com.pucsp.tcc.authenticator.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.exceptions.UnregisteredUserException;
@@ -13,7 +18,7 @@ import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 import br.com.pucsp.tcc.authenticator.utils.RespJSON;
 import br.com.pucsp.tcc.authenticator.user.GetUserFromDB;
-import br.com.pucsp.tcc.authenticator.user.SaveSessionTokenDB;
+import br.com.pucsp.tcc.authenticator.user.SessionTokenManagerDB;
 
 public class EmailOTPValidator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailOTPValidator.class);
@@ -26,10 +31,11 @@ public class EmailOTPValidator {
 		
 		validateBody(userEmail, userOTP);
 		
-		try(OTPManagerDB OTPManager = new OTPManagerDB();
-				SaveSessionTokenDB saveSessionToken = new SaveSessionTokenDB();
-				GetUserFromDB getUserFromDB = new GetUserFromDB();) {
-			JSONObject user = getUserFromDB.verify(userEmail);
+		try(ConnDB connDB = ConnDB.getInstance();
+				Connection connection = connDB.getConnection();) {
+			
+			GetUserFromDB getUserFromDB = new GetUserFromDB();
+			JSONObject user = getUserFromDB.verify(connection, userEmail);
 			
 			if(user == null || user.getInt("userId") == 0) {
 				throw new UnregisteredUserException("Unable to validate OTP or Session Token to unregistered user");
@@ -37,18 +43,15 @@ public class EmailOTPValidator {
 			
 			LOGGER.info("User '{}' found in database", user.getInt("userId"));
 			
-			String resp = createResponse(user, userEmail, saveSessionToken);
-			boolean isOTPUpdated = OTPManager.insert(SqlQueries.UPDATE_AUTH_OTP, userEmail, userOTP);
+			OTPManagerDB OTPManager = new OTPManagerDB();
+			OTPManager.insert(connection, SqlQueries.UPDATE_AUTH_OTP, userEmail, userOTP);
 			
-			if(isOTPUpdated) {
-				return resp;
-			}
+			SessionTokenManagerDB saveSessionToken = new SessionTokenManagerDB();
+			return createResponse(connection, user, userEmail, saveSessionToken);
 		}
-		
-		return null;
 	}
 	
-	private static String createResponse(JSONObject user, String userEmail, SaveSessionTokenDB saveSessionToken) {
+	private static String createResponse(Connection connection, JSONObject user, String userEmail, SessionTokenManagerDB saveSessionToken) throws DatabaseInsertException, SQLException {
 		int userId = user.getInt("userId");
 		String session = user.getString("session");
 		boolean isSessionTokenActive = user.getBoolean("isSessionTokenActive");
@@ -59,13 +62,11 @@ public class EmailOTPValidator {
 		}
 		else {
 			String userSession = CreateToken.generate("session");
-			boolean isSessionTokenSaved = saveSessionToken.insert(userId, userEmail, userSession, true);
-			if(isSessionTokenSaved) {
-				return RespJSON.createResp(userId, isLogin, userSession, true);
-			}
+			
+			saveSessionToken.insert(connection, userId, userEmail, userSession, true);
+			
+			return RespJSON.createResp(userId, isLogin, userSession, true);
 		}
-		
-		return null;
 	}
 	
 	private static void validateBody(String userEmail, String userOTP) throws Exception {

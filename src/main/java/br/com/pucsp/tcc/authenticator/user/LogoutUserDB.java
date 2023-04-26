@@ -2,7 +2,6 @@ package br.com.pucsp.tcc.authenticator.user;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.json.JSONObject;
@@ -11,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
+import br.com.pucsp.tcc.authenticator.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
@@ -25,57 +25,29 @@ public class LogoutUserDB {
 		String userSessionToken = body.getString("session").trim().toUpperCase();
 		boolean isSelectedKillAll = body.getBoolean("killAll");
 		
-		Connection connection = null;
-	    PreparedStatement statement = null;
-	    int rowsUpdated = 0;
+		int rowsUpdated = 0;
 	    
 	    validateBody(userEmail, userSessionToken);
 	    
-	    try {
-	        connection = ConnDB.getConnection();
-	        
-	        String sql = null;
-	        
-	        sql = SqlQueries.UPDATE_SESSION_LOGOUT_ONE;
-	        
-	        if(isSelectedKillAll) {
-	        	sql = SqlQueries.UPDATE_SESSION_LOGOUT_ALL;
-	        }
-	        
-	        statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+	    String sql = isSelectedKillAll ? SqlQueries.UPDATE_SESSION_LOGOUT_ALL : SqlQueries.UPDATE_SESSION_LOGOUT_ONE;
+	    
+	    try(ConnDB connDB = ConnDB.getInstance();
+				Connection connection = connDB.getConnection();
+	    		PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
+	    	
 	        statement.setString(1, userSessionToken);
 	        statement.setString(2, userEmail);
 	        
 	        rowsUpdated = statement.executeUpdate();
 	    }
-	    catch(SQLException e) {
-	    	LOGGER.error("Error logging out user", e);
-	    }
-	    finally {
-		    if(statement != null) {
-		        try {
-		        	statement.close();
-		        }
-		        catch(SQLException e) {
-		        	LOGGER.error("Error closing statement", e);
-		        }
-		    }
-		    if(connection != null) {
-		        try {
-		            ConnDB.closeConnection(connection);
-		        }
-		        catch(SQLException e) {
-		        	LOGGER.error("Error closing connection", e);
-		        }
-		    }
-		}
 	    
-	    if(rowsUpdated > 0) {
-	        return true;
-	    }
-	    else{
-	        return false;
-	    }
+	    if(rowsUpdated == 0) {
+	    	throw new DatabaseInsertException("Email Token could not be updated");
+        }
+	    
+	    String log = isSelectedKillAll ? "Deleted session tokens: " : "Session tokens disabled: ";
+	    LOGGER.info(log + rowsUpdated);
+	    return true;
 	}
 	
 	private static void validateBody(String userEmail, String userSessionToken) throws Exception {

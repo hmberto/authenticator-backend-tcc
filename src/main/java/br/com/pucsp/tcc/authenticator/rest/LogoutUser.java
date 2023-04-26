@@ -2,6 +2,7 @@ package br.com.pucsp.tcc.authenticator.rest;
 
 import java.sql.SQLException;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -45,14 +46,17 @@ private static final Logger LOGGER = LoggerFactory.getLogger(LogoutUser.class);
 		catch(JSONException e) {
 			return buildErrorResponse("Invalid JSON payload", Response.Status.BAD_REQUEST);
 		}
-		catch(InvalidEmailException | UnregisteredUserException | BusinessException | InvalidTokenException | InvalidNameException e) {
+		catch(InvalidEmailException | InvalidTokenException | InvalidNameException | UnregisteredUserException | BusinessException e) {
 			return buildErrorResponse(e.getMessage(), Response.Status.BAD_REQUEST);
 		}
 		catch(SQLException | DatabaseInsertException e) {
-			return buildErrorResponse("Unexpected error occurred while registering a new user", Response.Status.INTERNAL_SERVER_ERROR);
+			return buildErrorResponse("An error occurred with the database", Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		catch(MessagingException e) {
+			return buildErrorResponse("An error occurred while sending email", Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		catch(Exception e) {
-			return buildErrorResponse("Unexpected error occurred while registering a new user", Response.Status.INTERNAL_SERVER_ERROR);
+			return buildErrorResponse("Unknown error", Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		
 		return buildErrorResponse("Unexpected error occurred while registering a new user", Response.Status.INTERNAL_SERVER_ERROR);

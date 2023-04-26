@@ -7,89 +7,30 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 
-public class GetUserFromDB implements AutoCloseable {
-	private static final Logger LOGGER = LoggerFactory.getLogger(GetUserFromDB.class);
-	
-	private Connection connection;
-	
-	public GetUserFromDB() throws SQLException {
-		this.connection = ConnDB.getConnection();
-	}
-	
-	public JSONObject verify(String userEmail) throws SQLException {
+public class GetUserFromDB {
+	public JSONObject verify(Connection connection, String userEmail) throws SQLException {
 		JSONObject json = new JSONObject();
+		int userId = 0;
 		
-		PreparedStatement statement = null;
-		ResultSet rs = null;
-		
-		try {
-			connection = ConnDB.getConnection();
-			
-			statement = connection.prepareStatement(SqlQueries.CHECK_EMAIL_ALREADY_REGISTERED, Statement.RETURN_GENERATED_KEYS);
+		try(PreparedStatement statement = connection.prepareStatement(SqlQueries.CHECK_EMAIL_ALREADY_REGISTERED, Statement.RETURN_GENERATED_KEYS);) {
 			statement.setString(1, userEmail);
+			ResultSet rs = statement.executeQuery();
 			
-			rs = statement.executeQuery();
-			
-			while(rs.next()) {
-				json.put("userId", rs.getInt("user_id"));
+			if(rs.next()) {
+				userId = rs.getInt("user_id");
+				json.put("userId", userId);
 				json.put("session", rs.getString("session"));
 				json.put("isSessionTokenActive", rs.getBoolean("is_active"));
 				
-				String firstName = rs.getString("first_name").trim().toLowerCase();
-				if("null".equals(firstName) || firstName == null) {
-					json.put("isLogin", false);
-				}
-				else {
-					json.put("isLogin", true);
-				}
+				String firstName = rs.getString("first_name");
+				json.put("isLogin", firstName != null && !firstName.trim().equalsIgnoreCase("null"));
 			}
-		}
-		catch(SQLException e) {
-			throw new SQLException("Error checking if user '" + userEmail + "' already exists in database", e);
-		}
-		finally {
-			if(rs != null) {
-				try {
-					rs.close();
-				}
-				catch (SQLException e) {
-					LOGGER.error("Error closing result set", e);
-				}
-			}
-			if(statement != null) {
-				try {
-					statement.close();
-				}
-				catch (SQLException e) {
-					LOGGER.error("Error closing statement", e);
-				}
-			}
-			if(connection != null) {
-				try {
-					ConnDB.closeConnection(connection);
-				}
-				catch (SQLException e) {
-					LOGGER.error("Error closing connection", e);
-				}
-			}
+			
+			rs.close();
 		}
 		
-		if(json.toString().length() < 3) {
-			return null;
-		}
-		return json;
-	}
-	
-	@Override
-	public void close() throws Exception {
-		if(connection != null) {
-			ConnDB.closeConnection(connection);
-		}
+		return userId >= 1 ? json : null;
 	}
 }

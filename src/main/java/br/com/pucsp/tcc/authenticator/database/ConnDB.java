@@ -7,7 +7,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConnDB {
+public class ConnDB implements AutoCloseable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnDB.class);
     
     private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
@@ -19,8 +19,17 @@ public class ConnDB {
     private static final int MAX_POOL_SIZE = 250;
 
     private static DataSource dataSource;
-
+    private Connection connection;
+    
     private ConnDB() {}
+    
+    private static ConnDB instance;
+    public static ConnDB getInstance() {
+        if(instance == null) {
+            instance = new ConnDB();
+        }
+        return instance;
+    }
 
     private static DataSource getDataSource() {
         if (dataSource == null) {
@@ -39,16 +48,25 @@ public class ConnDB {
         return dataSource;
     }
 
-    public static Connection getConnection() throws SQLException {
-        Connection connection = getDataSource().getConnection();
-        LOGGER.info("Connection established");
+    public Connection getConnection() throws SQLException {
+    	if (connection == null || connection.isClosed()) {
+    		connection = getDataSource().getConnection();
+    		LOGGER.info("Connection established");
+    	}
+    	
         return connection;
     }
 
-    public static void closeConnection(Connection connection) throws SQLException {
+    public void closeConnection(Connection connection) throws SQLException {
         if (connection != null && !connection.isClosed()) {
             connection.close();
             LOGGER.info("Connection closed");
         }
     }
+
+	@Override
+	public void close() throws Exception {
+		LOGGER.info("AutoCloseable method executed - is connection closed: " + connection.isClosed());
+		closeConnection(connection);
+	}
 }

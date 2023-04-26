@@ -58,5 +58,3 @@ CREATE TABLE `access_confirmations` (
 	`updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	INDEX idx_user_id (user_id)
 );
-$
-SET GLOBAL time_zone = 'America/Sao_Paulo';

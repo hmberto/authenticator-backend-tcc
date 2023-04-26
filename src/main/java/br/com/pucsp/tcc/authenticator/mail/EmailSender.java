@@ -53,21 +53,17 @@ public class EmailSender {
 		
 		session.setDebug(false);
 		
-		try {
-			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(EMAIL_BOX));
+		Message message = new MimeMessage(session);
+		message.setFrom(new InternetAddress(EMAIL_BOX));
 
-			Address[] toUser = InternetAddress.parse(destinatario);
-			
-			message.setRecipients(Message.RecipientType.TO, toUser);
-			message.setSubject(messageSubject);
-			message.setContent(messageSend, "text/html; charset=UTF-8");
-			
-			LOGGER.info("Sending email from {} to {}.", EMAIL_BOX, destinatario);
-			
-			Transport.send(message);
-		} catch (MessagingException e) {
-			throw new MessagingException(e.toString());
-		}
+		Address[] toUser = InternetAddress.parse(destinatario);
+		
+		message.setRecipients(Message.RecipientType.TO, toUser);
+		message.setSubject(messageSubject);
+		message.setContent(messageSend, "text/html; charset=UTF-8");
+		
+		LOGGER.info("Sending email from '{}' to '{}'", EMAIL_BOX, destinatario);
+		
+		Transport.send(message);
 	}
 }

@@ -1,16 +1,18 @@
 package br.com.pucsp.tcc.authenticator.token;
 
+import java.sql.Connection;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.exceptions.UnregisteredUserException;
 import br.com.pucsp.tcc.authenticator.user.EmailTokenManagerDB;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 import br.com.pucsp.tcc.authenticator.user.GetUserFromDB;
-import br.com.pucsp.tcc.authenticator.user.SaveSessionTokenDB;
 
 public class EmailTokenValidator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailTokenValidator.class);
@@ -20,7 +22,7 @@ public class EmailTokenValidator {
     
 	public boolean verify(final JSONObject body, final String userIP, final String loginDate) throws Exception {
 		String userEmail = body.has("email") ? body.getString("email").trim().toLowerCase() : null;
-		String userSessionToken = body.has("sessionTokenOrOTP") ? body.getString("sessionTokenOrOTP").trim().toUpperCase() : null;
+		String userSessionToken = body.has("sessionToken") ? body.getString("sessionToken").trim().toUpperCase() : null;
 		String userEmailToken = body.has("emailToken") ? body.getString("emailToken").trim().toUpperCase() : null;
 		boolean isSelectedApprove = body.has("approve") ? body.getBoolean("approve") : false;
 		
@@ -30,10 +32,11 @@ public class EmailTokenValidator {
 			return true;
 		}
 		
-		try(EmailTokenManagerDB emailTokenManagerDB = new EmailTokenManagerDB();
-				SaveSessionTokenDB saveSessionToken = new SaveSessionTokenDB();
-				GetUserFromDB getUserFromDB = new GetUserFromDB();) {
-			JSONObject user = getUserFromDB.verify(userEmail);
+		try(ConnDB connDB = ConnDB.getInstance();
+				Connection connection = connDB.getConnection();) {
+			
+			GetUserFromDB getUserFromDB = new GetUserFromDB();
+			JSONObject user = getUserFromDB.verify(connection, userEmail);
 			
 			if(user == null || user.getInt("userId") == 0) {
 				throw new UnregisteredUserException("Unable to validate Email Token to unregistered user");
@@ -41,14 +44,11 @@ public class EmailTokenValidator {
 			
 			LOGGER.info("User '{}' found in database", user.getInt("userId"));
 			
-			boolean isEmailTokenUpdated = emailTokenManagerDB.insert(user.getInt("userId"), userEmail, userSessionToken, userEmailToken);
+			EmailTokenManagerDB emailTokenManagerDB = new EmailTokenManagerDB();
+			emailTokenManagerDB.updateToken(connection, user.getInt("userId"), userEmail, userSessionToken, userEmailToken);
 			
-			if(isEmailTokenUpdated) {
-				return true;
-			}
+			return true;
 		}
-		
-		return false;
 	}
 	
 	private static void validateBody(String userEmail, String userSessionToken, String userEmailToken, boolean isSelectedApprove) throws Exception {
