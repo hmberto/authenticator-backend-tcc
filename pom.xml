@@ -218,7 +218,7 @@
 					<warName>${project.artifactId}</warName>
 					<archive>
 						<manifest>
-							<mainClass>br.com.pucsp.tcc.authenticator.RestAPI</mainClass>
+							<mainClass>br.com.pucsp.tcc.authenticator.APIController</mainClass>
 						</manifest>
 					</archive>
 					<webResources>
