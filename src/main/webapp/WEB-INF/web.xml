@@ -30,7 +30,7 @@
 	</filter-mapping>
 	
 	<listener>
-		<listener-class>br.com.pucsp.tcc.authenticator.config.AppInitializer</listener-class>
+		<listener-class>br.com.pucsp.tcc.authenticator.utils.config.AppInitializer</listener-class>
 	</listener>
 
 	<servlet>
