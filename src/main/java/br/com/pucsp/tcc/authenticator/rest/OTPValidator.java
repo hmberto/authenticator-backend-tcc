@@ -19,33 +19,36 @@ import org.slf4j.LoggerFactory;
 import br.com.pucsp.tcc.authenticator.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
-import br.com.pucsp.tcc.authenticator.exceptions.InvalidNameException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.exceptions.UnregisteredUserException;
-import br.com.pucsp.tcc.authenticator.user.UpdateUserNameDB;
+import br.com.pucsp.tcc.authenticator.token.EmailOTPValidator;
+import br.com.pucsp.tcc.authenticator.utils.DateTime;
 
-@Path("/register-name")
+@Path("/otp-validator")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class RegisterName {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterName.class);
-
+public class OTPValidator {
+	private static final Logger LOGGER = LoggerFactory.getLogger(OTPValidator.class);
+	
 	@POST
-	public Response register(final @Context HttpServletRequest request, final String body) {
+	public Response validateOTP(final @Context HttpServletRequest request, final String body) {
 		JSONObject bodyJSON = new JSONObject(body);
 		
+		String loginDate = DateTime.date();
+    	String userIP = request.getRemoteAddr();
+		
 		try {
-			UpdateUserNameDB updateUserNameDB = new UpdateUserNameDB();
-			boolean result = updateUserNameDB.update(bodyJSON);
+			EmailOTPValidator emailOTPValidator = new EmailOTPValidator();
+			String resp = emailOTPValidator.verify(bodyJSON, userIP, loginDate);
 			
-			if(result) {
-				return Response.ok().build();
+			if(resp != null) {
+				return Response.ok(resp).build();
 			}
 		}
 		catch(JSONException e) {
 			return buildErrorResponse("Invalid JSON payload", Response.Status.BAD_REQUEST);
 		}
-		catch(InvalidEmailException | UnregisteredUserException | BusinessException | InvalidTokenException | InvalidNameException e) {
+		catch(InvalidEmailException | UnregisteredUserException | BusinessException | InvalidTokenException e) {
 			return buildErrorResponse(e.getMessage(), Response.Status.BAD_REQUEST);
 		}
 		catch(SQLException | DatabaseInsertException e) {

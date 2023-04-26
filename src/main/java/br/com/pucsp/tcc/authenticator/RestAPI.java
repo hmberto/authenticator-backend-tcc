@@ -15,14 +15,16 @@ import br.com.pucsp.tcc.authenticator.cors.CORSFilter;
 import br.com.pucsp.tcc.authenticator.rest.LogoutUser;
 import br.com.pucsp.tcc.authenticator.rest.RegisterName;
 import br.com.pucsp.tcc.authenticator.rest.AccessRequester;
+import br.com.pucsp.tcc.authenticator.rest.OTPValidator;
 import br.com.pucsp.tcc.authenticator.rest.AccessValidator;
 
 @Produces("application/json")
 @Consumes("application/json")
 public class RestAPI {
 	private final TestAPI api = new TestAPI();
-	private final AccessRequester newSessionTokenOrOTP = new AccessRequester();
-	private final AccessValidator sessionTokenOrOTP = new AccessValidator();
+	private final AccessRequester newEmailTokenOrOTP = new AccessRequester();
+	private final OTPValidator otp = new OTPValidator();
+	private final AccessValidator access = new AccessValidator();
 	private final RegisterName newName = new RegisterName();
 	private final LogoutUser logoutUser = new LogoutUser();
 	private final CORSFilter CORSFilter = new CORSFilter();
@@ -35,13 +37,19 @@ public class RestAPI {
 	@POST
 	@Path("/access-requester")
 	public Response requester(@Context HttpServletRequest request, String body) {
-		return newSessionTokenOrOTP.request(request, body);
+		return newEmailTokenOrOTP.request(request, body);
+	}
+	
+	@POST
+	@Path("/otp-validator")
+	public Response validatorOTP(@Context HttpServletRequest request, String body) {
+		return otp.validateOTP(request, body);
 	}
 	
 	@POST
 	@Path("/access-validator")
-	public Response validator(@Context HttpServletRequest request, String body) {
-		return sessionTokenOrOTP.validate(request, body);
+	public Response validatorAccess(@Context HttpServletRequest request, String body) {
+		return access.validateAccess(request, body);
 	}
 	
 	@POST

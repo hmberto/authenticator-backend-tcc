@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
-import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionTokenOrOTPException;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 
 public class LogoutUserDB {
@@ -83,7 +83,7 @@ public class LogoutUserDB {
 			throw new InvalidEmailException("Invalid email format");
 		}
 		if(!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != SESSION_LENGTH) {
-			throw new InvalidSessionTokenOrOTPException("Invalid Session Token format");
+			throw new InvalidTokenException("Invalid Session Token format");
 		}
 	}
 }

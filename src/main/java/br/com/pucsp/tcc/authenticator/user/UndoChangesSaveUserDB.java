@@ -15,9 +15,14 @@ import br.com.pucsp.tcc.authenticator.exceptions.DatabaseInsertException;
 public class UndoChangesSaveUserDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UndoChangesSaveUserDB.class);
 	
+	private Connection connection;
+	
+	public UndoChangesSaveUserDB() throws SQLException {
+		this.connection = ConnDB.getConnection();
+	}
+	
 	public void recovery(int userId) throws SQLException, DatabaseInsertException {
-		try (Connection connection = ConnDB.getConnection();
-	    		PreparedStatement statementUser = connection.prepareStatement(SqlQueries.DELETE_USER, Statement.RETURN_GENERATED_KEYS);
+		try (PreparedStatement statementUser = connection.prepareStatement(SqlQueries.DELETE_USER, Statement.RETURN_GENERATED_KEYS);
 	    		PreparedStatement statementOTP = connection.prepareStatement(SqlQueries.DELETE_OTP, Statement.RETURN_GENERATED_KEYS);
 	    		PreparedStatement statementSession = connection.prepareStatement(SqlQueries.DELETE_SESSION, Statement.RETURN_GENERATED_KEYS);
 	    		PreparedStatement statementConfirmEmail = connection.prepareStatement(SqlQueries.DELETE_EMAIL_VERIFICATION, Statement.RETURN_GENERATED_KEYS)) {
@@ -50,5 +55,9 @@ public class UndoChangesSaveUserDB implements AutoCloseable {
 	}
 	
 	@Override
-	public void close() throws Exception {}
+	public void close() throws Exception {
+		if(connection != null) {
+			ConnDB.closeConnection(connection);
+		}
+	}
 }

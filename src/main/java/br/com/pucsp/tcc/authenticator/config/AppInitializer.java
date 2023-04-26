@@ -44,16 +44,35 @@ public class AppInitializer implements ServletContextListener {
 			String[] sqlStatements = sql.split("\\$");
 			
 			for (String sqlStatement : sqlStatements) {
-				String sqlType = sqlStatement.contains("DROP") ? "DROP" : 
-	                 sqlStatement.contains("CREATE") ? "CREATE" : null;
-				
-				String partes[] = sqlStatement.split("`");
-				String tableName = partes[1];
+				String sqlType = getSqlType(sqlStatement);
+				String tableName = getTableName(sqlStatement);
 				
 				LOGGER.info("Trying to '{}' table '{}'", sqlType, tableName);
 				statement.execute(sqlStatement);
 				LOGGER.info("'{}' performed successfully on table '{}'", sqlType, tableName);
 			}
 		}
+	}
+	
+	private String getSqlType(String sqlStatement) {
+	    if (sqlStatement.contains("DROP")) {
+	        return "DROP";
+	    } else if (sqlStatement.contains("CREATE")) {
+	        return "CREATE";
+	    } else if (sqlStatement.contains("SET")) {
+	        return "SET time_zone";
+	    } else {
+	        throw new IllegalArgumentException("Unrecognized SQL statement: " + sqlStatement);
+	    }
+	}
+	
+	private String getTableName(String sqlStatement) {
+	    String[] parts = sqlStatement.split("`");
+	    if(parts.length > 1) {
+	        return parts[1];
+	    }
+	    else {
+	        return "**GLOBAL**";
+	    }
 	}
 }

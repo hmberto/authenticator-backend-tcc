@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS `access_confirmations`;
+$
 DROP TABLE IF EXISTS `email_verifications`;
 $
 DROP TABLE IF EXISTS `otps`;
@@ -43,3 +45,18 @@ CREATE TABLE `email_verifications` (
 	`updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	INDEX idx_user_id (user_id)
 );
+$
+CREATE TABLE `access_confirmations` (
+	`access_confirmations_id` int AUTO_INCREMENT PRIMARY KEY,
+	`user_id` int NOT NULL,
+	`token` varchar(250) UNIQUE NOT NULL,
+	`request_ip` varchar(250) NOT NULL,
+	`request_browser` varchar(250) NOT NULL,
+	`request_operational_system` varchar(250) NOT NULL,
+	`is_approved` boolean NOT NULL,
+	`created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	INDEX idx_user_id (user_id)
+);
+$
+SET GLOBAL time_zone = 'America/Sao_Paulo';

@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 import br.com.pucsp.tcc.authenticator.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
-import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionTokenOrOTPException;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.exceptions.UnregisteredUserException;
-import br.com.pucsp.tcc.authenticator.token.EmailSessionTokenOrOTPValidator;
+import br.com.pucsp.tcc.authenticator.token.EmailTokenValidator;
 import br.com.pucsp.tcc.authenticator.utils.DateTime;
 
 @Path("/access-validator")
@@ -31,15 +31,15 @@ public class AccessValidator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccessValidator.class);
 	
 	@POST
-	public Response validate(final @Context HttpServletRequest request, final String body) {
+	public Response validateAccess(final @Context HttpServletRequest request, final String body) {
 		JSONObject bodyJSON = new JSONObject(body);
 		
 		String loginDate = DateTime.date();
     	String userIP = request.getRemoteAddr();
 		
 		try {
-			EmailSessionTokenOrOTPValidator emailSessionTokenOrOTPValidator = new EmailSessionTokenOrOTPValidator();
-			boolean resp = emailSessionTokenOrOTPValidator.verify(bodyJSON, userIP, loginDate);
+			EmailTokenValidator emailTokenValidator = new EmailTokenValidator();
+			boolean resp = emailTokenValidator.verify(bodyJSON, userIP, loginDate);
 			
 			if(resp) {
 				return Response.ok().build();
@@ -48,7 +48,7 @@ public class AccessValidator {
 		catch(JSONException e) {
 			return buildErrorResponse("Invalid JSON payload", Response.Status.BAD_REQUEST);
 		}
-		catch(InvalidEmailException | UnregisteredUserException | BusinessException | InvalidSessionTokenOrOTPException e) {
+		catch(InvalidEmailException | UnregisteredUserException | BusinessException | InvalidTokenException e) {
 			return buildErrorResponse(e.getMessage(), Response.Status.BAD_REQUEST);
 		}
 		catch(SQLException | DatabaseInsertException e) {

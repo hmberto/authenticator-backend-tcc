@@ -16,10 +16,15 @@ import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 public class GetUserFromDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GetUserFromDB.class);
 	
+	private Connection connection;
+	
+	public GetUserFromDB() throws SQLException {
+		this.connection = ConnDB.getConnection();
+	}
+	
 	public JSONObject verify(String userEmail) throws SQLException {
 		JSONObject json = new JSONObject();
 		
-		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		
@@ -82,5 +87,9 @@ public class GetUserFromDB implements AutoCloseable {
 	}
 	
 	@Override
-	public void close() throws Exception {}
+	public void close() throws Exception {
+		if(connection != null) {
+			ConnDB.closeConnection(connection);
+		}
+	}
 }

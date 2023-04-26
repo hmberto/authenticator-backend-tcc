@@ -10,8 +10,9 @@ import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.exceptions.UnregisteredUserException;
 import br.com.pucsp.tcc.authenticator.mail.EmailType;
 import br.com.pucsp.tcc.authenticator.user.GetUserFromDB;
-import br.com.pucsp.tcc.authenticator.user.SessionTokenAndOTPManagerDB;
+import br.com.pucsp.tcc.authenticator.user.OTPManagerDB;
 import br.com.pucsp.tcc.authenticator.user.SaveSessionTokenDB;
+import br.com.pucsp.tcc.authenticator.user.SaveEmailTokenDB;
 import br.com.pucsp.tcc.authenticator.user.SaveUserDB;
 import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
@@ -20,11 +21,12 @@ import br.com.pucsp.tcc.authenticator.utils.RespJSON;
 public class EmailSessionTokenOrOTPSender {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailSessionTokenOrOTPSender.class);
 	
-	public String send(final JSONObject body, final String userIP, final String loginDate) throws Exception {
+	public String send(final JSONObject body, final String userIP, final String userBrowser, final String userOS, final String loginDate) throws Exception {
 		try(GetUserFromDB getUserFromDB = new GetUserFromDB();
 	    		SaveUserDB saveUserDB = new SaveUserDB();
 	    		SaveSessionTokenDB saveSessionToken = new SaveSessionTokenDB();
-	    		SessionTokenAndOTPManagerDB saveActiveOTPDB = new SessionTokenAndOTPManagerDB()) {
+				SaveEmailTokenDB saveEmailToken = new SaveEmailTokenDB();
+	    		OTPManagerDB saveActiveOTPDB = new OTPManagerDB()) {
 			
 			String userEmail = body.has("email") ? body.getString("email").trim().toLowerCase() : null;
 			boolean isSelectedLink = body.has("link") ? body.getBoolean("link") : false;
@@ -56,8 +58,9 @@ public class EmailSessionTokenOrOTPSender {
 	    	}
 	    	else if(isSelectedLink && isLogin) {
 	    		boolean isSessionTokenSaved = saveSessionToken.insert(userId, userEmail, userSession, sessionTokenActive);
+	    		boolean isEmailTokenSaved = saveEmailToken.insert(userId, userEmail, userIP, userBrowser, userOS);
 	    		
-	    		if(isSessionTokenSaved) {
+	    		if(isSessionTokenSaved && isEmailTokenSaved) {
 	    			sendToken(userEmail, "", userSession, userIP, loginDate, "session");
 	    			
 	    			String resp = RespJSON.createResp(userId, isLogin, userSession, sessionTokenActive);

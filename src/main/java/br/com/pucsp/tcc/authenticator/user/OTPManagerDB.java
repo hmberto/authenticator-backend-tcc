@@ -10,11 +10,16 @@ import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 
-public class SessionTokenAndOTPManagerDB implements AutoCloseable {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SessionTokenAndOTPManagerDB.class);
+public class OTPManagerDB implements AutoCloseable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(OTPManagerDB.class);
+	
+	private Connection connection;
+	
+	public OTPManagerDB() throws SQLException {
+		this.connection = ConnDB.getConnection();
+	}
 	
 	public boolean insert(String sql, String userEmail, String userOTP) {
-		Connection connection = null;
 		PreparedStatement statement = null;
 	    int rowsUpdated = 0;
 	    
@@ -28,7 +33,7 @@ public class SessionTokenAndOTPManagerDB implements AutoCloseable {
 	        rowsUpdated = statement.executeUpdate();
 	    }
 	    catch(SQLException e) {
-	    	LOGGER.error("Error inserting 6 digit code into database - Email: " + userEmail, e);
+	    	LOGGER.error("Error updating OTP or Session Token - Email: " + userEmail, e);
 	    }
 	    finally {
 	    	if(statement != null) {
@@ -58,5 +63,9 @@ public class SessionTokenAndOTPManagerDB implements AutoCloseable {
 	}
 	
 	@Override
-	public void close() throws Exception {}
+	public void close() throws Exception {
+		if(connection != null) {
+			ConnDB.closeConnection(connection);
+		}
+	}
 }

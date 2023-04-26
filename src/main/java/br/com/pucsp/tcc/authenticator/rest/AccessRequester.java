@@ -21,6 +21,8 @@ import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.exceptions.UnregisteredUserException;
 import br.com.pucsp.tcc.authenticator.token.EmailSessionTokenOrOTPSender;
 import br.com.pucsp.tcc.authenticator.utils.DateTime;
+import br.com.pucsp.tcc.authenticator.utils.GetUserBrowser;
+import br.com.pucsp.tcc.authenticator.utils.GetUserOS;
 
 @Path("/access-requester")
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,12 +34,17 @@ public class AccessRequester {
     public Response request(final @Context HttpServletRequest request, final String body) {
     	JSONObject bodyJSON = new JSONObject(body);
     	
+    	String userAgent = request.getHeader("User-Agent");
+    	
     	String loginDate = DateTime.date();
 		String userIP = request.getRemoteAddr();
+		String userBrowser = GetUserBrowser.browser(userAgent);
+		String userOS = GetUserOS.os(userAgent);
 		
 		try {
         	EmailSessionTokenOrOTPSender emailSessionTokenOrOTPSender = new EmailSessionTokenOrOTPSender();
-        	String resp = emailSessionTokenOrOTPSender.send(bodyJSON, userIP, loginDate);
+        	
+        	String resp = emailSessionTokenOrOTPSender.send(bodyJSON, userIP, userBrowser, userOS, loginDate);
 			
 			if(resp != null) {
 				return Response.ok(resp).build();

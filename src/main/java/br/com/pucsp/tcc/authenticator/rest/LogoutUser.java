@@ -20,7 +20,7 @@ import br.com.pucsp.tcc.authenticator.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.exceptions.InvalidNameException;
-import br.com.pucsp.tcc.authenticator.exceptions.InvalidSessionTokenOrOTPException;
+import br.com.pucsp.tcc.authenticator.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.exceptions.UnregisteredUserException;
 import br.com.pucsp.tcc.authenticator.user.LogoutUserDB;
 
@@ -45,7 +45,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(LogoutUser.class);
 		catch(JSONException e) {
 			return buildErrorResponse("Invalid JSON payload", Response.Status.BAD_REQUEST);
 		}
-		catch(InvalidEmailException | UnregisteredUserException | BusinessException | InvalidSessionTokenOrOTPException | InvalidNameException e) {
+		catch(InvalidEmailException | UnregisteredUserException | BusinessException | InvalidTokenException | InvalidNameException e) {
 			return buildErrorResponse(e.getMessage(), Response.Status.BAD_REQUEST);
 		}
 		catch(SQLException | DatabaseInsertException e) {

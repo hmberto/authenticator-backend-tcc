@@ -15,8 +15,13 @@ import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 public class SaveSessionTokenDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SaveSessionTokenDB.class);
 	
+	private Connection connection;
+	
+	public SaveSessionTokenDB() throws SQLException {
+		this.connection = ConnDB.getConnection();
+	}
+	
 	public boolean insert(int userId, String userEmail, String userSessionToken, boolean isActive) {
-	    Connection connection = null;
 	    PreparedStatement statement = null;
 	    int sessionId = 0;
 	    
@@ -65,7 +70,8 @@ public class SaveSessionTokenDB implements AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		// TODO Auto-generated method stub
-		
+		if(connection != null) {
+			ConnDB.closeConnection(connection);
+		}
 	}
 }

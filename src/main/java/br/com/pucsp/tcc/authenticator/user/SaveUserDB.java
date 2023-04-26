@@ -18,11 +18,16 @@ import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 public class SaveUserDB implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SaveUserDB.class);
 	
+	private Connection connection;
+	
+	public SaveUserDB() throws SQLException {
+		this.connection = ConnDB.getConnection();
+	}
+	
 	public int insert(String userFirstName, String userLastName, String userEmail, String userSessionToken, String userIP, String loginDate) throws Exception {
 		int userId = 0;
 	    
-	    try(Connection connection = ConnDB.getConnection();
-	    		UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();
+	    try(UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();
 	    		PreparedStatement statementUser = connection.prepareStatement(SqlQueries.INSERT_USER, Statement.RETURN_GENERATED_KEYS);
 	    		PreparedStatement statementOTP = connection.prepareStatement(SqlQueries.INSERT_OTP, Statement.RETURN_GENERATED_KEYS);
 	    		PreparedStatement statementSessionToken = connection.prepareStatement(SqlQueries.INSERT_SESSION, Statement.RETURN_GENERATED_KEYS);
@@ -88,5 +93,9 @@ public class SaveUserDB implements AutoCloseable {
 	}
 	
 	@Override
-	public void close() throws Exception {}
+	public void close() throws Exception {
+		if(connection != null) {
+			ConnDB.closeConnection(connection);
+		}
+	}
 }
