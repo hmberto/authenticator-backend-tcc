@@ -1,9 +1,13 @@
 <!DOCTYPE configuration>
+
 <configuration>
-	<!--<property name="LOG_DIR" value="./logs" />-->
-	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+	<!-- <property name="LOG_DIR" value="./logs" /> -->
+	<appender name="console"
+		class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%date{dd/MM/yyyy HH:mm:ss} %-5level %logger{FULL} - %msg%n</pattern>
+			<pattern>
+				[%highlight(%level)] [%date{dd/MM/yyyy HH:mm:ss}] %logger{0} - %msg%n
+			</pattern>
 		</encoder>
 	</appender>
 	<root level="info">
