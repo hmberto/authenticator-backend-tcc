@@ -26,7 +26,7 @@ import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidNameException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
 
-@Path("/check-active-session")
+@Path("/check/session")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class CheckActiveSessionService {
@@ -37,7 +37,7 @@ public class CheckActiveSessionService {
 		JSONObject bodyJSON = new JSONObject(body);
 		
 		String loginDate = DateTime.date();
-    	String userIP = request.getRemoteAddr();
+		String userIP = request.getRemoteAddr();
 		
 		try {
 			SessionTokenValidator sessionTokenValidator = new SessionTokenValidator();

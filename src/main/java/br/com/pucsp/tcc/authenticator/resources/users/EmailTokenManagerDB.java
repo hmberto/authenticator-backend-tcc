@@ -6,10 +6,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
+import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 
 public class EmailTokenManagerDB {
@@ -72,5 +74,31 @@ public class EmailTokenManagerDB {
 	    if(rowsUpdated == 0) {
 	    	throw new DatabaseInsertException("Email Token could not be updated");
         }
+	}
+	
+	public JSONObject getToken(Connection connection, String userEmailToken) throws SQLException, BusinessException {
+		try(PreparedStatement statementGet = connection.prepareStatement(SqlQueries.GET_EMAIL_TOKEN, Statement.RETURN_GENERATED_KEYS);) {
+	    	JSONObject tokenInfo = new JSONObject();
+	    	
+	        statementGet.setString(1, userEmailToken);
+	        
+	        ResultSet rs = statementGet.executeQuery();
+	        
+	        int userId = 0;
+	        if(rs.next()) {
+	        	userId = rs.getInt("user_id");
+	        	tokenInfo.put("userId", userId);
+	        	tokenInfo.put("requestIP", rs.getString("request_ip"));
+	        	tokenInfo.put("requestBrowser", rs.getString("request_browser"));
+	        	tokenInfo.put("requestOS", rs.getString("request_operational_system"));
+	        	tokenInfo.put("isApproved", rs.getString("is_approved"));
+	        }
+	        
+	        if(userId == 0) {
+	        	throw new BusinessException("Email Token does not exist in database");
+	        }
+	        
+	        return tokenInfo;
+	    }
 	}
 }

@@ -25,7 +25,7 @@ import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidNameException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
 
-@Path("/register-name")
+@Path("/register/name")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class RegisterNameService {

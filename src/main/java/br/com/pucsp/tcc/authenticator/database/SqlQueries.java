@@ -23,6 +23,7 @@ public class SqlQueries {
 	public static final String DELETE_USER = "DELETE FROM users WHERE user_id = ? AND EXISTS (SELECT user_id FROM users WHERE user_id = ?)";
 	
 	public static final String GET_SESSION = "SELECT session_id, session, is_active FROM sessions WHERE user_id = ? AND session = ?";
+	public static final String GET_EMAIL_TOKEN = "SELECT * FROM access_confirmations WHERE token = ?";
 
 	public static final String DELETE_EMAIL_TOKENS = "DELETE FROM `access_confirmations`\n" + "WHERE `user_id` = ?\n"
 			+ "AND `created_at` < DATE_SUB(NOW(), INTERVAL 5 MINUTE)";

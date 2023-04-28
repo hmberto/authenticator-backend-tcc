@@ -28,7 +28,7 @@ import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidNameException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
 
-@Path("/register-email")
+@Path("/register/email")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class RegisterEmailService {

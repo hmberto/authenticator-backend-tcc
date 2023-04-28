@@ -6,12 +6,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import br.com.pucsp.tcc.authenticator.impl.AuthorizeAccessLinkService;
+import br.com.pucsp.tcc.authenticator.impl.CheckAccessLinkService;
 import br.com.pucsp.tcc.authenticator.impl.CheckActiveSessionService;
 import br.com.pucsp.tcc.authenticator.impl.LogoutService;
 import br.com.pucsp.tcc.authenticator.impl.RegisterEmailService;
@@ -28,6 +30,7 @@ public class APIController {
 	private final RegisterNameService registerNameService = new RegisterNameService();
 	private final ValidateOtpService validateOtpService = new ValidateOtpService();
 	private final AuthorizeAccessLinkService authorizeAccessLinkService = new AuthorizeAccessLinkService();
+	private final CheckAccessLinkService checkAccessLinkService = new CheckAccessLinkService();
 	private final CheckActiveSessionService checkActiveSessionService = new CheckActiveSessionService();
 	private final LogoutService logoutService = new LogoutService();
 	private final CORSFilter CORSFilter = new CORSFilter();
@@ -38,31 +41,37 @@ public class APIController {
 	}
 	
 	@POST
-	@Path("/register-email")
+	@Path("/register/email")
 	public Response registerEmail(@Context HttpServletRequest request, String body) {
 		return registerEmailService.validateData(request, body);
 	}
 	
 	@POST
-	@Path("/register-name")
+	@Path("/register/name")
 	public Response registerName(@Context HttpServletRequest request, String body) {
 		return registerNameService.validateData(request, body);
 	}
 	
 	@POST
-	@Path("/validate-otp")
+	@Path("/validate/otp")
 	public Response validateOtp(@Context HttpServletRequest request, String body) {
 		return validateOtpService.validateData(request, body);
 	}
 	
 	@POST
-	@Path("/authorize-access-link")
+	@Path("/validate/access-link")
 	public Response authorizeAccessLink(@Context HttpServletRequest request, String body) {
 		return authorizeAccessLinkService.validateData(request, body);
 	}
 	
+	@GET
+	@Path("/check/access-link/{emailToken}")
+	public Response checkAccessLink(@Context HttpServletRequest request, @PathParam("emailToken") String emailToken) {
+		return checkAccessLinkService.validateData(request, emailToken);
+	}
+	
 	@POST
-	@Path("/check-active-session")
+	@Path("/check/session")
 	public Response checkActiveSession(@Context HttpServletRequest request, String body) {
 		return checkActiveSessionService.validateData(request, body);
 	}
