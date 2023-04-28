@@ -38,7 +38,7 @@ public class EmailOTPValidator {
 			JSONObject user = getUserFromDB.verify(connection, userEmail);
 			
 			if(user == null || user.getInt("userId") == 0) {
-				throw new UnregisteredUserException("Unable to validate OTP or Session Token to unregistered user");
+				throw new UnregisteredUserException("Unable to validate OTP to unregistered user");
 			}
 			
 			LOGGER.info("User '{}' found in database", user.getInt("userId"));
