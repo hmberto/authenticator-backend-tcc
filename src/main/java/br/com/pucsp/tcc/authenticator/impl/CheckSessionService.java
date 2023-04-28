@@ -29,8 +29,8 @@ import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException
 @Path("/check/session")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class CheckActiveSessionService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CheckActiveSessionService.class);
+public class CheckSessionService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CheckSessionService.class);
 	
 	@POST
 	public Response validateData(final @Context HttpServletRequest request, final String body) {

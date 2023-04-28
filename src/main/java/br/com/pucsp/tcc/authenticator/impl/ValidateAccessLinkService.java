@@ -29,8 +29,8 @@ import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException
 @Path("/validate/access-link")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AuthorizeAccessLinkService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizeAccessLinkService.class);
+public class ValidateAccessLinkService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ValidateAccessLinkService.class);
 	
 	@POST
 	public Response validateData(final @Context HttpServletRequest request, final String body) {

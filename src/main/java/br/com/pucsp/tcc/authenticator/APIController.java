@@ -12,9 +12,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import br.com.pucsp.tcc.authenticator.impl.AuthorizeAccessLinkService;
+import br.com.pucsp.tcc.authenticator.impl.ValidateAccessLinkService;
 import br.com.pucsp.tcc.authenticator.impl.CheckAccessLinkService;
-import br.com.pucsp.tcc.authenticator.impl.CheckActiveSessionService;
+import br.com.pucsp.tcc.authenticator.impl.CheckSessionService;
 import br.com.pucsp.tcc.authenticator.impl.LogoutService;
 import br.com.pucsp.tcc.authenticator.impl.RegisterEmailService;
 import br.com.pucsp.tcc.authenticator.impl.RegisterNameService;
@@ -29,9 +29,9 @@ public class APIController {
 	private final RegisterEmailService registerEmailService = new RegisterEmailService();
 	private final RegisterNameService registerNameService = new RegisterNameService();
 	private final ValidateOtpService validateOtpService = new ValidateOtpService();
-	private final AuthorizeAccessLinkService authorizeAccessLinkService = new AuthorizeAccessLinkService();
+	private final ValidateAccessLinkService validateAccessLinkService = new ValidateAccessLinkService();
 	private final CheckAccessLinkService checkAccessLinkService = new CheckAccessLinkService();
-	private final CheckActiveSessionService checkActiveSessionService = new CheckActiveSessionService();
+	private final CheckSessionService checkSessionService = new CheckSessionService();
 	private final LogoutService logoutService = new LogoutService();
 	private final CORSFilter CORSFilter = new CORSFilter();
 	
@@ -60,8 +60,8 @@ public class APIController {
 	
 	@POST
 	@Path("/validate/access-link")
-	public Response authorizeAccessLink(@Context HttpServletRequest request, String body) {
-		return authorizeAccessLinkService.validateData(request, body);
+	public Response validateAccessLink(@Context HttpServletRequest request, String body) {
+		return validateAccessLinkService.validateData(request, body);
 	}
 	
 	@GET
@@ -72,8 +72,8 @@ public class APIController {
 	
 	@POST
 	@Path("/check/session")
-	public Response checkActiveSession(@Context HttpServletRequest request, String body) {
-		return checkActiveSessionService.validateData(request, body);
+	public Response checkSession(@Context HttpServletRequest request, String body) {
+		return checkSessionService.validateData(request, body);
 	}
 	
 	@POST
