@@ -57,16 +57,12 @@ public class ConnDB implements AutoCloseable {
         return connection;
     }
 
-    public void closeConnection(Connection connection) throws SQLException {
-        if (connection != null && !connection.isClosed()) {
-            connection.close();
-            LOGGER.info("Connection closed");
-        }
-    }
-
 	@Override
 	public void close() throws Exception {
 		LOGGER.info("AutoCloseable method executed - is connection closed: " + connection.isClosed());
-		closeConnection(connection);
+		if (connection != null && !connection.isClosed()) {
+            connection.close();
+            LOGGER.info("Connection closed");
+        }
 	}
 }
