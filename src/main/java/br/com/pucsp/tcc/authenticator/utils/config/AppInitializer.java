@@ -29,6 +29,9 @@ public class AppInitializer implements ServletContextListener {
 			if(validateEnvironmentVariable()) {
 				LOGGER.info("Application may not work properly - unconfigured environment variables");
 			}
+			else {
+				LOGGER.info("Environment variables OK");
+			}
 		}
 		catch(SQLException e) {
 			LOGGER.error("Unable to initialize the database");
@@ -106,10 +109,12 @@ public class AppInitializer implements ServletContextListener {
 				String sqlType = getSqlType(sqlStatement);
 				String tableName = getTableName(sqlStatement);
 				
-				LOGGER.info("Trying to '{}' table '{}'", sqlType, tableName);
+				LOGGER.info(">> Trying to '{}' table '{}'", sqlType, tableName);
 				statement.execute(sqlStatement);
-				LOGGER.info("'{}' performed successfully on table '{}'", sqlType, tableName);
+				LOGGER.info(">> '{}' performed successfully on table '{}'", sqlType, tableName);
 			}
+			
+			LOGGER.info("--------------------------------------------");
 		}
 	}
 	

@@ -70,9 +70,12 @@ public class EmailSessionTokenOrOTPSender {
 				throw new BusinessException("Link request denied for email '" + userEmail
 						+ "' because the user did not complete the registration");
 			}
+			else if(!body.has("link") && !body.has("otp") && isLogin) {
+				return RespJSON.createResp(userId, isLogin, "null", false);
+			}
 			else if(isSelectedLink && isLogin) {
 				SessionTokenManagerDB saveSessionToken = new SessionTokenManagerDB();
-				saveSessionToken.insert(connection, userId, userEmail, userSession, sessionTokenActive);
+				saveSessionToken.insertSession(connection, userId, userSession, sessionTokenActive);
 				LOGGER.info("Session token created for user '{}'", userEmail);
 				
 				EmailTokenManagerDB saveEmailToken = new EmailTokenManagerDB();
@@ -124,7 +127,7 @@ public class EmailSessionTokenOrOTPSender {
 					+ "' because it is not possible to request LINK and OTP at the same time");
 		}
 		if(!isSelectedLink && !isSelectedOTP) {
-			throw new BusinessException("Request denied for email '" + userEmail + "' because LINK or OTP is required");
+			
 		}
 	}
 }

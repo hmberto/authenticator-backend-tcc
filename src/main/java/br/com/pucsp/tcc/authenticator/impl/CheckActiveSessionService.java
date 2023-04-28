@@ -41,10 +41,10 @@ public class CheckActiveSessionService {
 		
 		try {
 			SessionTokenValidator sessionTokenValidator = new SessionTokenValidator();
-			boolean resp = sessionTokenValidator.verify(bodyJSON, userIP, loginDate);
+			String resp = sessionTokenValidator.verify(bodyJSON, userIP, loginDate).toString();
 			
-			if(resp) {
-				return Response.ok().build();
+			if(resp != null) {
+				return Response.ok(resp).build();
 			}
 		}
 		catch(JSONException e) {

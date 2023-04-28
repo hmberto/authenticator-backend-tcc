@@ -63,7 +63,7 @@ public class EmailOTPValidator {
 		else {
 			String userSession = CreateToken.generate("session");
 			
-			saveSessionToken.insert(connection, userId, userEmail, userSession, true);
+			saveSessionToken.insertSession(connection, userId, userSession, true);
 			
 			return RespJSON.createResp(userId, isLogin, userSession, true);
 		}
