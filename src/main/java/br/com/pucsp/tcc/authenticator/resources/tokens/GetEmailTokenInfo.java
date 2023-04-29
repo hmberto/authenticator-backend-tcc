@@ -18,7 +18,15 @@ public class GetEmailTokenInfo {
 				Connection connection = connDB.getConnection();) {
 			
 			EmailTokenManagerDB emailTokenManagerDB = new EmailTokenManagerDB();
-			return emailTokenManagerDB.getToken(connection, userEmailToken);
+			JSONObject json = emailTokenManagerDB.getToken(connection, userEmailToken);
+			
+			if(json.getString("requestIP").equals(userIP)) {
+				json.put("sameIP", true);
+			}
+			
+			json.put("sameIP", true);
+			
+			return json;
 		}
 	}
 	

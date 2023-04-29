@@ -1,9 +1,20 @@
 package br.com.pucsp.tcc.authenticator.utils;
 
+import eu.bitwalker.useragentutils.UserAgent;
+import eu.bitwalker.useragentutils.Browser;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class GetUserBrowser {
+	public static String browser(String userAgent) {
+		UserAgent ua = UserAgent.parseUserAgentString(userAgent);
+		Browser browser = ua.getBrowser();
+		
+		String gettedBrouser = "Unknown".equals(browser.getGroup().getName()) ? "Desconhecido" : browser.getGroup().getName();
+		return "Desconhecido".equals(gettedBrouser) ? verify(userAgent) : verify(gettedBrouser);
+	}
+	
 	private static final Map<String, String> browserMap = new HashMap<>();
 	static {
 		browserMap.put("Chrome", "Google Chrome");
@@ -24,18 +35,15 @@ public class GetUserBrowser {
 		browserMap.put("Insomnia", "Insomnia");
 		browserMap.put("PostmanRuntime", "Postman");
 	}
-
-	public static String browser(String userAgent) {
-		String os = "Desconhecido";
-		userAgent = userAgent.toUpperCase();
-
+	
+	private static String verify(String userBrowser) {
 		for (String key : browserMap.keySet()) {
-			if (userAgent.contains(key.toUpperCase())) {
-				os = browserMap.get(key);
+			if (userBrowser.toUpperCase().contains(key.toUpperCase())) {
+				userBrowser = browserMap.get(key);
 				break;
 			}
 		}
-
-		return os;
+		
+		return userBrowser;
 	}
 }

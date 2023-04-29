@@ -12,6 +12,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.cxf.jaxrs.ext.PATCH;
+
 import br.com.pucsp.tcc.authenticator.impl.ValidateAccessLinkService;
 import br.com.pucsp.tcc.authenticator.impl.CheckAccessLinkService;
 import br.com.pucsp.tcc.authenticator.impl.CheckSessionService;
@@ -46,7 +48,7 @@ public class APIController {
 		return registerEmailService.validateData(request, body);
 	}
 	
-	@POST
+	@PATCH
 	@Path("/register/name")
 	public Response registerName(@Context HttpServletRequest request, String body) {
 		return registerNameService.validateData(request, body);
@@ -58,7 +60,7 @@ public class APIController {
 		return validateOtpService.validateData(request, body);
 	}
 	
-	@POST
+	@PATCH
 	@Path("/validate/access-link")
 	public Response validateAccessLink(@Context HttpServletRequest request, String body) {
 		return validateAccessLinkService.validateData(request, body);

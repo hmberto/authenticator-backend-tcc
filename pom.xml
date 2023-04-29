@@ -1,5 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-	http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.com.pucsp.tcc.authenticator</groupId>
 	<artifactId>UserAuthenticator</artifactId>
@@ -149,6 +150,11 @@
 			<version>${geronimo-servlet_3.0_spec.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>eu.bitwalker</groupId>
+			<artifactId>UserAgentUtils</artifactId>
+			<version>1.21</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -167,10 +173,12 @@
 				<version>6.1.26</version>
 				<configuration>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
-					<webApp>${project.build.directory}/${project.build.finalName}</webApp>
+					<webApp>
+						${project.build.directory}/${project.build.finalName}</webApp>
 					<contextPath>/api</contextPath>
 					<connectors>
-						<connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+						<connector
+							implementation="org.mortbay.jetty.nio.SelectChannelConnector">
 							<port>8080</port>
 							<maxIdleTime>60000</maxIdleTime>
 						</connector>
@@ -218,7 +226,8 @@
 					<warName>${project.artifactId}</warName>
 					<archive>
 						<manifest>
-							<mainClass>br.com.pucsp.tcc.authenticator.APIController</mainClass>
+							<mainClass>
+								br.com.pucsp.tcc.authenticator.APIController</mainClass>
 						</manifest>
 					</archive>
 					<webResources>
@@ -241,8 +250,11 @@
 						<phase>package</phase>
 						<configuration>
 							<target>
-								<war destfile="${project.build.directory}/${project.artifactId}.war" update="true">
-									<zipfileset dir="${project.build.directory}/classes" />
+								<war
+									destfile="${project.build.directory}/${project.artifactId}.war"
+									update="true">
+									<zipfileset
+										dir="${project.build.directory}/classes" />
 								</war>
 							</target>
 						</configuration>

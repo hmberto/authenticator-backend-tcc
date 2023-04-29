@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.resources.tokens.GetEmailTokenInfo;
+import br.com.pucsp.tcc.authenticator.utils.LocalhostIP;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
@@ -33,11 +34,11 @@ public class CheckAccessLinkService {
 	
 	@POST
 	public Response validateData(final @Context HttpServletRequest request, final String emailToken) {
-    	String userIP = request.getRemoteAddr();
+		String userIp = LocalhostIP.get(request.getRemoteAddr());
 		
 		try {
 			GetEmailTokenInfo getEmailTokenInfo = new GetEmailTokenInfo();
-			String resp = getEmailTokenInfo.verify(emailToken, userIP).toString();
+			String resp = getEmailTokenInfo.verify(emailToken, userIp).toString();
 			
 			if(resp != null) {
 				return Response.ok(resp).build();

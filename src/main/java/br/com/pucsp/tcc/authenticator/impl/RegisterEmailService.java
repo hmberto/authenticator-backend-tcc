@@ -18,9 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.resources.tokens.EmailSessionTokenOrOTPSender;
-import br.com.pucsp.tcc.authenticator.utils.DateTime;
 import br.com.pucsp.tcc.authenticator.utils.GetUserBrowser;
 import br.com.pucsp.tcc.authenticator.utils.GetUserOS;
+import br.com.pucsp.tcc.authenticator.utils.LocalhostIP;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
@@ -40,14 +40,13 @@ public class RegisterEmailService {
     	
     	String userAgent = request.getHeader("User-Agent");
     	
-    	String loginDate = DateTime.date();
-		String userIP = request.getRemoteAddr();
+    	String userIp = LocalhostIP.get(request.getRemoteAddr());
 		String userBrowser = GetUserBrowser.browser(userAgent);
 		String userOS = GetUserOS.os(userAgent);
 		
 		try {
         	EmailSessionTokenOrOTPSender emailSessionTokenOrOTPSender = new EmailSessionTokenOrOTPSender();
-        	String resp = emailSessionTokenOrOTPSender.send(bodyJSON, userIP, userBrowser, userOS, loginDate);
+        	String resp = emailSessionTokenOrOTPSender.send(bodyJSON, userIp, userBrowser, userOS);
 			
 			if(resp != null) {
 				return Response.ok(resp).build();

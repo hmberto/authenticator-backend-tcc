@@ -20,7 +20,7 @@ public class EmailTokenValidator {
 	private static final int SESSION_LENGTH = Integer.parseInt(System.getenv("SESSION_LENGTH"));
     private static final int EMAIL_TOKEN_LENGTH = Integer.parseInt(System.getenv("EMAIL_TOKEN_LENGTH"));
     
-	public boolean verify(final JSONObject body, final String userIP, final String loginDate) throws Exception {
+	public boolean verify(final JSONObject body) throws Exception {
 		String userEmail = body.has("email") ? body.getString("email").trim().toLowerCase() : null;
 		String userSessionToken = body.has("sessionToken") ? body.getString("sessionToken").trim().toUpperCase() : null;
 		String userEmailToken = body.has("emailToken") ? body.getString("emailToken").trim().toUpperCase() : null;

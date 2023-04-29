@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.resources.tokens.EmailOTPValidator;
-import br.com.pucsp.tcc.authenticator.utils.DateTime;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
@@ -36,12 +35,9 @@ public class ValidateOtpService {
 	public Response validateData(final @Context HttpServletRequest request, final String body) {
 		JSONObject bodyJSON = new JSONObject(body);
 		
-		String loginDate = DateTime.date();
-    	String userIP = request.getRemoteAddr();
-		
 		try {
 			EmailOTPValidator emailOTPValidator = new EmailOTPValidator();
-			String resp = emailOTPValidator.verify(bodyJSON, userIP, loginDate);
+			String resp = emailOTPValidator.verify(bodyJSON);
 			
 			if(resp != null) {
 				return Response.ok(resp).build();

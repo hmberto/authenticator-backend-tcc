@@ -25,7 +25,7 @@ public class EmailOTPValidator {
 	
 	private static final int OTP_LENGTH = Integer.parseInt(System.getenv("OTP_LENGTH"));
     
-	public String verify(final JSONObject body, final String userIP, final String loginDate) throws Exception {
+	public String verify(final JSONObject body) throws Exception {
 		String userEmail = body.has("email") ? body.getString("email").trim().toLowerCase() : null;
 		String userOTP = body.has("otp") ? body.getString("otp").trim().toUpperCase() : null;
 		

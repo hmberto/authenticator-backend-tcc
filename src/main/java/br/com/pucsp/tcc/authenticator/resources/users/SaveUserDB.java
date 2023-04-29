@@ -10,7 +10,7 @@ import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 
 public class SaveUserDB {
-	public int insert(Connection connection, String userFirstName, String userLastName, String userEmail, String userSessionToken, String userOTP, String userIP, String loginDate) throws Exception {
+	public int insert(Connection connection, String userFirstName, String userLastName, String userEmail, String userSessionToken, String userOTP) throws Exception {
 		int userId = 0;
 	    
 		UndoChangesSaveUserDB undoChanges = new UndoChangesSaveUserDB();

@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
+import br.com.pucsp.tcc.authenticator.utils.DateTime;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 
@@ -87,11 +88,15 @@ public class EmailTokenManagerDB {
 	        int userId = 0;
 	        if(rs.next()) {
 	        	userId = rs.getInt("user_id");
+	        	String date = rs.getString("created_at");
+	        	String createdAt = DateTime.formatDate(date);
+	        	
 	        	tokenInfo.put("userId", userId);
 	        	tokenInfo.put("requestIP", rs.getString("request_ip"));
 	        	tokenInfo.put("requestBrowser", rs.getString("request_browser"));
 	        	tokenInfo.put("requestOS", rs.getString("request_operational_system"));
-	        	tokenInfo.put("isApproved", rs.getString("is_approved"));
+	        	tokenInfo.put("isApproved", rs.getBoolean("is_approved"));
+	        	tokenInfo.put("createdAt", createdAt);
 	        }
 	        
 	        if(userId == 0) {

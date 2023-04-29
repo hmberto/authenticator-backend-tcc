@@ -26,8 +26,7 @@ import br.com.pucsp.tcc.authenticator.database.ConnDB;
 public class EmailSessionTokenOrOTPSender {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailSessionTokenOrOTPSender.class);
 
-	public String send(final JSONObject body, final String userIP, final String userBrowser, final String userOS,
-			final String loginDate) throws Exception {
+	public String send(final JSONObject body, final String userIp, final String userBrowser, final String userOS) throws Exception {
 		String userEmail = body.has("email") ? body.getString("email").trim().toLowerCase() : null;
 		boolean isSelectedLink = body.has("link") ? body.getBoolean("link") : false;
 		boolean isSelectedOTP = body.has("otp") ? body.getBoolean("otp") : true;
@@ -48,7 +47,7 @@ public class EmailSessionTokenOrOTPSender {
 				LOGGER.info("Unregistered email '{}'", userEmail);
 
 				SaveUserDB saveUserDB = new SaveUserDB();
-				int userId = saveUserDB.insert(connection, "null", "null", userEmail, userSession, userOTP, userIP, loginDate);
+				int userId = saveUserDB.insert(connection, "null", "null", userEmail, userSession, userOTP);
 
 				if(userId == 0) {
 					throw new UnregisteredUserException(
@@ -57,7 +56,7 @@ public class EmailSessionTokenOrOTPSender {
 
 				LOGGER.info("User '{}' created in database", userEmail);
 
-				EmailType.sendEmailOTP(userEmail, userOTP, userIP, loginDate);
+				EmailType.sendEmailOTP(userEmail, userOTP, userIp);
 
 				return RespJSON.createResp(userId, false, "null", false);
 			}
@@ -79,10 +78,10 @@ public class EmailSessionTokenOrOTPSender {
 				LOGGER.info("Session token created for user '{}'", userEmail);
 				
 				EmailTokenManagerDB saveEmailToken = new EmailTokenManagerDB();
-				saveEmailToken.insertToken(connection, userId, userEmail, emailToken, userIP, userBrowser, userOS);
+				saveEmailToken.insertToken(connection, userId, userEmail, emailToken, userIp, userBrowser, userOS);
 				LOGGER.info("Email token created for user '{}'", userEmail);
 				
-				sendToken(userEmail, "", userSession, emailToken, userIP, loginDate, "session");
+				sendToken(userEmail, "", userSession, emailToken, userIp, "session");
 
 				return RespJSON.createResp(userId, isLogin, userSession, sessionTokenActive);
 			}
@@ -91,7 +90,7 @@ public class EmailSessionTokenOrOTPSender {
 				saveActiveOTPDB.insert(connection, SqlQueries.UPDATE_OTP_TABLE, userEmail, userOTP);
 				LOGGER.info("OTP created for user '{}'", userEmail);
 				
-				sendToken(userEmail, userOTP, "", "", userIP, loginDate, "otp");
+				sendToken(userEmail, userOTP, "", "", userIp, "otp");
 
 				return RespJSON.createResp(userId, isLogin, "null", sessionTokenActive);
 			}
@@ -101,13 +100,13 @@ public class EmailSessionTokenOrOTPSender {
 	}
 
 	private static void sendToken(String userEmail, String userOTP, String userSessionToken, String userEmailToken,
-			String userIP, String loginDate, String tokenType) throws MessagingException {
+			String userIP, String tokenType) throws MessagingException {
 		switch (tokenType) {
 		case "session":
 			EmailType.sendEmailLink(userEmail, userSessionToken, userEmailToken);
 			break;
 		case "otp":
-			EmailType.sendEmailOTP(userEmail, userOTP, userIP, loginDate);
+			EmailType.sendEmailOTP(userEmail, userOTP, userIP);
 			break;
 		default:
 			throw new IllegalArgumentException(

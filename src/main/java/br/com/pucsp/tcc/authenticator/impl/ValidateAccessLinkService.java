@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.resources.tokens.EmailTokenValidator;
-import br.com.pucsp.tcc.authenticator.utils.DateTime;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
@@ -36,12 +35,9 @@ public class ValidateAccessLinkService {
 	public Response validateData(final @Context HttpServletRequest request, final String body) {
 		JSONObject bodyJSON = new JSONObject(body);
 		
-		String loginDate = DateTime.date();
-    	String userIP = request.getRemoteAddr();
-		
 		try {
 			EmailTokenValidator emailTokenValidator = new EmailTokenValidator();
-			boolean resp = emailTokenValidator.verify(bodyJSON, userIP, loginDate);
+			boolean resp = emailTokenValidator.verify(bodyJSON);
 			
 			if(resp) {
 				return Response.ok().build();

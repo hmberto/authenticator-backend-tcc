@@ -16,7 +16,7 @@ public class CORSFilter implements ContainerResponseFilter {
 		return Response.ok("").header("Access-Control-Allow-Origin", "*")
 				.header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
 				.header("Access-Control-Allow-Credentials", "true")
-				.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
+				.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD")
 				.header("Access-Control-Max-Age", "1209600")
 				.build();
 	}
@@ -29,7 +29,7 @@ public class CORSFilter implements ContainerResponseFilter {
 		cres.getHeaders().add("Access-Control-Allow-Origin", "*");
 		cres.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization");
 		cres.getHeaders().add("Access-Control-Allow-Credentials", "true");
-		cres.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+		cres.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD");
 		cres.getHeaders().add("Access-Control-Max-Age", "1209600");
 	}
 }

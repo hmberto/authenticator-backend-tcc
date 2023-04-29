@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.resources.tokens.SessionTokenValidator;
-import br.com.pucsp.tcc.authenticator.utils.DateTime;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
@@ -36,12 +35,9 @@ public class CheckSessionService {
 	public Response validateData(final @Context HttpServletRequest request, final String body) {
 		JSONObject bodyJSON = new JSONObject(body);
 		
-		String loginDate = DateTime.date();
-		String userIP = request.getRemoteAddr();
-		
 		try {
 			SessionTokenValidator sessionTokenValidator = new SessionTokenValidator();
-			String resp = sessionTokenValidator.verify(bodyJSON, userIP, loginDate).toString();
+			String resp = sessionTokenValidator.verify(bodyJSON).toString();
 			
 			if(resp != null) {
 				return Response.ok(resp).build();
