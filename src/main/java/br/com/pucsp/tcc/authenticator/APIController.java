@@ -1,6 +1,5 @@
 package br.com.pucsp.tcc.authenticator;
 
-import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -41,7 +40,6 @@ public class APIController {
 	private final CORSFilter CORSFilter = new CORSFilter();
 	
 	@GET
-	@RolesAllowed("user")
 	public Response test(@Context HttpServletRequest request) {
 		return testService.validateData(request);
 	}
