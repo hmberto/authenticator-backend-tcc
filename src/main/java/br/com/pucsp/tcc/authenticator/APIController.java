@@ -1,5 +1,6 @@
 package br.com.pucsp.tcc.authenticator;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -20,6 +21,7 @@ import br.com.pucsp.tcc.authenticator.impl.CheckSessionService;
 import br.com.pucsp.tcc.authenticator.impl.LogoutService;
 import br.com.pucsp.tcc.authenticator.impl.RegisterEmailService;
 import br.com.pucsp.tcc.authenticator.impl.RegisterNameService;
+import br.com.pucsp.tcc.authenticator.impl.GetUserDataService;
 import br.com.pucsp.tcc.authenticator.impl.TestService;
 import br.com.pucsp.tcc.authenticator.impl.ValidateOtpService;
 import br.com.pucsp.tcc.authenticator.utils.config.cors.CORSFilter;
@@ -34,10 +36,12 @@ public class APIController {
 	private final ValidateAccessLinkService validateAccessLinkService = new ValidateAccessLinkService();
 	private final CheckAccessLinkService checkAccessLinkService = new CheckAccessLinkService();
 	private final CheckSessionService checkSessionService = new CheckSessionService();
+	private final GetUserDataService getUserDataService = new GetUserDataService();
 	private final LogoutService logoutService = new LogoutService();
 	private final CORSFilter CORSFilter = new CORSFilter();
 	
 	@GET
+	@RolesAllowed("user")
 	public Response test(@Context HttpServletRequest request) {
 		return testService.validateData(request);
 	}
@@ -76,6 +80,12 @@ public class APIController {
 	@Path("/check/session")
 	public Response checkSession(@Context HttpServletRequest request, String body) {
 		return checkSessionService.validateData(request, body);
+	}
+	
+	@GET
+	@Path("/users/{userEmail}")
+	public Response getUserData(@Context HttpServletRequest request, @PathParam("userEmail") String userEmail) {
+		return getUserDataService.validateData(request, userEmail);
 	}
 	
 	@POST

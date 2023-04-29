@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 import br.com.pucsp.tcc.authenticator.resources.mail.EmailType;
 import br.com.pucsp.tcc.authenticator.resources.users.EmailTokenManagerDB;
-import br.com.pucsp.tcc.authenticator.resources.users.GetUserFromDB;
+import br.com.pucsp.tcc.authenticator.resources.users.FindUserDB;
 import br.com.pucsp.tcc.authenticator.resources.users.OTPManagerDB;
 import br.com.pucsp.tcc.authenticator.resources.users.SaveUserDB;
 import br.com.pucsp.tcc.authenticator.resources.users.SessionTokenManagerDB;
@@ -36,7 +36,7 @@ public class EmailSessionTokenOrOTPSender {
 		try(ConnDB connDB = ConnDB.getInstance();
 				Connection connection = connDB.getConnection();) {
 			
-			GetUserFromDB getUserFromDB = new GetUserFromDB();
+			FindUserDB getUserFromDB = new FindUserDB();
 			JSONObject userJSON = getUserFromDB.verify(connection, userEmail);
 
 			String userSession = CreateToken.generate("session");

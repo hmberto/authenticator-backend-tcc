@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
-import br.com.pucsp.tcc.authenticator.resources.users.GetUserFromDB;
+import br.com.pucsp.tcc.authenticator.resources.users.FindUserDB;
 import br.com.pucsp.tcc.authenticator.resources.users.OTPManagerDB;
 import br.com.pucsp.tcc.authenticator.resources.users.SessionTokenManagerDB;
 import br.com.pucsp.tcc.authenticator.utils.CreateToken;
@@ -34,7 +34,7 @@ public class EmailOTPValidator {
 		try(ConnDB connDB = ConnDB.getInstance();
 				Connection connection = connDB.getConnection();) {
 			
-			GetUserFromDB getUserFromDB = new GetUserFromDB();
+			FindUserDB getUserFromDB = new FindUserDB();
 			JSONObject user = getUserFromDB.verify(connection, userEmail);
 			
 			if(user == null || user.getInt("userId") == 0) {

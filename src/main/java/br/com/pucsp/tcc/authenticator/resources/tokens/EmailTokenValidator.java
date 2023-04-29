@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.resources.users.EmailTokenManagerDB;
-import br.com.pucsp.tcc.authenticator.resources.users.GetUserFromDB;
+import br.com.pucsp.tcc.authenticator.resources.users.FindUserDB;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
@@ -35,7 +35,7 @@ public class EmailTokenValidator {
 		try(ConnDB connDB = ConnDB.getInstance();
 				Connection connection = connDB.getConnection();) {
 			
-			GetUserFromDB getUserFromDB = new GetUserFromDB();
+			FindUserDB getUserFromDB = new FindUserDB();
 			JSONObject user = getUserFromDB.verify(connection, userEmail);
 			
 			if(user == null || user.getInt("userId") == 0) {

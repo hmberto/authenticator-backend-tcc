@@ -9,7 +9,7 @@ import java.sql.Statement;
 import org.json.JSONObject;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 
-public class GetUserFromDB {
+public class FindUserDB {
 	public JSONObject verify(Connection connection, String userEmail) throws SQLException {
 		JSONObject json = new JSONObject();
 		int userId = 0;
