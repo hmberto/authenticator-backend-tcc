@@ -1,4 +1,4 @@
-package br.com.pucsp.tcc.authenticator.impl;
+package br.com.pucsp.tcc.authenticator.rest;
 
 import java.sql.SQLException;
 

@@ -1,4 +1,4 @@
-package br.com.pucsp.tcc.authenticator.impl;
+package br.com.pucsp.tcc.authenticator.rest;
 
 import java.sql.SQLException;
 
@@ -17,7 +17,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.pucsp.tcc.authenticator.resources.tokens.EmailOTPValidator;
+import br.com.pucsp.tcc.authenticator.resources.tokens.GetEmailTokenInfo;
+import br.com.pucsp.tcc.authenticator.utils.LocalhostIP;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
@@ -25,19 +26,19 @@ import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidNameException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
 
-@Path("/validate/otp")
+@Path("/check/access-link/{emailToken}")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ValidateOtpService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ValidateOtpService.class);
+public class CheckAccessLinkService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CheckAccessLinkService.class);
 	
 	@POST
-	public Response validateData(final @Context HttpServletRequest request, final String body) {
-		JSONObject bodyJSON = new JSONObject(body);
+	public Response validateData(final @Context HttpServletRequest request, final String emailToken) {
+		String userIp = LocalhostIP.get(request.getRemoteAddr());
 		
 		try {
-			EmailOTPValidator emailOTPValidator = new EmailOTPValidator();
-			String resp = emailOTPValidator.verify(bodyJSON);
+			GetEmailTokenInfo getEmailTokenInfo = new GetEmailTokenInfo();
+			String resp = getEmailTokenInfo.verify(emailToken, userIp).toString();
 			
 			if(resp != null) {
 				return Response.ok(resp).build();

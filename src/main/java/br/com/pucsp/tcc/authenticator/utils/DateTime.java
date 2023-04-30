@@ -19,7 +19,7 @@ public class DateTime {
 		DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd 'de' MMM. 'de' yyyy HH:mm", new Locale("pt", "BR"));
 		String loginDate = now.format(formatador);
 		
-		return loginDate;
+		return loginDate + "h";
 	}
 	
 	public static String formatDate(String date) {

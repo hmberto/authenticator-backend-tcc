@@ -6,52 +6,36 @@
 	<artifactId>UserAuthenticator</artifactId>
 	<version>1.0</version>
 	<name>UserAuthenticator</name>
-	<description>Projeto de autenticação de usuários</description>
 	<url>http://maven.apache.org</url>
-
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-
-	<developers>
-		<developer>
-			<name>Humberto Araújo</name>
-			<email>contato@humbertoaraujo.com</email>
-		</developer>
-	</developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<skip.integration.tests>false</skip.integration.tests>
-		<commons-dbcp2.version>2.9.0</commons-dbcp2.version>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<junit.version>4.13.2</junit.version>
+		<jetty-servlet.verison>9.4.51.v20230217</jetty-servlet.verison>
+		<javax.servlet-api.version>3.1.0</javax.servlet-api.version>
 		<slf4j-api.version>1.8.0-beta4</slf4j-api.version>
 		<logback-classic.version>1.3.0-alpha4</logback-classic.version>
-		<jetty-servlets.version>9.4.18.v20190429</jetty-servlets.version>
-		<mysql-connector-java.version>8.0.24</mysql-connector-java.version>
-		<json.version>20180130</json.version>
-		<junit.version>4.11</junit.version>
-		<guava.version>18.0</guava.version>
+		<commons-dbcp2.version>2.9.0</commons-dbcp2.version>
 		<javax.ws.rs-api.version>2.0-m10</javax.ws.rs-api.version>
-		<cxf.version>2.7.18</cxf.version>
-		<spring-web.version>3.0.1.RELEASE</spring-web.version>
-		<jaxb-api.version>2.1</jaxb-api.version>
-		<jackson-xc.version>1.9.13</jackson-xc.version>
-		<jackson-jaxrs.version>1.9.13</jackson-jaxrs.version>
-		<httpclient.version>4.3</httpclient.version>
+		<json.version>20180130</json.version>
 		<javax.mail.version>1.6.2</javax.mail.version>
-		<geronimo-javamail_1.4_spec.version>1.7.1</geronimo-javamail_1.4_spec.version>
-		<geronimo-servlet_3.0_spec.version>1.0</geronimo-servlet_3.0_spec.version>
+		<mysql-connector-java.version>8.0.24</mysql-connector-java.version>
+		<UserAgentUtils.version>1.21</UserAgentUtils.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-dbcp2</artifactId>
-			<version>${commons-dbcp2.version}</version>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>${jetty-servlet.verison}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -64,14 +48,17 @@
 			<version>${logback-classic.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlets</artifactId>
-			<version>${jetty-servlets.version}</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
+			<version>${commons-dbcp2.version}</version>
 		</dependency>
+
+
+		<!--Verificar necessidade-->
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysql-connector-java.version}</version>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>${javax.ws.rs-api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -79,223 +66,133 @@
 			<version>${json.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>${guava.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
-			<version>${javax.ws.rs-api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-core</artifactId>
-			<version>${cxf.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
-			<version>${cxf.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-transports-http-jetty</artifactId>
-			<version>${cxf.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<version>${spring-web.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<version>${jaxb-api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-xc</artifactId>
-			<version>${jackson-xc.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-jaxrs</artifactId>
-			<version>${jackson-jaxrs.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>${httpclient.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
 			<version>${javax.mail.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-javamail_1.4_spec</artifactId>
-			<version>${geronimo-javamail_1.4_spec.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-servlet_3.0_spec</artifactId>
-			<version>${geronimo-servlet_3.0_spec.version}</version>
-			<scope>provided</scope>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysql-connector-java.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.bitwalker</groupId>
 			<artifactId>UserAgentUtils</artifactId>
-			<version>1.21</version>
+			<version>${UserAgentUtils.version}</version>
 		</dependency>
 	</dependencies>
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<packaging.type>war</packaging.type>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+					<version>${javax.servlet-api.version}</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>prd</id>
+			<properties>
+				<packaging.type>jar</packaging.type>
+			</properties>
+			<activation>
+				<property>
+					<name>project.build.profile</name>
+					<value>production</value>
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+					<version>${javax.servlet-api.version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+	<packaging>${packaging.type}</packaging>
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-				<version>6.1.26</version>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>9.4.51.v20230217</version>
 				<configuration>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
-					<webApp>
-						${project.build.directory}/${project.build.finalName}</webApp>
-					<contextPath>/api</contextPath>
-					<connectors>
-						<connector
-							implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-							<port>8080</port>
-							<maxIdleTime>60000</maxIdleTime>
-						</connector>
-					</connectors>
+					<httpConnector>
+						<port>8080</port>
+					</httpConnector>
 				</configuration>
 			</plugin>
 			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.5.3</version>
-				<configuration>
-					<tagNameFormat>v@{project.version}</tagNameFormat>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>3.2.0</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>templating-maven-plugin</artifactId>
-				<version>1.0-alpha-3</version>
-				<executions>
-					<execution>
-						<id>filter-src</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>filter-sources</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.3.2</version>
+				<version>3.3.1</version>
 				<configuration>
-					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
-					<warName>${project.artifactId}</warName>
 					<archive>
 						<manifest>
+							<addClasspath>true</addClasspath>
 							<mainClass>
 								br.com.pucsp.tcc.authenticator.APIController</mainClass>
 						</manifest>
 					</archive>
-					<webResources>
-						<resource>
-							<directory>src/main/webapp</directory>
-							<targetPath>WEB-INF</targetPath>
-							<includes>
-								<include>**/*.xml</include>
-							</includes>
-						</resource>
-					</webResources>
+					<!--<failOnMissingWebXml>false</failOnMissingWebXml>-->
 				</configuration>
 			</plugin>
 			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.4</version>
+				<configuration>
+					<createDependencyReducedPom>false</createDependencyReducedPom>
+					<filters>
+						<filter>
+							<artifact>*:*</artifact>
+							<excludes>
+								<exclude>META-INF/*.SF</exclude>
+								<exclude>META-INF/*.DSA</exclude>
+								<exclude>META-INF/*.RSA</exclude>
+							</excludes>
+						</filter>
+					</filters>
+				</configuration>
 				<executions>
 					<execution>
-						<id>package-command</id>
 						<phase>package</phase>
-						<configuration>
-							<target>
-								<war
-									destfile="${project.build.directory}/${project.artifactId}.war"
-									update="true">
-									<zipfileset
-										dir="${project.build.directory}/classes" />
-								</war>
-							</target>
-						</configuration>
 						<goals>
-							<goal>run</goal>
+							<goal>shade</goal>
 						</goals>
+						<configuration>
+							<finalName>${project.artifactId}-${project.version}</finalName>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>
+										br.com.pucsp.tcc.authenticator.APIController</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>
-											templating-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0-alpha-3,)
-										</versionRange>
-										<goals>
-											<goal>filter-sources</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 </project>

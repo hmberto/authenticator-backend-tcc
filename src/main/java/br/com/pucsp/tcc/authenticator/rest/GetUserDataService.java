@@ -1,4 +1,4 @@
-package br.com.pucsp.tcc.authenticator.impl;
+package br.com.pucsp.tcc.authenticator.rest;
 
 import java.sql.SQLException;
 
@@ -17,7 +17,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.pucsp.tcc.authenticator.resources.tokens.SessionTokenValidator;
+import br.com.pucsp.tcc.authenticator.resources.users.GetUserDataDB;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
@@ -25,19 +25,17 @@ import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidNameException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
 
-@Path("/check/session")
+@Path("/users/{userEmail}")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class CheckSessionService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CheckSessionService.class);
+public class GetUserDataService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(GetUserDataService.class);
 	
 	@POST
-	public Response validateData(final @Context HttpServletRequest request, final String body) {
-		JSONObject bodyJSON = new JSONObject(body);
-		
+	public Response validateData(final @Context HttpServletRequest request, final String emailToken) {
 		try {
-			SessionTokenValidator sessionTokenValidator = new SessionTokenValidator();
-			String resp = sessionTokenValidator.verify(bodyJSON).toString();
+			GetUserDataDB getUserData = new GetUserDataDB();
+			String resp = getUserData.user(emailToken).toString();
 			
 			if(resp != null) {
 				return Response.ok(resp).build();

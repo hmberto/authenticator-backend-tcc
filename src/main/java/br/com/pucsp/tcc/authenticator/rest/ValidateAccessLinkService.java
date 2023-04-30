@@ -1,4 +1,4 @@
-package br.com.pucsp.tcc.authenticator.impl;
+package br.com.pucsp.tcc.authenticator.rest;
 
 import java.sql.SQLException;
 
@@ -17,8 +17,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.pucsp.tcc.authenticator.resources.tokens.GetEmailTokenInfo;
-import br.com.pucsp.tcc.authenticator.utils.LocalhostIP;
+import br.com.pucsp.tcc.authenticator.resources.tokens.EmailTokenValidator;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
@@ -26,22 +25,22 @@ import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidNameException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
 
-@Path("/check/access-link/{emailToken}")
+@Path("/validate/access-link")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class CheckAccessLinkService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CheckAccessLinkService.class);
+public class ValidateAccessLinkService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ValidateAccessLinkService.class);
 	
 	@POST
-	public Response validateData(final @Context HttpServletRequest request, final String emailToken) {
-		String userIp = LocalhostIP.get(request.getRemoteAddr());
+	public Response validateData(final @Context HttpServletRequest request, final String body) {
+		JSONObject bodyJSON = new JSONObject(body);
 		
 		try {
-			GetEmailTokenInfo getEmailTokenInfo = new GetEmailTokenInfo();
-			String resp = getEmailTokenInfo.verify(emailToken, userIp).toString();
+			EmailTokenValidator emailTokenValidator = new EmailTokenValidator();
+			boolean resp = emailTokenValidator.verify(bodyJSON);
 			
-			if(resp != null) {
-				return Response.ok(resp).build();
+			if(resp) {
+				return Response.ok().build();
 			}
 		}
 		catch(JSONException e) {

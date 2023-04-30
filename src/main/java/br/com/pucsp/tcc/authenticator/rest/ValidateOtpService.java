@@ -1,4 +1,4 @@
-package br.com.pucsp.tcc.authenticator.impl;
+package br.com.pucsp.tcc.authenticator.rest;
 
 import java.sql.SQLException;
 
@@ -17,7 +17,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.pucsp.tcc.authenticator.resources.tokens.EmailTokenValidator;
+import br.com.pucsp.tcc.authenticator.resources.tokens.EmailOTPValidator;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
@@ -25,22 +25,22 @@ import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidNameException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
 
-@Path("/validate/access-link")
+@Path("/validate/otp")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ValidateAccessLinkService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ValidateAccessLinkService.class);
+public class ValidateOtpService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ValidateOtpService.class);
 	
 	@POST
 	public Response validateData(final @Context HttpServletRequest request, final String body) {
 		JSONObject bodyJSON = new JSONObject(body);
 		
 		try {
-			EmailTokenValidator emailTokenValidator = new EmailTokenValidator();
-			boolean resp = emailTokenValidator.verify(bodyJSON);
+			EmailOTPValidator emailOTPValidator = new EmailOTPValidator();
+			String resp = emailOTPValidator.verify(bodyJSON);
 			
-			if(resp) {
-				return Response.ok().build();
+			if(resp != null) {
+				return Response.ok(resp).build();
 			}
 		}
 		catch(JSONException e) {

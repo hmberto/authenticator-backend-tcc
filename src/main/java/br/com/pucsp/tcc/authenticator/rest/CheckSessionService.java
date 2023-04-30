@@ -1,4 +1,4 @@
-package br.com.pucsp.tcc.authenticator.impl;
+package br.com.pucsp.tcc.authenticator.rest;
 
 import java.sql.SQLException;
 
@@ -17,10 +17,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.pucsp.tcc.authenticator.resources.tokens.EmailSessionTokenOrOTPSender;
-import br.com.pucsp.tcc.authenticator.utils.GetUserBrowser;
-import br.com.pucsp.tcc.authenticator.utils.GetUserOS;
-import br.com.pucsp.tcc.authenticator.utils.LocalhostIP;
+import br.com.pucsp.tcc.authenticator.resources.tokens.SessionTokenValidator;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
@@ -28,30 +25,24 @@ import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidNameException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
 
-@Path("/register/email")
+@Path("/check/session")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class RegisterEmailService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RegisterEmailService.class);
+public class CheckSessionService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CheckSessionService.class);
 	
 	@POST
-    public Response validateData(final @Context HttpServletRequest request, final String body) {
-    	JSONObject bodyJSON = new JSONObject(body);
-    	
-    	String userAgent = request.getHeader("User-Agent");
-    	
-    	String userIp = LocalhostIP.get(request.getRemoteAddr());
-		String userBrowser = GetUserBrowser.browser(userAgent);
-		String userOS = GetUserOS.os(userAgent);
+	public Response validateData(final @Context HttpServletRequest request, final String body) {
+		JSONObject bodyJSON = new JSONObject(body);
 		
 		try {
-        	EmailSessionTokenOrOTPSender emailSessionTokenOrOTPSender = new EmailSessionTokenOrOTPSender();
-        	String resp = emailSessionTokenOrOTPSender.send(bodyJSON, userIp, userBrowser, userOS);
+			SessionTokenValidator sessionTokenValidator = new SessionTokenValidator();
+			String resp = sessionTokenValidator.verify(bodyJSON).toString();
 			
 			if(resp != null) {
 				return Response.ok(resp).build();
 			}
-        }
+		}
 		catch(JSONException e) {
 			return buildErrorResponse("Invalid JSON payload", Response.Status.BAD_REQUEST);
 		}
