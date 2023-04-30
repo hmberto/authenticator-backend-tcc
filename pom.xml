@@ -52,9 +52,6 @@
 			<artifactId>commons-dbcp2</artifactId>
 			<version>${commons-dbcp2.version}</version>
 		</dependency>
-
-
-		<!--Verificar necessidade-->
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>javax.ws.rs-api</artifactId>
@@ -88,7 +85,10 @@
 				<packaging.type>war</packaging.type>
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>project.build.profile</name>
+					<value>production</value>
+				</property>
 			</activation>
 			<dependencies>
 				<dependency>
@@ -105,10 +105,7 @@
 				<packaging.type>jar</packaging.type>
 			</properties>
 			<activation>
-				<property>
-					<name>project.build.profile</name>
-					<value>production</value>
-				</property>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<dependencies>
 				<dependency>
@@ -131,6 +128,8 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
@@ -140,8 +139,23 @@
 					<httpConnector>
 						<port>8080</port>
 					</httpConnector>
+					<webApp>
+						<contextPath>/api</contextPath>
+					</webApp>
+					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
 				</configuration>
+				<executions>
+					<execution>
+						<id>jetty-server</id>
+						<phase>package</phase>
+						<goals>
+							<goal>run-war</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
+
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
