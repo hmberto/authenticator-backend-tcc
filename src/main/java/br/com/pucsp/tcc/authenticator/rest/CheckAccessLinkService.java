@@ -1,23 +1,22 @@
 package br.com.pucsp.tcc.authenticator.rest;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 import javax.mail.MessagingException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.resources.tokens.GetEmailTokenInfo;
+import br.com.pucsp.tcc.authenticator.utils.ErrorResponse;
 import br.com.pucsp.tcc.authenticator.utils.LocalhostIP;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
@@ -26,46 +25,39 @@ import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidNameException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
 
-@Path("/check/access-link/{emailToken}")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-public class CheckAccessLinkService {
+@WebServlet("/check/access-link/{emailToken}")
+public class CheckAccessLinkService extends HttpServlet {
+	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CheckAccessLinkService.class);
-	
-	@POST
-	public Response validateData(final @Context HttpServletRequest request, final String emailToken) {
-		String userIp = LocalhostIP.get(request.getRemoteAddr());
-		
+
+	@Override
+	protected void doGet(final @Context HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+
+		resp.setContentType(MediaType.APPLICATION_JSON);
+
+		String userIp = LocalhostIP.get(req.getRemoteAddr());
+		String emailToken = req.getParameter("emailToken");
+
 		try {
 			GetEmailTokenInfo getEmailTokenInfo = new GetEmailTokenInfo();
-			String resp = getEmailTokenInfo.verify(emailToken, userIp).toString();
-			
-			if(resp != null) {
-				return Response.ok(resp).build();
-			}
+			String response = getEmailTokenInfo.verify(emailToken, userIp).toString();
+
+			resp.setStatus(HttpServletResponse.SC_OK);
+			resp.getWriter().write(response);
+		} catch (JSONException e) {
+			ErrorResponse.build(resp, LOGGER, "Invalid JSON payload", HttpServletResponse.SC_BAD_REQUEST);
+		} catch (InvalidEmailException | InvalidTokenException | InvalidNameException | UnregisteredUserException
+				| BusinessException e) {
+			ErrorResponse.build(resp, LOGGER, e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+		} catch (SQLException | DatabaseInsertException e) {
+			ErrorResponse.build(resp, LOGGER, "An error occurred with the database",
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		} catch (MessagingException e) {
+			ErrorResponse.build(resp, LOGGER, "An error occurred while sending email",
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		} catch (Exception e) {
+			ErrorResponse.build(resp, LOGGER, "Unknown error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
-		catch(JSONException e) {
-			return buildErrorResponse("Invalid JSON payload", Response.Status.BAD_REQUEST);
-		}
-		catch(InvalidEmailException | InvalidTokenException | InvalidNameException | UnregisteredUserException | BusinessException e) {
-			return buildErrorResponse(e.getMessage(), Response.Status.BAD_REQUEST);
-		}
-		catch(SQLException | DatabaseInsertException e) {
-			return buildErrorResponse("An error occurred with the database", Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		catch(MessagingException e) {
-			return buildErrorResponse("An error occurred while sending email", Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		catch(Exception e) {
-			return buildErrorResponse("Unknown error", Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		
-		return buildErrorResponse("Unexpected error occurred while registering a new user", Response.Status.INTERNAL_SERVER_ERROR);
-	}
-	
-	private Response buildErrorResponse(String message, Response.Status status) {
-		String errorJson = new JSONObject().put("Error Message", message).toString();
-		LOGGER.error(message);
-		return Response.status(status).entity(errorJson).build();
 	}
 }

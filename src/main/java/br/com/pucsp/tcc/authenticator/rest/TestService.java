@@ -16,7 +16,7 @@ import br.com.pucsp.tcc.authenticator.utils.GetUserBrowser;
 import br.com.pucsp.tcc.authenticator.utils.GetUserOS;
 import br.com.pucsp.tcc.authenticator.utils.LocalhostIP;
 
-@WebServlet("/")
+@WebServlet("/test")
 public class TestService extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
