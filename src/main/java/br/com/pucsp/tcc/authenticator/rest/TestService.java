@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.utils.DateTime;
 import br.com.pucsp.tcc.authenticator.utils.GetUserBrowser;
@@ -19,27 +21,30 @@ import br.com.pucsp.tcc.authenticator.utils.LocalhostIP;
 @WebServlet("/test")
 public class TestService extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = LoggerFactory.getLogger(TestService.class);
 
 	@Override
 	protected void doGet(final @Context HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		resp.setContentType(MediaType.APPLICATION_JSON);
 		resp.setStatus(HttpServletResponse.SC_OK);
-		
+
 		String userAgent = req.getHeader("User-Agent");
-		
+
 		String date = DateTime.date();
 		String userIp = LocalhostIP.get(req.getRemoteAddr());
 		String userBrowser = GetUserBrowser.browser(userAgent);
 		String userOS = GetUserOS.os(userAgent);
-		
+
 		String res = new JSONObject()
 				.put("date", date)
 				.put("ip", userIp)
 				.put("browser", userBrowser)
 				.put("os", userOS)
 				.toString();
+
+		LOGGER.info("User IP: " + userIp);
 
 		resp.getWriter().write(res);
 	}

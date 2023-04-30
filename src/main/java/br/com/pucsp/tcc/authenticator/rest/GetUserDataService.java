@@ -34,7 +34,9 @@ public class GetUserDataService extends HttpServlet {
 			throws ServletException, IOException {
 
 		resp.setContentType(MediaType.APPLICATION_JSON);
-		String userEmail = req.getParameter("userEmail");
+		String pathInfo = req.getPathInfo();
+		String userEmail = pathInfo.substring(1);
+		System.out.println(userEmail);
 
 		try {
 			GetUserDataDB getUserData = new GetUserDataDB();

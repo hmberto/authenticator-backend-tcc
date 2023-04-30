@@ -37,7 +37,8 @@ public class CheckAccessLinkService extends HttpServlet {
 		resp.setContentType(MediaType.APPLICATION_JSON);
 
 		String userIp = LocalhostIP.get(req.getRemoteAddr());
-		String emailToken = req.getParameter("emailToken");
+		String pathInfo = req.getPathInfo();
+		String emailToken = pathInfo.substring(1);
 
 		try {
 			GetEmailTokenInfo getEmailTokenInfo = new GetEmailTokenInfo();
