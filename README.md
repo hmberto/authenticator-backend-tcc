@@ -10,7 +10,7 @@ This backend provides the core functionality for a Passwordless Authentication s
 ## Installation
 To install and run this project, you need to have Java 1.8 and Maven installed on your system. After installing them, follow the steps below:
 
-> For the proper functioning of the API, it is necessary to correctly configure the environment variables **API_USER** and **API_PASS**, as they will be responsible for authenticating requests to the API. If this configuration is not set, the application will use default values of "user" and "pass".
+> For the proper functioning of the API, it is necessary to correctly configure the environment variables **API_USER** and **API_PASS**, as they will be responsible for authenticating requests to the API. If this configuration is not set, the application will use default values of "username" and "password".
 
 > The environment variables **CONTEXT_PATH** and **API_PORT** are also used to configure the API. If these variables are not set, the application will use default values of "/api" and "8080", respectively.
 
