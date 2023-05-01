@@ -128,21 +128,16 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-
-
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>9.4.51.v20230217</version>
 				<configuration>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
-					<httpConnector>
-						<port>8080</port>
-					</httpConnector>
-					<webApp>
-						<contextPath>/api</contextPath>
-					</webApp>
 					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+					<httpConnector>
+						<port>9999</port>
+					</httpConnector>
 				</configuration>
 				<executions>
 					<execution>
@@ -154,8 +149,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>

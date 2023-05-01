@@ -8,12 +8,8 @@
 	</context-param>
 
 	<servlet>
-		<servlet-name>UserAuthenticator</servlet-name>
+		<servlet-name>APIController</servlet-name>
 		<servlet-class>br.com.pucsp.tcc.authenticator.APIController</servlet-class>
+		<load-on-startup>0</load-on-startup>
 	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>UserAuthenticator</servlet-name>
-		<url-pattern>/*</url-pattern>
-	</servlet-mapping>
 </web-app>
