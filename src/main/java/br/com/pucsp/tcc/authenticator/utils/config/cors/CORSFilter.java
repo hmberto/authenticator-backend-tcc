@@ -2,32 +2,26 @@ package br.com.pucsp.tcc.authenticator.utils.config.cors;
 
 import java.io.IOException;
 
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
 
-@Provider
-public class CORSFilter implements ContainerResponseFilter {
-	@OPTIONS
-	public Response options() {
-		return Response.ok("").header("Access-Control-Allow-Origin", "*")
-				.header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
-				.header("Access-Control-Allow-Credentials", "true")
-				.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD")
-				.header("Access-Control-Max-Age", "1209600").build();
+import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
+
+public class CORSFilter implements Filter {
+	
+	private static final String SITE_HOST = SystemDefaultVariables.siteHost;
+	
+	public void init(FilterConfig filterConfig) throws ServletException {}
+
+	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain filterChain)
+			throws IOException, ServletException {
+		HttpServletResponse response = (HttpServletResponse) resp;
+		response.setHeader("Access-Control-Allow-Origin", SITE_HOST);
+		response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
+		response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept, origins");
+		response.setHeader("Access-Control-Max-Age", "3600");
+		filterChain.doFilter(req, resp);
 	}
 
-	@Override
-	public void filter(final ContainerRequestContext requestContext, final ContainerResponseContext cres)
-			throws IOException {
-
-		cres.getHeaders().add("Access-Control-Allow-Origin", "*");
-		cres.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization");
-		cres.getHeaders().add("Access-Control-Allow-Credentials", "true");
-		cres.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD");
-		cres.getHeaders().add("Access-Control-Max-Age", "1209600");
-	}
+	public void destroy() {}
 }

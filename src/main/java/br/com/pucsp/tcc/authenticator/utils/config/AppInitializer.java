@@ -19,19 +19,20 @@ public class AppInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AppInitializer.class);
 
 	public void contextInitialization() {
-		try {
-			createTables();
-			LOGGER.info("Database started successfully");
-			if (validateEnvironmentVariable()) {
-				LOGGER.info("Application may not work properly - unconfigured environment variables");
-			} else {
-				LOGGER.info("Environment variables OK");
-			}
-		} catch (SQLException e) {
-			LOGGER.error("Unable to initialize the database");
-		} catch (Exception e) {
-			LOGGER.error("Application started with errors");
+		if (validateEnvironmentVariable()) {
+			LOGGER.info("Application may not work properly - unconfigured environment variables");
+		} else {
+			LOGGER.info("Environment variables OK");
 		}
+		
+//		try {
+//			createTables();
+//			LOGGER.info("Database started successfully");
+//		} catch (SQLException e) {
+//			LOGGER.error("Unable to initialize the database");
+//		} catch (Exception e) {
+//			LOGGER.error("Application started with errors");
+//		}
 
 		LOGGER.info("Application is ready");
 	}

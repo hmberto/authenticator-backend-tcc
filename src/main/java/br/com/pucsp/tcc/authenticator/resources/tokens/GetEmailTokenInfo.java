@@ -24,7 +24,7 @@ public class GetEmailTokenInfo {
 				json.put("sameIP", true);
 			}
 
-			json.put("sameIP", true);
+			json.put("sameIP", false);
 
 			return json;
 		}

@@ -39,12 +39,10 @@ public class MethodNotAllowedFilter implements Filter {
 	}
 
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-	}
+	public void init(FilterConfig filterConfig) throws ServletException {}
 
 	@Override
-	public void destroy() {
-	}
+	public void destroy() {}
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -77,7 +75,8 @@ public class MethodNotAllowedFilter implements Filter {
 			Pattern pattern = Pattern.compile(patternString);
 			Matcher matcher = pattern.matcher(requestURI);
 
-			if (matcher.matches() && httpMethod.equals(allowedMethod)) {
+			if (matcher.matches() && 
+					(httpMethod.equals(allowedMethod) || httpMethod.equals(HttpMethod.OPTIONS))) {
 				return true;
 			}
 		}
