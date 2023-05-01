@@ -1,11 +1,13 @@
 package br.com.pucsp.tcc.authenticator.database;
 
+import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
+
 public class SqlQueries {
-	public static final String TIME_ZONE = System.getenv("TIME_ZONE") != null
-			? "SET time_zone = '" + System.getenv("TIME_ZONE") + "'"
+	public static final String TIME_ZONE = SystemDefaultVariables.timeZone != null
+			? "SET time_zone = '" + SystemDefaultVariables.timeZone + "'"
 			: "SET time_zone = 'UTC'";
-	public static final String TIME_ZONE_GLOBAL = System.getenv("TIME_ZONE") != null
-			? "SET GLOBAL time_zone = '" + System.getenv("TIME_ZONE") + "'"
+	public static final String TIME_ZONE_GLOBAL = SystemDefaultVariables.timeZone != null
+			? "SET GLOBAL time_zone = '" + SystemDefaultVariables.timeZone + "'"
 			: "SET GLOBAL time_zone = 'UTC'";
 
 	public static final String INSERT_USER = "INSERT INTO users (first_name, last_name, email) VALUES (?, ?, ?)";
@@ -21,7 +23,7 @@ public class SqlQueries {
 	public static final String DELETE_SESSION = "DELETE FROM sessions WHERE user_id = ? AND EXISTS (SELECT user_id FROM sessions WHERE user_id = ?)";
 	public static final String DELETE_OTP = "DELETE FROM otps WHERE user_id = ? AND EXISTS (SELECT user_id FROM otps WHERE user_id = ?)";
 	public static final String DELETE_USER = "DELETE FROM users WHERE user_id = ? AND EXISTS (SELECT user_id FROM users WHERE user_id = ?)";
-	
+
 	public static final String GET_SESSION = "SELECT session_id, session, is_active FROM sessions WHERE user_id = ? AND session = ?";
 	public static final String GET_EMAIL_TOKEN = "SELECT * FROM access_confirmations WHERE token = ?";
 	public static final String GET_USER = "SELECT * FROM users WHERE email = ?";

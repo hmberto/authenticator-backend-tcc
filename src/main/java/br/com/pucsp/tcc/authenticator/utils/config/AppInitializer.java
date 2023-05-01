@@ -14,25 +14,25 @@ import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
+import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
 
 public class AppInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AppInitializer.class);
 
 	public void contextInitialization() {
-		if (validateEnvironmentVariable()) {
-			LOGGER.info("Application may not work properly - unconfigured environment variables");
-		} else {
-			LOGGER.info("Environment variables OK");
+		try {
+			createTables();
+			LOGGER.info("Database started successfully");
+			if (validateEnvironmentVariable()) {
+				LOGGER.info("Application may not work properly - Unconfigured environment variables");
+			} else {
+				LOGGER.info("Environment variables OK");
+			}
+		} catch (SQLException e) {
+			LOGGER.error("Unable to initialize the database");
+		} catch (Exception e) {
+			LOGGER.error("Application started with errors");
 		}
-		
-//		try {
-//			createTables();
-//			LOGGER.info("Database started successfully");
-//		} catch (SQLException e) {
-//			LOGGER.error("Unable to initialize the database");
-//		} catch (Exception e) {
-//			LOGGER.error("Application started with errors");
-//		}
 
 		LOGGER.info("Application is ready");
 	}
@@ -89,7 +89,7 @@ public class AppInitializer {
 
 			statement.execute(sqlTimeZone);
 
-			Path path = Paths.get(System.getenv("SQL_SCRIPT"));
+			Path path = Paths.get(SystemDefaultVariables.sqlScript);
 			String sql = new String(Files.readAllBytes(path));
 
 			LOGGER.info("Script SQL File Path: {}", path);
