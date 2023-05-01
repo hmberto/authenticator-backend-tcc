@@ -1,4 +1,4 @@
-package br.com.pucsp.tcc.authenticator.rest.error;
+package br.com.pucsp.tcc.authenticator.rest.filter;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
