@@ -2,7 +2,7 @@
 
 # PUC-SP - Passwordless Authentication Backend
 
-This is the backend for a Passwordless Authentication system built using Java 1.8.
+This backend serves as the foundation for a Passwordless Authentication system that was developed using Maven, Java 1.8, and the Jetty Maven Plugin version 9.4.51.v20230217.
 
 ## Description
 This backend provides the core functionality for a Passwordless Authentication system. It handles the generation of one-time passwords (OTPs) and their validation. It also provides APIs for user registration and authentication.
@@ -10,70 +10,127 @@ This backend provides the core functionality for a Passwordless Authentication s
 ## Installation
 To install and run this project, you need to have Java 1.8 and Maven installed on your system. After installing them, follow the steps below:
 
+> For the proper functioning of the API, it is necessary to correctly configure the environment variables **API_USER** and **API_PASS**, as they will be responsible for authenticating requests to the API. If this configuration is not set, the application will use default values of "username" and "password".
+
+> The environment variables **CONTEXT_PATH** and **API_PORT** are also used to configure the API. If these variables are not set, the application will use default values of "/api" and "8080", respectively.
+
 - Clone the repository to your local system;
 - Navigate to the project directory;
-- Run the command **mvn package jetty:run** to start the server;
+- Run the command **mvn jetty:run -Pdev** to start the server;
 - The server will be started at **http://localhost:8080/api/**;
+
+## Build Instructions
+
+The entire project is built upon the Maven framework, which provides a robust and efficient system for managing project dependencies and building the project. To ensure the project is ready for a productive environment, it is recommended to run the following commands in sequence:
+
+> The command to generate an executable jar file does not require the -Pprd flag because the production profile is already set as the default.
+
+```shell
+$ mvn clean package -Pprd
+$ java -jar target/UserAuthenticator-1.0.jar
+```
+
+To run the project in a development environment you need to run the following command while passing the -Pdev flag. This is necessary to ensure that the dependencies are configured correctly:
+
+```shell
+$ mvn jetty:run -Pdev
+```
 
 ## Usage
 This backend provides the following APIs:
 
 ### User Registration Initiation API
-**POST** ```/api/register-email```
+**POST** ```/api/register/email```
 
-This API is used to register a new user. It takes the following parameters:
+This service can be used to either register a new user or send an OTP or Access Link to an existing user. It takes the following parameters:
 
-```email``` : The email address of the user
+```email``` : The email address of the user to register or receive email if you are already registered<br>
+```link``` : Boolean value to request Access Link by email - **optional if it is a new registration**<br>
+```otp``` : Boolean value to request OTP by email - **optional if it is a new registration**
 
-On successful registration, it returns a JSON response containing the following:
-
-```userId``` : The unique ID of the registered user<br>
-```session``` : The unique session token to validate the next requests
+If successful, the system will reply with a status code 201 and a JSON response that includes the user ID as ```userId```.
 
 ### User Registration Completion API
-**POST** ```/api/register-name```
+**PUT** ```/api/register/name```
 
-This API is used to finish the registration of a new user. It takes the following parameters:
+This service is used to finish the registration of a new user. It takes the following parameters:
 
-```name``` : The full name of the user<br>
-```email``` : The email address of the user<br>
-```session``` : The unique session token to validate the request
+```firstName``` : User's first name<br>
+```lastName``` : User's last name<br>
+```email``` : User's email address<br>
+```session``` : Unique and valid session token to perform the update
 
-On successful registration, it returns an OK response with status 200.
+If successful, the system will reply with a status code 200.
 
-### Generate and Send new OTP
-**POST** ```/api/generate-otp```
+### Validates OTP code
+**POST** ```/api/validate/otp```
 
-This API is used to generate and email a new OTP code to the user. It takes the following parameters:
+This service is used to validate the OTP sent by email to the user. It takes the following parameters:
 
-```email``` : The email address of the user<br>
-```otp``` : TRUE or FALSE value for email new 6-digit OTP<br>
-```link``` : TRUE or FALSE value for email confirmation link
+```email``` : User's email address<br>
+```otp``` : Unique OTP code for validation
 
-On successful registration, it returns a JSON response containing the following:
+If successful, the system will reply with a status code 200. The JSON response containing the following:
 
-```userId``` : The unique ID of the registered user<br>
-```session``` : The unique session token to validate the next requests
+```isLogin``` : Returns true if the user has already completed the registration flow<br>
+```session``` : Unique session token for the user<br>
+```isSessionTokenActive``` : Confirms if session token is active<br>
+```userId``` : User's ID
 
-### Validates 6-digit OTP code and Session Tokens
-**POST** ```/api/validate-otp```
+### Updates the user's session token to active when the user confirms access through the link sent via email,
+**POST** ```/api/validate/access-link```
 
-This API is used to validate OTP sent by email to the user. It takes the following parameters:
+This service is used to validate the Access Link sent by email to the user. It takes the following parameters:
 
-```email``` : The email address of the user<br>
-```approve``` : TRUE or FALSE value to approve or disapprove the login request<br>
-```sessionTokenOrOTP``` : The unique session token or 6-digt OTP to validate
+```email``` : User's email address<br>
+```approve``` : Boolean value to authorize or deny access<br>
+```sessionToken``` : Inactive session token emailed to be validated<br>
+```emailToken``` : Unique token sent by email to identify that login attempt
 
-On successful registration, it returns an OK response with status 200.
+If successful, the system will reply with a status code 200.
+
+### Search the access link information sent by email
+**GET** ```/api/check/access-link/{emailToken}```
+
+This service allows to search for information about Access Link sent by email. To use this service, only need to pass the token of the access as a parameter in the URL. The JSON response containing the following:
+
+```createdAt``` : Date the access request was made<br>
+```requestBrowser``` : Browser that originated the access request<br>
+```requestOS``` : Operating system that originated the access request<br>
+```requestIP``` : IP that originated the access request<br>
+```sameIP``` : Boolean value that confirm whether the current IP is the same as the one that originated the access request<br>
+```isApproved``` : Boolean value that confirms whether the access request has already been approved or not<br>
+```userId``` : User's ID
+
+### Check user session status
+**POST** ```/api/check/session```
+
+This service is used to verify if the Access Link sent by email to the user was authorized or denied. It also verifies that the user's current session remains active. It takes the following parameters:
+
+```email``` : User's email address<br>
+```sessionToken``` : Unique session token
+
+If successful, the system will reply with a status code 200. The JSON response containing the following:
+
+```Status``` : "Valid session", "Unconfirmed session" or "Invalid session token".
+
+### Get user information
+**GET** ```/api/users/{email}```
+
+This service allows to search for information about the user through email. To do this, just pass the email as a parameter in the URL. The JSON response containing the following:
+
+```firstName``` : User's first name<br>
+```lastName``` : User's last name<br>
+```userId``` : User's ID
 
 ### Closes active sessions
-**POST** ```/api/logout```
+**PUT** ```/api/logout```
 
 This API is used to end active sessions. It takes the following parameters:
 
-```email``` : The email address of the user<br>
-```killAll``` : TRUE or FALSE value to end just the current session or all<br>
-```session``` : The unique session token to validate the request
+```email``` : User's email address<br>
+```session``` : Unique session token<br>
+```killAll``` : Boolean value to end all active sessions or just the current session
 
 On successful registration, it returns an OK response with status 200.
 
@@ -82,24 +139,22 @@ This service utilizes system variables to set up the configuration for its servi
 
 ~~~
 EMAIL_BOX="humberto.pucsp@outlook.com"
-
 EMAIL_PASS="email_pass"
-
 EMAIL_SERVER="OUTLOOK/GMAIL"
-
 DB_HOST="localhost"
-
 DB_NAME="tcc-humberto"
-
 DB_USER="user-db"
-
 DB_PASS="user-pass"
-
 OTP_LENGTH="6"
-
 SESSION_LENGTH="100"
-
+EMAIL_TOKEN_LENGTH="50"
+SQL_SCRIPT="db/v1_init.sql"
 SITE_HOST="https://site_url.com"
+TIME_ZONE="America/Sao_Paulo"
+API_USER="username"
+API_PASS="password"
+CONTEXT_PATH="/api"
+API_PORT="8080"
 ~~~
 
 > EMAIL_BOX: This variable specifies the email address that the service will use for sending emails.<br>
@@ -111,22 +166,16 @@ SITE_HOST="https://site_url.com"
 > DB_PASS: This variable indicates the password associated with the database user provided above.<br>
 > OTP_LENGTH: This variable specifies the length of the One-Time Password (OTP) that the service will generate for user authentication.<br>
 > SESSION_LENGTH: This variable specifies the length of the session token that the service will generate to identify a user session.<br>
+> EMAIL_TOKEN_LENGTH: <br>
+> SQL_SCRIPT: <br>
 > SITE_HOST: This variable indicates the hostname of the website to which the service will connect and consume this rest service.
+> TIME_ZONE: <br>
+> API_USER: <br>
+> API_PASS: <br>
+> CONTEXT_PATH: <br>
+> API_PORT: <br>
 
 By modifying the values of these variables, the service's configuration can be customized to meet specific requirements.
-
-## Build Instructions
-
-All project is based on maven, so to build the project from the sources you should execute this command:
-
-```shell
-$ mvn clean package
-```
-
-Or
-```shell
-$ mvn package jetty:run
-```
 
 ## References
 * [Java](https://www.java.com/) - v1.8
