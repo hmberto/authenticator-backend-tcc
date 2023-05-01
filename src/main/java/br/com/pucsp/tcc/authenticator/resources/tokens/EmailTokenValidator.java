@@ -13,63 +13,65 @@ import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
+import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
 
 public class EmailTokenValidator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailTokenValidator.class);
-	
-	private static final int SESSION_LENGTH = Integer.parseInt(System.getenv("SESSION_LENGTH"));
-    private static final int EMAIL_TOKEN_LENGTH = Integer.parseInt(System.getenv("EMAIL_TOKEN_LENGTH"));
-    
+
+	private static final int SESSION_LENGTH = SystemDefaultVariables.sessionLength;
+	private static final int EMAIL_TOKEN_LENGTH = SystemDefaultVariables.emailTokenLength;
+
 	public boolean verify(final JSONObject body) throws Exception {
 		String userEmail = body.has("email") ? body.getString("email").trim().toLowerCase() : null;
 		String userSessionToken = body.has("sessionToken") ? body.getString("sessionToken").trim().toUpperCase() : null;
 		String userEmailToken = body.has("emailToken") ? body.getString("emailToken").trim().toUpperCase() : null;
 		boolean isSelectedApprove = body.has("approve") ? body.getBoolean("approve") : false;
-		
+
 		validateBody(userEmail, userSessionToken, userEmailToken, isSelectedApprove);
-		
-		if(!isSelectedApprove) {
+
+		if (!isSelectedApprove) {
 			return true;
 		}
-		
-		try(ConnDB connDB = ConnDB.getInstance();
-				Connection connection = connDB.getConnection();) {
-			
+
+		try (ConnDB connDB = ConnDB.getInstance(); Connection connection = connDB.getConnection();) {
+
 			FindUserDB getUserFromDB = new FindUserDB();
 			JSONObject user = getUserFromDB.verify(connection, userEmail);
-			
-			if(user == null || user.getInt("userId") == 0) {
+
+			if (user == null || user.getInt("userId") == 0) {
 				throw new UnregisteredUserException("Unable to validate Email Token to unregistered user");
 			}
-			
+
 			LOGGER.info("User '{}' found in database", user.getInt("userId"));
-			
+
 			EmailTokenManagerDB emailTokenManagerDB = new EmailTokenManagerDB();
-			emailTokenManagerDB.updateToken(connection, user.getInt("userId"), userEmail, userSessionToken, userEmailToken);
-			
+			emailTokenManagerDB.updateToken(connection, user.getInt("userId"), userEmail, userSessionToken,
+					userEmailToken);
+
 			return true;
 		}
 	}
-	
-	private static void validateBody(String userEmail, String userSessionToken, String userEmailToken, boolean isSelectedApprove) throws Exception {
-		if(userEmail == null) {
+
+	private static void validateBody(String userEmail, String userSessionToken, String userEmailToken,
+			boolean isSelectedApprove) throws Exception {
+		if (userEmail == null) {
 			throw new InvalidEmailException("email is required but not sent");
 		}
-		if(!DataValidator.isValidEmail(userEmail)) {
+		if (!DataValidator.isValidEmail(userEmail)) {
 			throw new InvalidEmailException("Invalid format for email");
-        }
-		
-		if(userSessionToken == null) {
+		}
+
+		if (userSessionToken == null) {
 			throw new InvalidTokenException("sessionToken is required but not sent");
 		}
-		if(!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != SESSION_LENGTH) {
+		if (!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != SESSION_LENGTH) {
 			throw new InvalidTokenException("Invalid sessionToken format");
 		}
-		
-		if(userEmailToken == null) {
+
+		if (userEmailToken == null) {
 			throw new InvalidTokenException("emailToken is required but not sent");
 		}
-		if(!DataValidator.isValidToken(userEmailToken) || userEmailToken.length() != EMAIL_TOKEN_LENGTH) {
+		if (!DataValidator.isValidToken(userEmailToken) || userEmailToken.length() != EMAIL_TOKEN_LENGTH) {
 			throw new InvalidTokenException("Invalid emailToken format");
 		}
 	}

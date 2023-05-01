@@ -26,16 +26,16 @@ import br.com.pucsp.tcc.authenticator.database.ConnDB;
 public class EmailSessionTokenOrOTPSender {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailSessionTokenOrOTPSender.class);
 
-	public String send(final JSONObject body, final String userIp, final String userBrowser, final String userOS) throws Exception {
+	public String send(final JSONObject body, final String userIp, final String userBrowser, final String userOS)
+			throws Exception {
 		String userEmail = body.has("email") ? body.getString("email").trim().toLowerCase() : null;
 		boolean isSelectedLink = body.has("link") ? body.getBoolean("link") : false;
 		boolean isSelectedOTP = body.has("otp") ? body.getBoolean("otp") : true;
-		
+
 		validateBody(userEmail, isSelectedLink, isSelectedOTP);
-		
-		try(ConnDB connDB = ConnDB.getInstance();
-				Connection connection = connDB.getConnection();) {
-			
+
+		try (ConnDB connDB = ConnDB.getInstance(); Connection connection = connDB.getConnection();) {
+
 			FindUserDB getUserFromDB = new FindUserDB();
 			JSONObject userJSON = getUserFromDB.verify(connection, userEmail);
 
@@ -43,13 +43,13 @@ public class EmailSessionTokenOrOTPSender {
 			String emailToken = CreateToken.generate("token");
 			String userOTP = CreateToken.generate("otp");
 
-			if(userJSON == null) {
+			if (userJSON == null) {
 				LOGGER.info("Unregistered email '{}'", userEmail);
 
 				SaveUserDB saveUserDB = new SaveUserDB();
 				int userId = saveUserDB.insert(connection, "null", "null", userEmail, userSession, userOTP);
 
-				if(userId == 0) {
+				if (userId == 0) {
 					throw new UnregisteredUserException(
 							"Unable to send OTP to an unregistered user and unable to register the user");
 				}
@@ -60,36 +60,33 @@ public class EmailSessionTokenOrOTPSender {
 
 				return RespJSON.createResp(userId, false, "null", false);
 			}
-			
+
 			int userId = userJSON.getInt("userId");
 			boolean isLogin = userJSON.getBoolean("isLogin");
 			boolean sessionTokenActive = false;
-			
-			if(isSelectedLink && !isLogin) {
+
+			if (isSelectedLink && !isLogin) {
 				throw new BusinessException("Link request denied for email '" + userEmail
 						+ "' because the user did not complete the registration");
-			}
-			else if(!body.has("link") && !body.has("otp") && isLogin) {
+			} else if (!body.has("link") && !body.has("otp") && isLogin) {
 				return RespJSON.createResp(userId, isLogin, "null", false);
-			}
-			else if(isSelectedLink && isLogin) {
+			} else if (isSelectedLink && isLogin) {
 				SessionTokenManagerDB saveSessionToken = new SessionTokenManagerDB();
 				saveSessionToken.insertSession(connection, userId, userSession, sessionTokenActive);
 				LOGGER.info("Session token created for user '{}'", userEmail);
-				
+
 				EmailTokenManagerDB saveEmailToken = new EmailTokenManagerDB();
 				saveEmailToken.insertToken(connection, userId, userEmail, emailToken, userIp, userBrowser, userOS);
 				LOGGER.info("Email token created for user '{}'", userEmail);
-				
+
 				sendToken(userEmail, "", userSession, emailToken, userIp, "session");
 
 				return RespJSON.createResp(userId, isLogin, userSession, sessionTokenActive);
-			}
-			else if(isSelectedOTP) {
+			} else if (isSelectedOTP) {
 				OTPManagerDB saveActiveOTPDB = new OTPManagerDB();
 				saveActiveOTPDB.insert(connection, SqlQueries.UPDATE_OTP_TABLE, userEmail, userOTP);
 				LOGGER.info("OTP created for user '{}'", userEmail);
-				
+
 				sendToken(userEmail, userOTP, "", "", userIp, "otp");
 
 				return RespJSON.createResp(userId, isLogin, "null", sessionTokenActive);
@@ -115,18 +112,18 @@ public class EmailSessionTokenOrOTPSender {
 	}
 
 	private static void validateBody(String userEmail, boolean isSelectedLink, boolean isSelectedOTP) throws Exception {
-		if(userEmail == null) {
+		if (userEmail == null) {
 			throw new InvalidEmailException("Email is required but not sent");
 		}
-		if(!DataValidator.isValidEmail(userEmail)) {
+		if (!DataValidator.isValidEmail(userEmail)) {
 			throw new InvalidEmailException("Invalid format for email '" + userEmail + "'");
 		}
-		if(isSelectedLink && isSelectedOTP) {
+		if (isSelectedLink && isSelectedOTP) {
 			throw new BusinessException("Request denied for email '" + userEmail
 					+ "' because it is not possible to request LINK and OTP at the same time");
 		}
-		if(!isSelectedLink && !isSelectedOTP) {
-			
+		if (!isSelectedLink && !isSelectedOTP) {
+
 		}
 	}
 }

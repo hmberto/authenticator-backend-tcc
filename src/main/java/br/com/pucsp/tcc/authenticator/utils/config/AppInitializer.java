@@ -9,66 +9,54 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.ArrayList;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 
-public class AppInitializer implements ServletContextListener {
+public class AppInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AppInitializer.class);
-	
-	@Override
-	public void contextInitialized(ServletContextEvent event) {
+
+	public void contextInitialization() {
 		try {
 			createTables();
 			LOGGER.info("Database started successfully");
-			if(validateEnvironmentVariable()) {
+			if (validateEnvironmentVariable()) {
 				LOGGER.info("Application may not work properly - unconfigured environment variables");
-			}
-			else {
+			} else {
 				LOGGER.info("Environment variables OK");
 			}
-		}
-		catch(SQLException e) {
+		} catch (SQLException e) {
 			LOGGER.error("Unable to initialize the database");
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			LOGGER.error("Application started with errors");
 		}
-		
+
 		LOGGER.info("Application is ready");
 	}
-	
-	@Override
-	public void contextDestroyed(ServletContextEvent event) {
-	}
-	
+
 	private static boolean validateEnvironmentVariable() {
 		boolean error = false;
-		
+
 		List<String> variableList = variableList();
-		
+
 		LOGGER.info("--------------------------------------------");
 		LOGGER.info("Checking environment variables");
-		for(String variableName : variableList) {
+		for (String variableName : variableList) {
 			String variableValue = System.getenv(variableName);
-			if(variableValue == null || variableValue.isEmpty()) {
-				LOGGER.warn(">> Variable '{}' not set correctly", variableName);
+			if (variableValue == null || variableValue.isEmpty()) {
+				LOGGER.warn(">> Variable '{}' not set correctly - Using default", variableName);
 				error = true;
-			}
-			else {
+			} else {
 				LOGGER.info(">> Variable '{}' OK", variableName);
 			}
 		}
 		LOGGER.info("--------------------------------------------");
-		
+
 		return error;
 	}
-	
+
 	private static List<String> variableList() {
 		List<String> variable = new ArrayList<String>();
 		variable.add("EMAIL_BOX");
@@ -84,59 +72,62 @@ public class AppInitializer implements ServletContextListener {
 		variable.add("SQL_SCRIPT");
 		variable.add("SITE_HOST");
 		variable.add("TIME_ZONE");
-		
+		variable.add("API_USER");
+		variable.add("API_PASS");
+		variable.add("CONTEXT_PATH");
+		variable.add("API_PORT");
+
 		return variable;
 	}
-	
+
 	private void createTables() throws Exception {
-		try(ConnDB connDB = ConnDB.getInstance();
+		try (ConnDB connDB = ConnDB.getInstance();
 				Connection connection = connDB.getConnection();
 				Statement statement = connection.createStatement()) {
 			String sqlTimeZone = SqlQueries.TIME_ZONE_GLOBAL;
-			
+
 			statement.execute(sqlTimeZone);
-			
+
 			Path path = Paths.get(System.getenv("SQL_SCRIPT"));
 			String sql = new String(Files.readAllBytes(path));
-			
+
 			LOGGER.info("Script SQL File Path: {}", path);
 			LOGGER.info("--------------------------------------------");
 			LOGGER.info("Checking database tables");
-			
+
 			String[] sqlStatements = sql.split("\\$");
-			
+
 			for (String sqlStatement : sqlStatements) {
 				String sqlType = getSqlType(sqlStatement);
 				String tableName = getTableName(sqlStatement);
-				
+
 				LOGGER.info(">> Trying to '{}' table '{}'", sqlType, tableName);
 				statement.execute(sqlStatement);
 				LOGGER.info(">> '{}' performed successfully on table '{}'", sqlType, tableName);
 			}
-			
+
 			LOGGER.info("--------------------------------------------");
 		}
 	}
-	
+
 	private String getSqlType(String sqlStatement) {
-	    if (sqlStatement.contains("DROP")) {
-	        return "DROP";
-	    } else if (sqlStatement.contains("CREATE")) {
-	        return "CREATE";
-	    } else if (sqlStatement.contains("SET")) {
-	        return "SET";
-	    } else {
-	        throw new IllegalArgumentException("Unrecognized SQL statement: " + sqlStatement);
-	    }
+		if (sqlStatement.contains("DROP")) {
+			return "DROP";
+		} else if (sqlStatement.contains("CREATE")) {
+			return "CREATE";
+		} else if (sqlStatement.contains("SET")) {
+			return "SET";
+		} else {
+			throw new IllegalArgumentException("Unrecognized SQL statement: " + sqlStatement);
+		}
 	}
-	
+
 	private String getTableName(String sqlStatement) {
-	    String[] parts = sqlStatement.split("`");
-	    if(parts.length > 1) {
-	        return parts[1];
-	    }
-	    else {
-	        return "unknown";
-	    }
+		String[] parts = sqlStatement.split("`");
+		if (parts.length > 1) {
+			return parts[1];
+		} else {
+			return "unknown";
+		}
 	}
 }

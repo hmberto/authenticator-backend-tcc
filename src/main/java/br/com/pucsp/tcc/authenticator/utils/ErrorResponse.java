@@ -9,9 +9,9 @@ import org.slf4j.Logger;
 
 public class ErrorResponse {
 	public static void build(HttpServletResponse resp, Logger LOGGER, String message, int status) throws IOException {
-		String errorJson = new JSONObject().put("Error Message", message).toString();
+		String errorJson = new JSONObject().put("Message", message).toString();
 		LOGGER.error(message);
-		
+
 		resp.setStatus(status);
 		resp.getWriter().write(errorJson);
 	}

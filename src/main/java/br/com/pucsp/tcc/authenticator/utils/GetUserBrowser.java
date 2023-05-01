@@ -10,11 +10,12 @@ public class GetUserBrowser {
 	public static String browser(String userAgent) {
 		UserAgent ua = UserAgent.parseUserAgentString(userAgent);
 		Browser browser = ua.getBrowser();
-		
-		String gettedBrouser = "Unknown".equals(browser.getGroup().getName()) ? "Desconhecido" : browser.getGroup().getName();
+
+		String gettedBrouser = "Unknown".equals(browser.getGroup().getName()) ? "Desconhecido"
+				: browser.getGroup().getName();
 		return "Desconhecido".equals(gettedBrouser) ? verify(userAgent) : verify(gettedBrouser);
 	}
-	
+
 	private static final Map<String, String> browserMap = new HashMap<>();
 	static {
 		browserMap.put("Chrome", "Google Chrome");
@@ -35,7 +36,7 @@ public class GetUserBrowser {
 		browserMap.put("Insomnia", "Insomnia");
 		browserMap.put("PostmanRuntime", "Postman");
 	}
-	
+
 	private static String verify(String userBrowser) {
 		for (String key : browserMap.keySet()) {
 			if (userBrowser.toUpperCase().contains(key.toUpperCase())) {
@@ -43,7 +44,7 @@ public class GetUserBrowser {
 				break;
 			}
 		}
-		
+
 		return userBrowser;
 	}
 }

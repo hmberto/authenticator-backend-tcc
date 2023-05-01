@@ -26,9 +26,7 @@ public class APIController extends HttpServlet {
 		}
 	}
 
-	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-		LOGGER.info("APIController called");
-	}
+	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {}
 
 	public void destroy() {
 		super.destroy();

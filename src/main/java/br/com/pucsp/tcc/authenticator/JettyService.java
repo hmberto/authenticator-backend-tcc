@@ -23,10 +23,11 @@ import br.com.pucsp.tcc.authenticator.rest.ValidateOtpService;
 import br.com.pucsp.tcc.authenticator.rest.error.NotFoundServlet;
 import br.com.pucsp.tcc.authenticator.rest.filter.BasicAuthFilter;
 import br.com.pucsp.tcc.authenticator.rest.filter.MethodNotAllowedFilter;
+import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
 
 public class JettyService {
 	public static void start() throws Exception {
-		Server server = new Server(8080);
+		Server server = new Server(SystemDefaultVariables.apiPort);
 
 		FilterHolder basicAuthFilter = new FilterHolder(new BasicAuthFilter());
 		FilterHolder methodNotAllowedFilterHolder = new FilterHolder(new MethodNotAllowedFilter());
@@ -35,7 +36,7 @@ public class JettyService {
 		ServletContextHandler apiContext = new ServletContextHandler();
 
 		rootContext.setContextPath("/");
-		apiContext.setContextPath("/api");
+		apiContext.setContextPath(SystemDefaultVariables.contextPath);
 
 		apiContext.addFilter(basicAuthFilter, "/*", EnumSet.of(DispatcherType.REQUEST));
 

@@ -15,7 +15,7 @@ public class SessionTokenManagerDB {
 			throws SQLException, DatabaseInsertException {
 		int sessionId = 0;
 
-		try(PreparedStatement statementTimezone = connection.prepareStatement(SqlQueries.TIME_ZONE);
+		try (PreparedStatement statementTimezone = connection.prepareStatement(SqlQueries.TIME_ZONE);
 				PreparedStatement statement = connection.prepareStatement(SqlQueries.INSERT_SESSION,
 						Statement.RETURN_GENERATED_KEYS);) {
 
@@ -26,25 +26,25 @@ public class SessionTokenManagerDB {
 			statement.setBoolean(3, isActive);
 
 			statement.executeUpdate();
-			
+
 			ResultSet rs = statement.getGeneratedKeys();
-			if(rs.next()) {
+			if (rs.next()) {
 				sessionId = rs.getInt(1);
 			}
 
 			rs.close();
 		}
-		
-		if(sessionId == 0) {
+
+		if (sessionId == 0) {
 			throw new DatabaseInsertException("Session ID could not be generated");
 		}
 	}
-	
+
 	public JSONObject getSession(Connection connection, int userId, String userSessionToken)
 			throws SQLException, DatabaseInsertException {
 		JSONObject session = new JSONObject();
-		
-		try(PreparedStatement statementTimezone = connection.prepareStatement(SqlQueries.TIME_ZONE);
+
+		try (PreparedStatement statementTimezone = connection.prepareStatement(SqlQueries.TIME_ZONE);
 				PreparedStatement statement = connection.prepareStatement(SqlQueries.GET_SESSION,
 						Statement.RETURN_GENERATED_KEYS);) {
 
@@ -54,12 +54,12 @@ public class SessionTokenManagerDB {
 			statement.setString(2, userSessionToken);
 
 			ResultSet rs = statement.executeQuery();
-			
-			if(rs.next()) {
+
+			if (rs.next()) {
 				int sessionId = rs.getInt("session_id");
 				String sessionToken = rs.getString("session");
 				boolean isSessionTokenActive = rs.getBoolean("is_active");
-				
+
 				session.put("sessionId", sessionId);
 				session.put("sessionToken", sessionToken);
 				session.put("isSessionTokenActive", isSessionTokenActive);
@@ -67,7 +67,7 @@ public class SessionTokenManagerDB {
 
 			rs.close();
 		}
-		
+
 		return session;
 	}
 }

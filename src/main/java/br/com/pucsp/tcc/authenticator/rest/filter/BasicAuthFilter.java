@@ -10,11 +10,13 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
+
 public class BasicAuthFilter implements Filter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthFilter.class);
 
-	private static final String API_USER = System.getenv("API_USER");
-	private static final String API_PASS = System.getenv("API_PASS");
+	private static final String API_USER = SystemDefaultVariables.apiUser;
+	private static final String API_PASS = SystemDefaultVariables.apiPass;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

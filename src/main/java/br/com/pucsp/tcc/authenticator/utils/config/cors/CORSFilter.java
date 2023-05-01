@@ -17,15 +17,13 @@ public class CORSFilter implements ContainerResponseFilter {
 				.header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
 				.header("Access-Control-Allow-Credentials", "true")
 				.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD")
-				.header("Access-Control-Max-Age", "1209600")
-				.build();
+				.header("Access-Control-Max-Age", "1209600").build();
 	}
-	
+
 	@Override
-	public void filter(final ContainerRequestContext requestContext, 
-			final ContainerResponseContext cres)
+	public void filter(final ContainerRequestContext requestContext, final ContainerResponseContext cres)
 			throws IOException {
-		
+
 		cres.getHeaders().add("Access-Control-Allow-Origin", "*");
 		cres.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization");
 		cres.getHeaders().add("Access-Control-Allow-Credentials", "true");

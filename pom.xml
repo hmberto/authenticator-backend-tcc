@@ -87,7 +87,7 @@
 			<activation>
 				<property>
 					<name>project.build.profile</name>
-					<value>production</value>
+					<value>dev</value>
 				</property>
 			</activation>
 			<dependencies>
@@ -106,6 +106,10 @@
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>project.build.profile</name>
+					<value>prd</value>
+				</property>
 			</activation>
 			<dependencies>
 				<dependency>

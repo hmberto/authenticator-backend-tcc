@@ -7,7 +7,7 @@ public class GetUserOS {
 	public static String os(String userAgent) {
 		UserAgent ua = UserAgent.parseUserAgentString(userAgent);
 		OperatingSystem os = ua.getOperatingSystem();
-		
+
 		return os.getName().equals("Unknown") ? "Desconhecido" : os.getName();
 	}
 }

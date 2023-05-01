@@ -11,50 +11,53 @@ import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidNameException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
+import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
 
 public class NameManagerDB {
-	private static final int SESSION_LENGTH = Integer.parseInt(System.getenv("SESSION_LENGTH"));
-	
+	private static final int SESSION_LENGTH = SystemDefaultVariables.sessionLength;
+
 	public boolean update(JSONObject body) throws Exception {
 		String userFirstName = body.getString("firstName").trim();
 		String userLastName = body.getString("lastName").trim();
 		String userEmail = body.getString("email").trim().toLowerCase();
 		String userSessionToken = body.getString("session").trim().toUpperCase();
-		
+
 		int rowsUpdated = 0;
-	    
-	    validateBody(userFirstName, userLastName, userEmail, userSessionToken);
-	    
-	    try(ConnDB connDB = ConnDB.getInstance();
+
+		validateBody(userFirstName, userLastName, userEmail, userSessionToken);
+
+		try (ConnDB connDB = ConnDB.getInstance();
 				Connection connection = connDB.getConnection();
-	    		PreparedStatement statement = connection.prepareStatement(SqlQueries.UPDATE_NAME, Statement.RETURN_GENERATED_KEYS);) {
-	    	
-	    	statement.setString(1, userFirstName);
-	    	statement.setString(2, userLastName);
-	    	statement.setString(3, userEmail);
-	    	statement.setString(4, userSessionToken);
-	    	
-	    	rowsUpdated = statement.executeUpdate();
-	    }
-	    
-	    return rowsUpdated > 0 ? true : false;
+				PreparedStatement statement = connection.prepareStatement(SqlQueries.UPDATE_NAME,
+						Statement.RETURN_GENERATED_KEYS);) {
+
+			statement.setString(1, userFirstName);
+			statement.setString(2, userLastName);
+			statement.setString(3, userEmail);
+			statement.setString(4, userSessionToken);
+
+			rowsUpdated = statement.executeUpdate();
+		}
+
+		return rowsUpdated > 0 ? true : false;
 	}
-	
-	private static void validateBody(String userFirstName, String userLastName, String userEmail, String userSessionToken) throws Exception {
-		if(!DataValidator.isValidUsername(userFirstName)) {
+
+	private static void validateBody(String userFirstName, String userLastName, String userEmail,
+			String userSessionToken) throws Exception {
+		if (!DataValidator.isValidUsername(userFirstName)) {
 			throw new InvalidNameException("Invalid first name format");
 		}
-		if(!DataValidator.isValidUsername(userLastName)) {
+		if (!DataValidator.isValidUsername(userLastName)) {
 			throw new InvalidNameException("Invalid last name format");
 		}
-		if(!DataValidator.isValidEmail(userEmail)) {
+		if (!DataValidator.isValidEmail(userEmail)) {
 			throw new InvalidEmailException("Invalid email format");
 		}
-		if(!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != SESSION_LENGTH) {
+		if (!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != SESSION_LENGTH) {
 			throw new InvalidTokenException("Invalid Session Token format");
 		}
 		String fullName = userFirstName + " " + userLastName;
-		if(!fullName.matches("^[\\p{L}]+( [\\p{L}]+)+$")) {
+		if (!fullName.matches("^[\\p{L}]+( [\\p{L}]+)+$")) {
 			throw new InvalidNameException("Name must have two words");
 		}
 	}

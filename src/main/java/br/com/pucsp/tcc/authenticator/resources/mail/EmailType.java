@@ -10,13 +10,14 @@ public class EmailType {
 		String btnText = userOTP;
 		String btnLink = "#";
 		String messageText = EmailTemplate.template(messageSubject, info, shortText, btnText, btnLink);
-		
+
 		EmailSender sendEmail = new EmailSender();
-		
+
 		sendEmail.confirmation(userEmail.toLowerCase(), messageSubject, messageText);
 	}
-	
-	public static void sendEmailLink(String userEmail, String userSessionToken, String userEmailToken) throws MessagingException {
+
+	public static void sendEmailLink(String userEmail, String userSessionToken, String userEmailToken)
+			throws MessagingException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(System.getenv("SITE_HOST"));
 		sb.append("/confirm-access");
@@ -26,16 +27,16 @@ public class EmailType {
 		sb.append(userSessionToken);
 		sb.append("&email=");
 		sb.append(userEmail.trim().toLowerCase());
-		
+
 		String messageSubject = "Humberto Araújo - TCC PUC-SP: Link de acesso";
 		String shortText = "Confirme que este é seu endereço de e-mail";
 		String info = "Clique no link abaixo para liberar seu acesso ao site.<br><br>Se você não está tentando fazer login, desconsidere este e-mail.";
 		String btnText = "Liberar Acesso";
 		String btnLink = sb.toString();
 		String messageText = EmailTemplate.template(messageSubject, info, shortText, btnText, btnLink);
-		
+
 		EmailSender sendEmail = new EmailSender();
-		
+
 		sendEmail.confirmation(userEmail.toLowerCase(), messageSubject, messageText);
 	}
 }
