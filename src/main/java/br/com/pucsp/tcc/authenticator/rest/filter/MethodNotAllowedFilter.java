@@ -17,9 +17,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.pucsp.tcc.authenticator.utils.ErrorResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MethodNotAllowedFilter implements Filter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodNotAllowedFilter.class);
+
+	private static final Map<String, String> ALLOWED_METHODS = new HashMap<>();
+
+	static {
+		ALLOWED_METHODS.put("/test", HttpMethod.GET);
+		ALLOWED_METHODS.put("/api/test", HttpMethod.GET);
+		ALLOWED_METHODS.put("/api/check/access-link/\\w+", HttpMethod.GET);
+		ALLOWED_METHODS.put("/api/check/session", HttpMethod.POST);
+		ALLOWED_METHODS.put("/api/users/\\S+", HttpMethod.GET);
+		ALLOWED_METHODS.put("/api/logout", HttpMethod.PUT);
+		ALLOWED_METHODS.put("/api/register/email", HttpMethod.POST);
+		ALLOWED_METHODS.put("/api/register/name", HttpMethod.PUT);
+		ALLOWED_METHODS.put("/api/validate/access-link", HttpMethod.POST);
+		ALLOWED_METHODS.put("/api/validate/otp", HttpMethod.POST);
+	}
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -53,43 +70,17 @@ public class MethodNotAllowedFilter implements Filter {
 	}
 
 	private boolean isHttpMethodAllowed(String httpMethod, String requestURI) {
-		Pattern pattern1 = Pattern.compile("/api/check/access-link/\\w+");
-		Matcher matcher1 = pattern1.matcher(requestURI);
+		for (Map.Entry<String, String> entry : ALLOWED_METHODS.entrySet()) {
+			String patternString = entry.getKey();
+			String allowedMethod = entry.getValue();
 
-		Pattern pattern2 = Pattern.compile("/api/users/\\S+");
-		Matcher matcher2 = pattern2.matcher(requestURI);
+			Pattern pattern = Pattern.compile(patternString);
+			Matcher matcher = pattern.matcher(requestURI);
 
-		if (requestURI.equals("/test") && httpMethod.equals(HttpMethod.GET)) {
-			return true;
+			if (matcher.matches() && httpMethod.equals(allowedMethod)) {
+				return true;
+			}
 		}
-		if (requestURI.equals("/api/test") && httpMethod.equals(HttpMethod.GET)) {
-			return true;
-		}
-		if (matcher1.matches() && httpMethod.equals(HttpMethod.GET)) {
-			return true;
-		}
-		if (requestURI.equals("/api/check/session") && httpMethod.equals(HttpMethod.POST)) {
-			return true;
-		}
-		if (matcher2.matches() && httpMethod.equals(HttpMethod.GET)) {
-			return true;
-		}
-		if (requestURI.equals("/api/logout") && httpMethod.equals(HttpMethod.POST)) {
-			return true;
-		}
-		if (requestURI.equals("/api/register/email") && httpMethod.equals(HttpMethod.POST)) {
-			return true;
-		}
-		if (requestURI.equals("/api/register/name") && httpMethod.equals(HttpMethod.PUT)) {
-			return true;
-		}
-		if (requestURI.equals("/api/validate/access-link") && httpMethod.equals(HttpMethod.POST)) {
-			return true;
-		}
-		if (requestURI.equals("/api/validate/otp") && httpMethod.equals(HttpMethod.POST)) {
-			return true;
-		}
-
 		return false;
 	}
 }

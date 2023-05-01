@@ -31,7 +31,7 @@ public class LogoutService extends HttpServlet {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LogoutService.class);
 
 	@Override
-	protected void doPost(final @Context HttpServletRequest req, HttpServletResponse resp)
+	protected void doPut(final @Context HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
 		resp.setContentType(MediaType.APPLICATION_JSON);
