@@ -10,14 +10,31 @@ This backend provides the core functionality for a Passwordless Authentication s
 ## Installation
 To install and run this project, you need to have Java 1.8 and Maven installed on your system. After installing them, follow the steps below:
 
-> For the proper functioning of the API, it is necessary to correctly configure the environment variables API_USER and API_PASS, as they will be responsible for authenticating requests to the API. If this configuration is not set, the application will use default values of "user" and "pass".
+> For the proper functioning of the API, it is necessary to correctly configure the environment variables **API_USER** and **API_PASS**, as they will be responsible for authenticating requests to the API. If this configuration is not set, the application will use default values of "user" and "pass".
 
-> The environment variables CONTEXT_PATH and API_PORT are also used to configure the API. If these variables are not set, the application will use default values of "/api" and "8080", respectively.
+> The environment variables **CONTEXT_PATH** and **API_PORT** are also used to configure the API. If these variables are not set, the application will use default values of "/api" and "8080", respectively.
 
 - Clone the repository to your local system;
 - Navigate to the project directory;
-- Run the command **mvn jetty:run** to start the server;
+- Run the command **mvn jetty:run -Pdev** to start the server;
 - The server will be started at **http://localhost:8080/api/**;
+
+## Build Instructions
+
+The entire project is built upon the Maven framework, which provides a robust and efficient system for managing project dependencies and building the project. To ensure the project is ready for a productive environment, it is recommended to run the following commands in sequence:
+
+> The command to generate an executable jar file does not require the -Pprd flag because the production profile is already set as the default.
+
+```shell
+$ mvn clean package -Pprd
+$ java -jar target/UserAuthenticator-1.0.jar
+```
+
+To run the project in a development environment you need to run the following command while passing the -Pdev flag. This is necessary to ensure that the dependencies are configured correctly:
+
+```shell
+$ mvn jetty:run -Pdev
+```
 
 ## Usage
 This backend provides the following APIs:
@@ -149,29 +166,16 @@ API_PORT="8080"
 > DB_PASS: This variable indicates the password associated with the database user provided above.<br>
 > OTP_LENGTH: This variable specifies the length of the One-Time Password (OTP) that the service will generate for user authentication.<br>
 > SESSION_LENGTH: This variable specifies the length of the session token that the service will generate to identify a user session.<br>
-> EMAIL_TOKEN_LENGTH: 
-> SQL_SCRIPT: 
+> EMAIL_TOKEN_LENGTH: <br>
+> SQL_SCRIPT: <br>
 > SITE_HOST: This variable indicates the hostname of the website to which the service will connect and consume this rest service.
-> TIME_ZONE: 
-> API_USER: 
-> API_PASS: 
-> CONTEXT_PATH: 
-> API_PORT: 
+> TIME_ZONE: <br>
+> API_USER: <br>
+> API_PASS: <br>
+> CONTEXT_PATH: <br>
+> API_PORT: <br>
 
 By modifying the values of these variables, the service's configuration can be customized to meet specific requirements.
-
-## Build Instructions
-
-All project is based on maven, so to build the project from the sources you should execute this command:
-
-```shell
-$ mvn clean package
-```
-
-Or
-```shell
-$ mvn package jetty:run
-```
 
 ## References
 * [Java](https://www.java.com/) - v1.8
