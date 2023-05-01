@@ -149,7 +149,14 @@ API_PORT="8080"
 > DB_PASS: This variable indicates the password associated with the database user provided above.<br>
 > OTP_LENGTH: This variable specifies the length of the One-Time Password (OTP) that the service will generate for user authentication.<br>
 > SESSION_LENGTH: This variable specifies the length of the session token that the service will generate to identify a user session.<br>
+> EMAIL_TOKEN_LENGTH: 
+> SQL_SCRIPT: 
 > SITE_HOST: This variable indicates the hostname of the website to which the service will connect and consume this rest service.
+> TIME_ZONE: 
+> API_USER: 
+> API_PASS: 
+> CONTEXT_PATH: 
+> API_PORT: 
 
 By modifying the values of these variables, the service's configuration can be customized to meet specific requirements.
 
