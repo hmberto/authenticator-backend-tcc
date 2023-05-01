@@ -13,20 +13,21 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import br.com.pucsp.tcc.authenticator.utils.ErrorResponse;
 
 public class MethodNotAllowedFilter implements Filter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodNotAllowedFilter.class);
 
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {}
+	public void init(FilterConfig filterConfig) throws ServletException {
+	}
 
 	@Override
-	public void destroy() {}
+	public void destroy() {
+	}
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -41,16 +42,10 @@ public class MethodNotAllowedFilter implements Filter {
 		String httpMethod = httpRequest.getMethod();
 
 		if (!isHttpMethodAllowed(httpMethod, httpRequest.getRequestURI())) {
-			httpResponse.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-			httpResponse.setContentType(MediaType.APPLICATION_JSON);
-
 			String message = String.format("HTTP method %s is not supported by this URL %s", httpMethod,
 					httpRequest.getRequestURI());
-			LOGGER.warn(message);
 
-			String res = new JSONObject().put("Message", message).toString();
-
-			httpResponse.getWriter().write(res);
+			ErrorResponse.build(httpResponse, LOGGER, message, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 			return;
 		}
 

@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.util.Base64;
 import javax.ws.rs.core.HttpHeaders;
 
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.pucsp.tcc.authenticator.utils.ErrorResponse;
 import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
 
 public class BasicAuthFilter implements Filter {
@@ -29,15 +29,11 @@ public class BasicAuthFilter implements Filter {
 
 		if (authHeader == null || !authHeader.startsWith("Basic ")) {
 			httpResponse.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"Secure Area\"");
-			httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
 			String message = String.format("Request at '%s' refused  because it was not authenticated",
 					httpRequest.getRequestURI());
-			LOGGER.warn(message);
 
-			String res = new JSONObject().put("Message", message).toString();
-			httpResponse.getWriter().write(res);
-
+			ErrorResponse.build(httpResponse, LOGGER, message, HttpServletResponse.SC_UNAUTHORIZED);
 			return;
 		}
 
@@ -46,15 +42,10 @@ public class BasicAuthFilter implements Filter {
 		String credentials = new String(decodedBytes, "UTF-8");
 
 		if (!credentials.equals(API_USER + ":" + API_PASS)) {
-			httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-
 			String message = String.format("Request at '%s' refused due to incorrect authentication credentials",
 					httpRequest.getRequestURI());
-			LOGGER.warn(message);
 
-			String res = new JSONObject().put("Message", message).toString();
-			httpResponse.getWriter().write(res);
-
+			ErrorResponse.build(httpResponse, LOGGER, message, HttpServletResponse.SC_FORBIDDEN);
 			return;
 		}
 
@@ -62,10 +53,8 @@ public class BasicAuthFilter implements Filter {
 	}
 
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-	}
+	public void init(FilterConfig filterConfig) throws ServletException {}
 
 	@Override
-	public void destroy() {
-	}
+	public void destroy() {}
 }

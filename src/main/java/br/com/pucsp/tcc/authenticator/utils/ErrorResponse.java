@@ -3,6 +3,7 @@ package br.com.pucsp.tcc.authenticator.utils;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ public class ErrorResponse {
 		LOGGER.error(message);
 
 		resp.setStatus(status);
+		resp.setContentType(MediaType.APPLICATION_JSON);
 		resp.getWriter().write(errorJson);
 	}
 }
