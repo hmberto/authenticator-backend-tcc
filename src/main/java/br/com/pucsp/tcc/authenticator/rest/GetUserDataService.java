@@ -36,7 +36,6 @@ public class GetUserDataService extends HttpServlet {
 		resp.setContentType(MediaType.APPLICATION_JSON);
 		String pathInfo = req.getPathInfo();
 		String userEmail = pathInfo.substring(1);
-		System.out.println(userEmail);
 
 		try {
 			GetUserDataDB getUserData = new GetUserDataDB();
