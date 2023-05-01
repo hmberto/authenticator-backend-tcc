@@ -2,6 +2,8 @@ package br.com.pucsp.tcc.authenticator.resources.mail;
 
 import javax.mail.MessagingException;
 
+import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
+
 public class EmailType {
 	public static void sendEmailOTP(String userEmail, String userOTP, String userIP) throws MessagingException {
 		String messageSubject = "Humberto Araújo - TCC PUC-SP: Código de acesso";
@@ -19,7 +21,7 @@ public class EmailType {
 	public static void sendEmailLink(String userEmail, String userSessionToken, String userEmailToken)
 			throws MessagingException {
 		StringBuilder sb = new StringBuilder();
-		sb.append(System.getenv("SITE_HOST"));
+		sb.append(SystemDefaultVariables.siteHost);
 		sb.append("/confirm-access");
 		sb.append("?token=");
 		sb.append(userEmailToken);
