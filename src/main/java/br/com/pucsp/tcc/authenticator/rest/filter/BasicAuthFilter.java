@@ -4,6 +4,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.Base64;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.HttpHeaders;
 
 import org.slf4j.Logger;
@@ -25,7 +26,16 @@ public class BasicAuthFilter implements Filter {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+		String httpMethod = httpRequest.getMethod();
+		if (httpMethod.equals(HttpMethod.OPTIONS)) {
+			chain.doFilter(request, response);
+			return;
+		}
+
 		String authHeader = httpRequest.getHeader("Authorization");
+		if (authHeader == null) {
+			authHeader = httpRequest.getHeader("authorization");
+		}
 
 		if (authHeader == null || !authHeader.startsWith("Basic ")) {
 			httpResponse.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"Secure Area\"");
