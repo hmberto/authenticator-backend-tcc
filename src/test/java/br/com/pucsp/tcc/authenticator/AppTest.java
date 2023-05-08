@@ -1,38 +1,41 @@
 package br.com.pucsp.tcc.authenticator;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import java.io.PrintWriter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 
-/**
- * Unit test for simple App.
- */
-public class AppTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
-    }
+import org.json.JSONObject;
+import org.junit.Test;
+import org.mockito.Mockito;
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
+import br.com.pucsp.tcc.authenticator.rest.*;
+import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
-    }
+public class AppTest {
+	@Test
+	public void testMinhaServlet() throws Exception {
+		String emailToken = CreateToken.generate("token");
+
+	    HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
+	    HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
+	    PrintWriter writer = Mockito.mock(PrintWriter.class);
+	    
+	    System.out.println(emailToken);
+
+	    Mockito.when(req.getMethod()).thenReturn("GET");
+	    Mockito.when(req.getRequestURI()).thenReturn("/api/check/access-link/" + emailToken);
+	    Mockito.when(req.getPathInfo()).thenReturn(emailToken);
+	    Mockito.when(req.getRemoteAddr()).thenReturn("127.0.0.1");
+	    Mockito.when(resp.getWriter()).thenReturn(writer);
+
+	    CheckAccessLinkService servlet = new CheckAccessLinkService();
+	    servlet.service(req, resp);
+
+	    String errorJson = new JSONObject().put("Message", "Invalid Email Token format").toString();
+
+	    Mockito.verify(resp).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+	    Mockito.verify(resp).setContentType(MediaType.APPLICATION_JSON);
+	    Mockito.verify(writer).write(errorJson);
+	}
 }
