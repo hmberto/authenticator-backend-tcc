@@ -9,40 +9,39 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
 import br.com.pucsp.tcc.authenticator.rest.*;
-import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 
-public class CheckAccessLinkTest {
+public class GetUserDataTest {
 	@Test
-	public void runInvalidEmailTokenFormat() throws Exception {
-		String emailToken = "0";
+	public void runEmailDoesNotExist() throws Exception {
+		String email = "/contato@teste.com";
+		runTest(email, HttpServletResponse.SC_BAD_REQUEST, "Email does not exist in database");
+	}
+
+	@Test
+	public void runInvalidEmailFormat() throws Exception {
+		String email = "contato@teste@com";
 		
-		String message = String.format("Invalid %s format '%s'", "token", emailToken);
-		emailToken("/" + emailToken, message);
+		String message = String.format("Invalid email format '%s'", email);
+		runTest("/" + email, HttpServletResponse.SC_BAD_REQUEST, message);
 	}
 
-	@Test
-	public void runEmailTokenDoesNotExist() throws Exception {
-		String emailToken = "/" + CreateToken.generate("token");
-		emailToken(emailToken, "Email Token does not exist in database");
-	}
-
-	private void emailToken(String emailToken, String errorMessage) throws Exception {
+	private void runTest(String email, int status, String errorMessage) throws Exception {
 		HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
 		HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
 		PrintWriter writer = Mockito.mock(PrintWriter.class);
 
 		Mockito.when(req.getMethod()).thenReturn("GET");
-		Mockito.when(req.getRequestURI()).thenReturn("/api/check/access-link" + emailToken);
-		Mockito.when(req.getPathInfo()).thenReturn(emailToken);
+		Mockito.when(req.getRequestURI()).thenReturn("/users" + email);
+		Mockito.when(req.getPathInfo()).thenReturn(email);
 		Mockito.when(req.getRemoteAddr()).thenReturn("127.0.0.1");
 		Mockito.when(resp.getWriter()).thenReturn(writer);
 
-		CheckAccessLinkService servlet = new CheckAccessLinkService();
+		GetUserDataService servlet = new GetUserDataService();
 		servlet.service(req, resp);
 
 		String errorJson = new JSONObject().put("Message", errorMessage).toString();
 
-		Mockito.verify(resp).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		Mockito.verify(resp).setStatus(status);
 		Mockito.verify(resp).setContentType(MediaType.APPLICATION_JSON);
 		Mockito.verify(writer).write(errorJson);
 	}
