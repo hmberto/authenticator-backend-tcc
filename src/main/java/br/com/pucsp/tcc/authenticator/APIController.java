@@ -17,9 +17,8 @@ public class APIController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	public static void main(String[] args) throws Exception {
-		AppInitializer appInitializer = new AppInitializer();
-		appInitializer.contextInitialization();
-		JettyService.start();
+		APIController APIController = new APIController();
+		APIController.init(null);
 	}
 
 	public void init(ServletConfig config) throws ServletException {
