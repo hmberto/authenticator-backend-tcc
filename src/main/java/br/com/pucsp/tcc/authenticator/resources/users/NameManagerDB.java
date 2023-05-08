@@ -5,18 +5,18 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidNameException;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
-import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
+import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 
 public class NameManagerDB {
-	private static final int SESSION_LENGTH = SystemDefaultVariables.sessionLength;
+	private static final Logger LOGGER = LoggerFactory.getLogger(NameManagerDB.class);
 
-	public boolean update(JSONObject body) throws Exception {
+	public void update(JSONObject body) throws Exception {
 		String userFirstName = body.getString("firstName").trim();
 		String userLastName = body.getString("lastName").trim();
 		String userEmail = body.getString("email").trim().toLowerCase();
@@ -39,26 +39,21 @@ public class NameManagerDB {
 			rowsUpdated = statement.executeUpdate();
 		}
 
-		return rowsUpdated > 0 ? true : false;
+		if (rowsUpdated == 0) {
+			throw new BusinessException("Name could not be updated");
+		}
+
+		LOGGER.info("Name updated for user '{}'", userEmail);
 	}
 
 	private static void validateBody(String userFirstName, String userLastName, String userEmail,
 			String userSessionToken) throws Exception {
-		if (!DataValidator.isValidUsername(userFirstName)) {
-			throw new InvalidNameException("Invalid first name format");
-		}
-		if (!DataValidator.isValidUsername(userLastName)) {
-			throw new InvalidNameException("Invalid last name format");
-		}
-		if (!DataValidator.isValidEmail(userEmail)) {
-			throw new InvalidEmailException("Invalid email format");
-		}
-		if (!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != SESSION_LENGTH) {
-			throw new InvalidTokenException("Invalid Session Token format");
-		}
-		String fullName = userFirstName + " " + userLastName;
-		if (!fullName.matches("^[\\p{L}]+( [\\p{L}]+)+$")) {
-			throw new InvalidNameException("Name must have two words");
-		}
+		DataValidator.isValidName(userFirstName, "first name");
+
+		DataValidator.isValidName(userLastName, "last name");
+
+		DataValidator.isValidEmail(userEmail);
+
+		DataValidator.isValidToken(userSessionToken, "session");
 	}
 }

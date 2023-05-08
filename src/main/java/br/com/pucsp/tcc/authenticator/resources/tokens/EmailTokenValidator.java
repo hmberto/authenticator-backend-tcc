@@ -10,18 +10,12 @@ import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.resources.users.EmailTokenManagerDB;
 import br.com.pucsp.tcc.authenticator.resources.users.FindUserDB;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
-import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
 
 public class EmailTokenValidator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailTokenValidator.class);
 
-	private static final int SESSION_LENGTH = SystemDefaultVariables.sessionLength;
-	private static final int EMAIL_TOKEN_LENGTH = SystemDefaultVariables.emailTokenLength;
-
-	public boolean verify(final JSONObject body) throws Exception {
+	public void verify(final JSONObject body) throws Exception {
 		String userEmail = body.has("email") ? body.getString("email").trim().toLowerCase() : null;
 		String userSessionToken = body.has("sessionToken") ? body.getString("sessionToken").trim().toUpperCase() : null;
 		String userEmailToken = body.has("emailToken") ? body.getString("emailToken").trim().toUpperCase() : null;
@@ -30,7 +24,7 @@ public class EmailTokenValidator {
 		validateBody(userEmail, userSessionToken, userEmailToken, isSelectedApprove);
 
 		if (!isSelectedApprove) {
-			return true;
+			return;
 		}
 
 		try (ConnDB connDB = ConnDB.getInstance(); Connection connection = connDB.getConnection();) {
@@ -47,32 +41,15 @@ public class EmailTokenValidator {
 			EmailTokenManagerDB emailTokenManagerDB = new EmailTokenManagerDB();
 			emailTokenManagerDB.updateToken(connection, user.getInt("userId"), userEmail, userSessionToken,
 					userEmailToken);
-
-			return true;
 		}
 	}
 
 	private static void validateBody(String userEmail, String userSessionToken, String userEmailToken,
 			boolean isSelectedApprove) throws Exception {
-		if (userEmail == null) {
-			throw new InvalidEmailException("email is required but not sent");
-		}
-		if (!DataValidator.isValidEmail(userEmail)) {
-			throw new InvalidEmailException("Invalid format for email");
-		}
+		DataValidator.isValidEmail(userEmail);
 
-		if (userSessionToken == null) {
-			throw new InvalidTokenException("sessionToken is required but not sent");
-		}
-		if (!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != SESSION_LENGTH) {
-			throw new InvalidTokenException("Invalid sessionToken format");
-		}
+		DataValidator.isValidToken(userSessionToken, "session");
 
-		if (userEmailToken == null) {
-			throw new InvalidTokenException("emailToken is required but not sent");
-		}
-		if (!DataValidator.isValidToken(userEmailToken) || userEmailToken.length() != EMAIL_TOKEN_LENGTH) {
-			throw new InvalidTokenException("Invalid emailToken format");
-		}
+		DataValidator.isValidToken(userEmailToken, "token");
 	}
 }

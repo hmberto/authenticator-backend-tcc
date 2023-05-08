@@ -11,17 +11,12 @@ import org.slf4j.LoggerFactory;
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.DatabaseInsertException;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
-import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
+import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 
 public class LogoutManagerDB {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LogoutManagerDB.class);
 
-	private static final int SESSION_LENGTH = SystemDefaultVariables.sessionLength;
-
-	public boolean logout(final JSONObject body) throws Exception {
+	public void logout(final JSONObject body) throws Exception {
 		String userEmail = body.getString("email").trim().toLowerCase();
 		String userSessionToken = body.getString("session").trim().toUpperCase();
 		boolean isSelectedKillAll = body.getBoolean("killAll");
@@ -43,20 +38,16 @@ public class LogoutManagerDB {
 		}
 
 		if (rowsUpdated == 0) {
-			throw new DatabaseInsertException("Email Token could not be updated");
+			throw new BusinessException("Email Token could not be updated");
 		}
 
-		String log = isSelectedKillAll ? "Deleted session tokens: " : "Session tokens disabled: ";
-		LOGGER.info(log + rowsUpdated);
-		return true;
+		String log = isSelectedKillAll ? "Deleted session tokens: '{}'" : "Session tokens disabled: '{}'";
+		LOGGER.info(log, rowsUpdated);
 	}
 
 	private static void validateBody(String userEmail, String userSessionToken) throws Exception {
-		if (!DataValidator.isValidEmail(userEmail)) {
-			throw new InvalidEmailException("Invalid email format");
-		}
-		if (!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != SESSION_LENGTH) {
-			throw new InvalidTokenException("Invalid Session Token format");
-		}
+		DataValidator.isValidEmail(userEmail);
+
+		DataValidator.isValidToken(userSessionToken, "session");
 	}
 }

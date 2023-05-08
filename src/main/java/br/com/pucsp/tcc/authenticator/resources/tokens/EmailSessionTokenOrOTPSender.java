@@ -19,7 +19,6 @@ import br.com.pucsp.tcc.authenticator.utils.CreateToken;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
 import br.com.pucsp.tcc.authenticator.utils.RespJSON;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 
@@ -106,24 +105,16 @@ public class EmailSessionTokenOrOTPSender {
 			EmailType.sendEmailOTP(userEmail, userOTP, userIP);
 			break;
 		default:
-			throw new IllegalArgumentException(
-					"Invalid token type: " + tokenType + " - token type must be session or otp");
+			throw new IllegalArgumentException("Invalid token type: " + tokenType + " - token type must be session or otp");
 		}
 	}
 
 	private static void validateBody(String userEmail, boolean isSelectedLink, boolean isSelectedOTP) throws Exception {
-		if (userEmail == null) {
-			throw new InvalidEmailException("Email is required but not sent");
-		}
-		if (!DataValidator.isValidEmail(userEmail)) {
-			throw new InvalidEmailException("Invalid format for email '" + userEmail + "'");
-		}
+		DataValidator.isValidEmail(userEmail);
+		
 		if (isSelectedLink && isSelectedOTP) {
 			throw new BusinessException("Request denied for email '" + userEmail
 					+ "' because it is not possible to request LINK and OTP at the same time");
-		}
-		if (!isSelectedLink && !isSelectedOTP) {
-
 		}
 	}
 }

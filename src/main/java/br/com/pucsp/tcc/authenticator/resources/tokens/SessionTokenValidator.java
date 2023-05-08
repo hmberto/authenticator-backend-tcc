@@ -10,15 +10,10 @@ import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.resources.users.SessionTokenManagerDB;
 import br.com.pucsp.tcc.authenticator.resources.users.FindUserDB;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidTokenException;
 import br.com.pucsp.tcc.authenticator.utils.exceptions.UnregisteredUserException;
-import br.com.pucsp.tcc.authenticator.utils.system.SystemDefaultVariables;
 
 public class SessionTokenValidator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SessionTokenValidator.class);
-
-	private static final int SESSION_LENGTH = SystemDefaultVariables.sessionLength;
 
 	public JSONObject verify(final JSONObject body) throws Exception {
 		String userEmail = body.has("email") ? body.getString("email").trim().toLowerCase() : null;
@@ -55,18 +50,8 @@ public class SessionTokenValidator {
 	}
 
 	private static void validateBody(String userEmail, String userSessionToken) throws Exception {
-		if (userEmail == null) {
-			throw new InvalidEmailException("email is required but not sent");
-		}
-		if (!DataValidator.isValidEmail(userEmail)) {
-			throw new InvalidEmailException("Invalid format for email");
-		}
+		DataValidator.isValidEmail(userEmail);
 
-		if (userSessionToken == null) {
-			throw new InvalidTokenException("sessionToken is required but not sent");
-		}
-		if (!DataValidator.isValidToken(userSessionToken) || userSessionToken.length() != SESSION_LENGTH) {
-			throw new InvalidTokenException("Invalid sessionToken format");
-		}
+		DataValidator.isValidToken(userSessionToken, "session");
 	}
 }
