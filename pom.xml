@@ -23,6 +23,7 @@
 		<javax.mail.version>1.6.2</javax.mail.version>
 		<mysql-connector-java.version>8.0.24</mysql-connector-java.version>
 		<UserAgentUtils.version>1.21</UserAgentUtils.version>
+		<mockito.version>3.9.0</mockito.version>
 	</properties>
 
 	<dependencies>
@@ -76,6 +77,12 @@
 			<groupId>eu.bitwalker</groupId>
 			<artifactId>UserAgentUtils</artifactId>
 			<version>${UserAgentUtils.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<profiles>
@@ -203,6 +210,14 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<skipTests>false</skipTests>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
