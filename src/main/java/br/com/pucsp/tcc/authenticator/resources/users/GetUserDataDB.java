@@ -7,14 +7,14 @@ import org.json.JSONObject;
 import br.com.pucsp.tcc.authenticator.database.ConnDB;
 import br.com.pucsp.tcc.authenticator.database.SqlQueries;
 import br.com.pucsp.tcc.authenticator.utils.DataValidator;
-import br.com.pucsp.tcc.authenticator.utils.exceptions.InvalidEmailException;
+import br.com.pucsp.tcc.authenticator.utils.exceptions.BusinessException;
 
 public class GetUserDataDB {
 	public JSONObject user(String userEmail) throws Exception {
 		JSONObject json = new JSONObject();
 		int userId = 0;
 
-		validateBody(userEmail);
+		DataValidator.isValidEmail(userEmail);
 
 		try (ConnDB connDB = ConnDB.getInstance();
 				Connection connection = connDB.getConnection();
@@ -32,12 +32,10 @@ public class GetUserDataDB {
 			}
 		}
 
-		return json.length() != 0 ? json : null;
-	}
-
-	private static void validateBody(String userEmail) throws Exception {
-		if (!DataValidator.isValidEmail(userEmail)) {
-			throw new InvalidEmailException("Invalid email format");
+		if (json.length() == 0) {
+			throw new BusinessException("Email does not exist in database");
 		}
+
+		return json.length() != 0 ? json : null;
 	}
 }
