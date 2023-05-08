@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +33,6 @@ public class CheckAccessLinkService extends HttpServlet {
 	protected void doGet(final @Context HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		resp.setContentType(MediaType.APPLICATION_JSON);
-
 		String userIp = LocalhostIP.get(req.getRemoteAddr());
 		String pathInfo = req.getPathInfo();
 		String emailToken = pathInfo.substring(1);
@@ -48,15 +45,12 @@ public class CheckAccessLinkService extends HttpServlet {
 			resp.getWriter().write(response);
 		} catch (JSONException e) {
 			ErrorResponse.build(resp, LOGGER, "Invalid JSON payload", HttpServletResponse.SC_BAD_REQUEST);
-		} catch (InvalidEmailException | InvalidTokenException | InvalidNameException | UnregisteredUserException
-				| BusinessException e) {
+		} catch (InvalidEmailException | InvalidTokenException | InvalidNameException | UnregisteredUserException | BusinessException e) {
 			ErrorResponse.build(resp, LOGGER, e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 		} catch (SQLException | DatabaseInsertException e) {
-			ErrorResponse.build(resp, LOGGER, "An error occurred with the database",
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			ErrorResponse.build(resp, LOGGER, "An error occurred with the database", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (MessagingException e) {
-			ErrorResponse.build(resp, LOGGER, "An error occurred while sending email",
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			ErrorResponse.build(resp, LOGGER, "An error occurred while sending email", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
 			ErrorResponse.build(resp, LOGGER, "Unknown error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
