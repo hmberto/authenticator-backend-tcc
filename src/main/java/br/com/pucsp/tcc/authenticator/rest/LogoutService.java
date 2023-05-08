@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -31,30 +30,24 @@ public class LogoutService extends HttpServlet {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LogoutService.class);
 
 	@Override
-	protected void doPut(final @Context HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-
-		resp.setContentType(MediaType.APPLICATION_JSON);
+	protected void doPut(final @Context HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String requestBody = req.getReader().lines().reduce("", (accumulator, actual) -> accumulator + actual);
 		JSONObject body = new JSONObject(requestBody);
 
 		try {
 			LogoutManagerDB logoutManager = new LogoutManagerDB();
-			boolean result = logoutManager.logout(body);
+			logoutManager.logout(body);
 
-			resp.setStatus(HttpServletResponse.SC_CREATED);
+			resp.setStatus(HttpServletResponse.SC_OK);
 			resp.getWriter();
 		} catch (JSONException e) {
 			ErrorResponse.build(resp, LOGGER, "Invalid JSON payload", HttpServletResponse.SC_BAD_REQUEST);
-		} catch (InvalidEmailException | InvalidTokenException | InvalidNameException | UnregisteredUserException
-				| BusinessException e) {
+		} catch (InvalidEmailException | InvalidTokenException | InvalidNameException | UnregisteredUserException | BusinessException e) {
 			ErrorResponse.build(resp, LOGGER, e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 		} catch (SQLException | DatabaseInsertException e) {
-			ErrorResponse.build(resp, LOGGER, "An error occurred with the database",
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			ErrorResponse.build(resp, LOGGER, "An error occurred with the database", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (MessagingException e) {
-			ErrorResponse.build(resp, LOGGER, "An error occurred while sending email",
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			ErrorResponse.build(resp, LOGGER, "An error occurred while sending email", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
 			ErrorResponse.build(resp, LOGGER, "Unknown error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}

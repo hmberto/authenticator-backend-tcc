@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +32,7 @@ public class CheckAccessLinkService extends HttpServlet {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CheckAccessLinkService.class);
 
 	@Override
-	protected void doGet(final @Context HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-
+	protected void doGet(final @Context HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String userIp = LocalhostIP.get(req.getRemoteAddr());
 		String pathInfo = req.getPathInfo();
 		String emailToken = pathInfo.substring(1);
@@ -41,6 +41,7 @@ public class CheckAccessLinkService extends HttpServlet {
 			GetEmailTokenInfo getEmailTokenInfo = new GetEmailTokenInfo();
 			String response = getEmailTokenInfo.verify(emailToken, userIp).toString();
 
+			resp.setContentType(MediaType.APPLICATION_JSON);
 			resp.setStatus(HttpServletResponse.SC_OK);
 			resp.getWriter().write(response);
 		} catch (JSONException e) {
